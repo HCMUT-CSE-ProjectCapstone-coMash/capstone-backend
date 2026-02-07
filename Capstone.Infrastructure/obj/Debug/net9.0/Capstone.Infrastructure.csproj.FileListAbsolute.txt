@@ -1,0 +1,17 @@
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/bin/Debug/net9.0/Capstone.Infrastructure.deps.json
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/bin/Debug/net9.0/Capstone.Infrastructure.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/bin/Debug/net9.0/Capstone.Infrastructure.pdb
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/obj/Debug/net9.0/Capstone.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/obj/Debug/net9.0/Capstone.Infrastructure.AssemblyInfoInputs.cache
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/obj/Debug/net9.0/Capstone.Infrastructure.AssemblyInfo.cs
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/obj/Debug/net9.0/Capstone.Infrastructure.csproj.CoreCompileInputs.cache
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/obj/Debug/net9.0/Capstone.Infrastructure.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/obj/Debug/net9.0/refint/Capstone.Infrastructure.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/obj/Debug/net9.0/Capstone.Infrastructure.pdb
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/obj/Debug/net9.0/ref/Capstone.Infrastructure.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/bin/Debug/net9.0/Capstone.Application.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/bin/Debug/net9.0/Capstone.Domain.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/bin/Debug/net9.0/Capstone.Application.pdb
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/bin/Debug/net9.0/Capstone.Domain.pdb
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/obj/Debug/net9.0/Capstone.Infrastructure.csproj.AssemblyReference.cache
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/obj/Debug/net9.0/Capstone.3F8BA1E5.Up2Date

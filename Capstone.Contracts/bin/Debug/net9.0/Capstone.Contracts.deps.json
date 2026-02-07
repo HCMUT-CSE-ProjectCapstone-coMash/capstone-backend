@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "Capstone.Contracts/1.0.0": {
+        "runtime": {
+          "Capstone.Contracts.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Capstone.Contracts/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
