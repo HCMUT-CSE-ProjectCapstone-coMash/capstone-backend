@@ -40,3 +40,12 @@
 /Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Swashbuckle.AspNetCore.Swagger.dll
 /Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Swashbuckle.AspNetCore.SwaggerGen.dll
 /Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Swashbuckle.AspNetCore.SwaggerUI.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/obj/Debug/net9.0/Capstone.Api.sourcelink.json
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.Extensions.DependencyInjection.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.EntityFrameworkCore.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.EntityFrameworkCore.Abstractions.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.EntityFrameworkCore.Relational.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Npgsql.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/BCrypt.Net-Next.dll

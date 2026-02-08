@@ -15,3 +15,4 @@
 /Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/bin/Debug/net9.0/Capstone.Domain.pdb
 /Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/obj/Debug/net9.0/Capstone.Infrastructure.csproj.AssemblyReference.cache
 /Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/obj/Debug/net9.0/Capstone.3F8BA1E5.Up2Date
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Infrastructure/obj/Debug/net9.0/Capstone.Infrastructure.sourcelink.json

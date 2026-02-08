@@ -9,3 +9,4 @@
 /Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Domain/obj/Debug/net9.0/refint/Capstone.Domain.dll
 /Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Domain/obj/Debug/net9.0/Capstone.Domain.pdb
 /Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Domain/obj/Debug/net9.0/ref/Capstone.Domain.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Domain/obj/Debug/net9.0/Capstone.Domain.sourcelink.json

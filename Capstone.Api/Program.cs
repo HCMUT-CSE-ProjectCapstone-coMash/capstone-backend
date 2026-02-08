@@ -1,6 +1,13 @@
+using Capstone.Application;
+using Capstone.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+// Dependency Injection
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 //Swagger
 builder.Services.AddEndpointsApiExplorer();

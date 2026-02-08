@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+using Capstone.Application.Services.Authentication;
 using Capstone.Contracts.Authentication;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,15 +9,54 @@ namespace Capstone.Api.Controllers.Authentication;
 [Route("auth")]
 public class AuthenticationController : ControllerBase
 {
-    [HttpPost("register")]
-    public IActionResult Register(RegisterRequest request)
+    private readonly IAuthenticationService _auth;
+
+    public AuthenticationController(IAuthenticationService auth)
     {
-        return Ok(request);
+        _auth = auth;
+    }
+
+    [HttpPost("register")]
+    public async Task<IActionResult> Register(RegisterRequest request)
+    {
+        var result = await _auth.Register(request.FullName, request.Email, request.Password);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new AuthenticationResponse(
+            result.Value.Id,
+            result.Value.FullName,
+            result.Value.Email,
+            result.Value.Token
+        ));
     }
 
     [HttpPost("login")]
-    public IActionResult Login(LoginRequest request)
+    public async Task<IActionResult> Login(LoginRequest request)
     {
-        return Ok(request);
+        var result = await _auth.Login(request.Email, request.Password);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new AuthenticationResponse(
+            result.Value.Id,
+            result.Value.FullName,
+            result.Value.Email,
+            result.Value.Token
+        ));
     }
 }
