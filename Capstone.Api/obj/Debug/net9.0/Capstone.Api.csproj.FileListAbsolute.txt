@@ -49,3 +49,17 @@
 /Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Npgsql.dll
 /Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll
 /Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/BCrypt.Net-Next.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.Extensions.Configuration.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.Extensions.Configuration.Abstractions.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.Extensions.Configuration.Binder.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.Extensions.Options.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.Extensions.Primitives.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.IdentityModel.Abstractions.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.IdentityModel.JsonWebTokens.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.IdentityModel.Logging.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.IdentityModel.Protocols.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/Microsoft.IdentityModel.Tokens.dll
+/Users/ngocnhon/Desktop/capstone-web-backend/Capstone.Api/bin/Debug/net9.0/System.IdentityModel.Tokens.Jwt.dll

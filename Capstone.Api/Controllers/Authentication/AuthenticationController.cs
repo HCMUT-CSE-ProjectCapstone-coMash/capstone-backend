@@ -1,6 +1,8 @@
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Capstone.Application.Services.Authentication;
 using Capstone.Contracts.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Capstone.Api.Controllers.Authentication;
@@ -34,6 +36,8 @@ public class AuthenticationController : ControllerBase
             result.Value.Id,
             result.Value.FullName,
             result.Value.Email,
+            result.Value.Role,
+            result.Value.CreatedAt,
             result.Value.Token
         ));
     }
@@ -56,6 +60,28 @@ public class AuthenticationController : ControllerBase
             result.Value.Id,
             result.Value.FullName,
             result.Value.Email,
+            result.Value.Role,
+            result.Value.CreatedAt,
+            result.Value.Token
+        ));
+    }
+
+    [Authorize]
+    [HttpGet("profile")]
+    public async Task<IActionResult> GetProfile()
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+            return Unauthorized();
+
+        var result = await _auth.GetUserById(userIdClaim.Value);
+
+        return Ok(new AuthenticationResponse(
+            result.Value.Id,
+            result.Value.FullName,
+            result.Value.Email,
+            result.Value.Role,
+            result.Value.CreatedAt,
             result.Value.Token
         ));
     }

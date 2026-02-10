@@ -17,3 +17,8 @@ Content-Type: application/json
     "Email": "test123@gmail.com",
     "Password": "123456"
 }
+
+###
+GET {{host}}/auth/profile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhYTU3NDJkNy1hM2E0LTQ2MzgtYTI0ZC03NmJlMDJiODUyOTMiLCJnaXZlbl9uYW1lIjoiSHV5bmggTmdvYyBOaG9uIiwianRpIjoiNTZjOGQ5OGUtYTMzZi00Nzk2LTk5OWItMThhYzhjMzRkZjYzIiwiZXhwIjoxNzcwNzAzMDM1LCJpc3MiOiJDYXBzdG9uZSIsImF1ZCI6IkNhcHN0b25lVXNlcnMifQ.hTxPbP1vPEyJV3NoAHI7-xERab9sUjbyDxpfKTLiDfY

@@ -23,4 +23,9 @@ public class UserRepository : IUserRepository
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<User?> GetUserById(Guid userId)
+    {
+        return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+    }
 }
