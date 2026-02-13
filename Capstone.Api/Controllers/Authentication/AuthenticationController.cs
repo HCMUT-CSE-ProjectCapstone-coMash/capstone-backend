@@ -56,6 +56,14 @@ public class AuthenticationController : ControllerBase
             });
         }
 
+        Response.Cookies.Append("accessToken", result.Value.Token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddMinutes(60)
+        });
+
         return Ok(new AuthenticationResponse(
             result.Value.Id,
             result.Value.FullName,
