@@ -32,13 +32,20 @@ public class AuthenticationController : ControllerBase
             });
         }
 
+        Response.Cookies.Append("accessToken", result.Value.Token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddMinutes(60)
+        });
+
         return Ok(new AuthenticationResponse(
             result.Value.Id,
             result.Value.FullName,
             result.Value.Email,
             result.Value.Role,
-            result.Value.CreatedAt,
-            result.Value.Token
+            result.Value.CreatedAt
         ));
     }
 
@@ -69,8 +76,7 @@ public class AuthenticationController : ControllerBase
             result.Value.FullName,
             result.Value.Email,
             result.Value.Role,
-            result.Value.CreatedAt,
-            result.Value.Token
+            result.Value.CreatedAt
         ));
     }
 
@@ -89,8 +95,7 @@ public class AuthenticationController : ControllerBase
             result.Value.FullName,
             result.Value.Email,
             result.Value.Role,
-            result.Value.CreatedAt,
-            result.Value.Token
+            result.Value.CreatedAt
         ));
     }
 }
