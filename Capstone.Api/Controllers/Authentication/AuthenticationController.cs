@@ -98,4 +98,17 @@ public class AuthenticationController : ControllerBase
             result.Value.CreatedAt
         ));
     }
+
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("accessToken", new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict
+        });
+        
+        return Ok();
+    }
 }
