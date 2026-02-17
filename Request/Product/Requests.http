@@ -13,17 +13,18 @@ Content-Type: application/json
     "quantities": [
         {
             "size": "S",
-            "quantity": 10
+            "quantities": 10
         },
         {
             "size": "M",
-            "quantity": 15
+            "quantities": 15
         },
         {
             "size": "L",
-            "quantity": 12
+            "quantities": 12
         }
-    ]
+    ],
+    "createdBy": "aa5742d7-a3a4-4638-a24d-76be02b85293"
 }
 
 ###
@@ -50,5 +51,6 @@ Content-Type: application/json
             "size": "32",
             "quantities": 12
         }
-    ]
+    ],
+    "createdBy": "aa5742d7-a3a4-4638-a24d-76be02b85293"
 }

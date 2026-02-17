@@ -1,5 +1,7 @@
 using Capstone.Application.Common;
 using Capstone.Application.Common.Interfaces.Persistence;
+using Capstone.Application.Common.Interfaces.Services;
+using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
 
 namespace Capstone.Application.Services.Products;
@@ -8,14 +10,17 @@ public class ProductsService : IProductsService
 {
     private readonly IProductsRepository _productsRepository;
     private readonly IProductQuantitiesRepository _productQuantitiesRepository;
+    private readonly IDateTimeProvider _dateTimeProvider;
 
     public ProductsService(
         IProductsRepository productsRepository,
-        IProductQuantitiesRepository productQuantitiesRepository
+        IProductQuantitiesRepository productQuantitiesRepository,
+        IDateTimeProvider dateTimeProvider
     )
     {
         _productsRepository = productsRepository;
         _productQuantitiesRepository = productQuantitiesRepository;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task<Result<CreateProductResult>> CreateProduct(
@@ -25,7 +30,8 @@ public class ProductsService : IProductsService
         string color,
         string pattern,
         string sizeType,
-        List<ProductQuantity> quantities
+        List<ProductQuantity> quantities,
+        string createdBy
     )
     {
         var product = new Product
@@ -36,7 +42,10 @@ public class ProductsService : IProductsService
             Category = category,
             Color = color,
             Pattern = pattern,
-            SizeType = sizeType
+            SizeType = sizeType,
+            CreatedBy = Guid.Parse(createdBy),
+            CreatedAt = _dateTimeProvider.UtcNow,
+            Status = ProductStatus.Pending
         };
 
         await _productsRepository.AddProduct(product);
@@ -68,7 +77,10 @@ public class ProductsService : IProductsService
             product.Color,
             product.Pattern,
             product.SizeType,
-            productQuantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList()
+            productQuantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+            product.CreatedBy,
+            product.CreatedAt,
+            product.Status
         ));
     }
 }

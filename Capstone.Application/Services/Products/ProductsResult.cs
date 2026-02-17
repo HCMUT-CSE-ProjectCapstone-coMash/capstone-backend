@@ -8,5 +8,8 @@ public record CreateProductResult(
     string Color,
     string Pattern,
     string SizeType,
-    List<ProductQuantity> Quantities
+    List<ProductQuantity> Quantities,
+    Guid CreatedBy,
+    DateTime CreatedAt,
+    string Status
 );

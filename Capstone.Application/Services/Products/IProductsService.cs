@@ -11,6 +11,7 @@ public interface IProductsService
         string color,
         string pattern,
         string sizeType,
-        List<ProductQuantity> productQuantities
+        List<ProductQuantity> productQuantities,
+        string createdBy
     );
 }

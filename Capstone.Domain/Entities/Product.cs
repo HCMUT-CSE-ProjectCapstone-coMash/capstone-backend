@@ -9,4 +9,7 @@ public class Product
     public string Color { get; set; } = string.Empty;
     public string Pattern { get; set; } = string.Empty;
     public string SizeType { get; set; } = string.Empty;
+    public Guid CreatedBy { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public string Status { get; set; } = string.Empty;
 }
