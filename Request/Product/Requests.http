@@ -1,0 +1,54 @@
+@host = http://localhost:5194
+
+POST {{host}}/product/create
+Content-Type: application/json
+
+{
+    "productID": "DAM01",
+    "productName": "Đầm đen",
+    "category": "Đầm",
+    "color": "Đen",
+    "pattern": "",
+    "sizeType": "letter",
+    "quantities": [
+        {
+            "size": "S",
+            "quantity": 10
+        },
+        {
+            "size": "M",
+            "quantity": 15
+        },
+        {
+            "size": "L",
+            "quantity": 12
+        }
+    ]
+}
+
+###
+POST {{host}}/product/create
+Content-Type: application/json
+
+{
+    "productID": "DAM02",
+    "productName": "Đầm đỏ",
+    "category": "Đầm",
+    "color": "Đen",
+    "pattern": "",
+    "sizeType": "letter",
+    "quantities": [
+        {
+            "size": "28",
+            "quantity": 10
+        },
+        {
+            "size": "30",
+            "quantity": 15
+        },
+        {
+            "size": "32",
+            "quantity": 12
+        }
+    ]
+}
