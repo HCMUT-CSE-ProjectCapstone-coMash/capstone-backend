@@ -34,21 +34,21 @@ Content-Type: application/json
     "productID": "DAM02",
     "productName": "Đầm đỏ",
     "category": "Đầm",
-    "color": "Đen",
+    "color": "Đỏ",
     "pattern": "",
     "sizeType": "letter",
     "quantities": [
         {
             "size": "28",
-            "quantity": 10
+            "quantities": 10
         },
         {
             "size": "30",
-            "quantity": 15
+            "quantities": 15
         },
         {
             "size": "32",
-            "quantity": 12
+            "quantities": 12
         }
     ]
 }

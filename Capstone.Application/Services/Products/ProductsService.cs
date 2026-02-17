@@ -9,13 +9,24 @@ public class ProductsService : IProductsService
     private readonly IProductsRepository _productsRepository;
     private readonly IProductQuantitiesRepository _productQuantitiesRepository;
 
-    public ProductsService(IProductsRepository productsRepository, IProductQuantitiesRepository productQuantitiesRepository)
+    public ProductsService(
+        IProductsRepository productsRepository,
+        IProductQuantitiesRepository productQuantitiesRepository
+    )
     {
         _productsRepository = productsRepository;
         _productQuantitiesRepository = productQuantitiesRepository;
     }
 
-    public async Task<Result<CreateProductResult>> CreateProduct(string productID, string productName, string category, string color, string pattern, string sizeType, List<ProductQuantity> quantities)
+    public async Task<Result<CreateProductResult>> CreateProduct(
+        string productID,
+        string productName,
+        string category,
+        string color,
+        string pattern,
+        string sizeType,
+        List<ProductQuantity> quantities
+    )
     {
         var product = new Product
         {
@@ -35,6 +46,7 @@ public class ProductsService : IProductsService
         for (int i = 0; i < quantities.Count; i++)
         {
             var quantity = quantities[i];
+
             var productQuantity = new ProductQuantities
             {
                 Id = Guid.NewGuid(),
