@@ -54,3 +54,8 @@ Content-Type: application/json
     ],
     "createdBy": "aa5742d7-a3a4-4638-a24d-76be02b85293"
 }
+
+###
+GET {{host}}/product/pending
+Content-Type: application/json
+Cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhYTU3NDJkNy1hM2E0LTQ2MzgtYTI0ZC03NmJlMDJiODUyOTMiLCJnaXZlbl9uYW1lIjoiSHXhu7NuaCBOZ-G7jWMgTmjGoW4iLCJqdGkiOiI3ZGE0NjFkNi00ZDgyLTRjNzEtYWRjNS1iMGQ1NzEzOTY0OTYiLCJleHAiOjE3NzEzNTU4MTMsImlzcyI6IkNhcHN0b25lIiwiYXVkIjoiQ2Fwc3RvbmVVc2VycyJ9.1hC-CFJBIFmV2qjj90cSlX_eDXYvndjDWDF7aRUcrDw

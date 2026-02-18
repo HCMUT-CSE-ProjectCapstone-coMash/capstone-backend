@@ -23,14 +23,14 @@ public class ProductsService : IProductsService
         _dateTimeProvider = dateTimeProvider;
     }
 
-    public async Task<Result<CreateProductResult>> CreateProduct(
+    public async Task<Result<ProductDto>> CreateProduct(
         string productID,
         string productName,
         string category,
         string color,
         string pattern,
         string sizeType,
-        List<ProductQuantity> quantities,
+        List<ProductQuantityDto> quantities,
         string createdBy
     )
     {
@@ -69,7 +69,7 @@ public class ProductsService : IProductsService
             productQuantities.Add(productQuantity);
         }
 
-        return Result<CreateProductResult>.Success(new CreateProductResult(
+        return Result<ProductDto>.Success(new ProductDto(
             product.Id,
             product.ProductID,
             product.ProductName,
@@ -77,7 +77,7 @@ public class ProductsService : IProductsService
             product.Color,
             product.Pattern,
             product.SizeType,
-            productQuantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+            productQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
             product.CreatedBy,
             product.CreatedAt,
             product.Status

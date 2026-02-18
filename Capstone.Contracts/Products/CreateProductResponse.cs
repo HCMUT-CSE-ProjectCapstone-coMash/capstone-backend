@@ -8,7 +8,7 @@ public record CreateProductResponse(
     string Color,
     string Pattern,
     string SizeType,
-    List<ProductQuantityDTO> Quantities,
+    List<ProductQuantity> Quantities,
     Guid CreatedBy,
     DateTime CreatedAt,
     string Status

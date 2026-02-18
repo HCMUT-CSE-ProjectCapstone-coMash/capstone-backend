@@ -1,6 +1,6 @@
 namespace Capstone.Contracts.Products;
 
-public record ProductQuantityDTO(
+public record ProductQuantity(
     string Size,
     int Quantities
 );

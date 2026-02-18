@@ -4,14 +4,16 @@ namespace Capstone.Application.Services.Products;
 
 public interface IProductsService
 {
-    Task<Result<CreateProductResult>> CreateProduct(
+    Task<Result<ProductDto>> CreateProduct(
         string productID,
         string ProductName,
         string category,
         string color,
         string pattern,
         string sizeType,
-        List<ProductQuantity> productQuantities,
+        List<ProductQuantityDto> productQuantities,
         string createdBy
     );
+
+
 }

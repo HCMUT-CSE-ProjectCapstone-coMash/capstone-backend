@@ -1,6 +1,6 @@
 namespace Capstone.Application.Services.Products;
 
-public record CreateProductResult(
+public record ProductDto(
     Guid Id,
     string ProductID,
     string ProductName,
@@ -8,8 +8,13 @@ public record CreateProductResult(
     string Color,
     string Pattern,
     string SizeType,
-    List<ProductQuantity> Quantities,
+    List<ProductQuantityDto> Quantities,
     Guid CreatedBy,
     DateTime CreatedAt,
     string Status
+);
+
+public record ProductQuantityDto(
+    string Size,
+    int Quantities
 );
