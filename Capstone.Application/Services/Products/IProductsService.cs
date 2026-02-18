@@ -15,5 +15,5 @@ public interface IProductsService
         string createdBy
     );
 
-
+    Task<Result<List<ProductDto>>> GetPendingProductsByUserId(Guid userId);
 }

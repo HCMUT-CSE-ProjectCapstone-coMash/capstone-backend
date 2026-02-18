@@ -54,4 +54,15 @@ public class ProductsController : ControllerBase
             result.Value.Status
         ));
     }
+
+    [Authorize]
+    [HttpGet("pending")]
+    public async Task<IActionResult> GetPendingProductsByUserId()
+    {   
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        var result = await _productsSerivce.GetPendingProductsByUserId(Guid.Parse(userId!));
+
+        return Ok(result);
+    }
 }

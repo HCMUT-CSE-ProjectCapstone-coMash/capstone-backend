@@ -12,4 +12,6 @@ public class Product
     public Guid CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
     public string Status { get; set; } = string.Empty;
+
+    public ICollection<ProductQuantities> ProductQuantities { get; set; } = new List<ProductQuantities>();
 }

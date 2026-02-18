@@ -83,4 +83,25 @@ public class ProductsService : IProductsService
             product.Status
         ));
     }
+
+    public async Task<Result<List<ProductDto>>> GetPendingProductsByUserId(Guid userId)
+    {
+        var products = await _productsRepository.GetPendingProductsByUserId(userId);
+
+        var productDtos = products.Select(product => new ProductDto(
+            product.Id,
+            product.ProductID,
+            product.ProductName,
+            product.Category,
+            product.Color,
+            product.Pattern,
+            product.SizeType,
+            product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+            product.CreatedBy,
+            product.CreatedAt,
+            product.Status
+        )).ToList();
+
+        return Result<List<ProductDto>>.Success(productDtos);  
+    } 
 }
