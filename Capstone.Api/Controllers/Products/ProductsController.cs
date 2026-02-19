@@ -1,5 +1,6 @@
 using Capstone.Application.Services.Products;
 using Capstone.Contracts.Products;
+using Capstone.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,7 +41,7 @@ public class ProductsController : ControllerBase
             });
         }
 
-        return Ok(new CreateProductResponse(
+        return Ok(new ProductResponse(
             result.Value.Id,
             result.Value.ProductID,
             result.Value.ProductName,
@@ -58,11 +59,32 @@ public class ProductsController : ControllerBase
     [Authorize]
     [HttpGet("pending")]
     public async Task<IActionResult> GetPendingProductsByUserId()
-    {   
+    {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
         var result = await _productsSerivce.GetPendingProductsByUserId(Guid.Parse(userId!));
 
-        return Ok(result);
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value.Select(product => new ProductResponse(
+            product.Id,
+            product.ProductID,
+            product.ProductName,
+            product.Category,
+            product.Color,
+            product.Pattern,
+            product.SizeType,
+            product.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+            product.CreatedBy,
+            product.CreatedAt,
+            product.Status
+        )).ToList());
     }
 }

@@ -1,6 +1,6 @@
 namespace Capstone.Contracts.Products;
 
-public record CreateProductResponse(
+public record ProductResponse(
     Guid Id,
     string ProductID,
     string ProductName,
