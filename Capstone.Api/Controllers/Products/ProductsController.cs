@@ -87,4 +87,10 @@ public class ProductsController : ControllerBase
             product.Status
         )).ToList());
     }
+
+    [HttpPatch("update/{productId}")]
+    public async Task<IActionResult> UpdateProductStatus([FromBody] PatchProductRequest request, [FromRoute] string productId)
+    {
+        return Ok(request);
+    }
 }
