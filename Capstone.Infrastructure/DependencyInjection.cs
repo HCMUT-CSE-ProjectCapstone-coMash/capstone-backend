@@ -1,4 +1,5 @@
 using System.Text;
+using Amazon.S3;
 using Capstone.Application.Common.Interfaces.Authentication;
 using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Application.Common.Interfaces.Services;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Capstone.Infrastructure;
@@ -20,6 +22,7 @@ public static class DependencyInjection
     {
         services.AddDbContext<AppDbContext>(options => options.UseNpgsql(config.GetConnectionString("DefaultConnection")));
         services.Configure<JwtSettings>(config.GetSection("JwtSettings"));
+        services.Configure<BucketSettings>(config.GetSection("BucketSettings"));
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IProductsRepository, ProductsRepository>();
@@ -28,7 +31,20 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddSingleton<IFileStorageProvider, FileStorageProvider>();
 
+        services.AddSingleton<IAmazonS3, AmazonS3Client>(sp =>
+        {
+            var settings = sp.GetRequiredService<IOptions<BucketSettings>>().Value;
+
+            var config = new AmazonS3Config
+            {
+                ServiceURL = settings.Endpoint,
+                ForcePathStyle = true
+            };
+
+            return new AmazonS3Client(settings.AccessKey, settings.SecretKey, config);
+        });
 
         services.AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>

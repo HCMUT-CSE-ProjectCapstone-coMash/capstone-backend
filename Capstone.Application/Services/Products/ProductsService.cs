@@ -3,6 +3,7 @@ using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Application.Common.Interfaces.Services;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace Capstone.Application.Services.Products;
 
@@ -11,16 +12,19 @@ public class ProductsService : IProductsService
     private readonly IProductsRepository _productsRepository;
     private readonly IProductQuantitiesRepository _productQuantitiesRepository;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly IFileStorageProvider _fileStorageProvider;
 
     public ProductsService(
         IProductsRepository productsRepository,
         IProductQuantitiesRepository productQuantitiesRepository,
-        IDateTimeProvider dateTimeProvider
+        IDateTimeProvider dateTimeProvider,
+        IFileStorageProvider fileStorageProvider
     )
     {
         _productsRepository = productsRepository;
         _productQuantitiesRepository = productQuantitiesRepository;
         _dateTimeProvider = dateTimeProvider;
+        _fileStorageProvider = fileStorageProvider;
     }
 
     public async Task<Result<ProductDto>> CreateProduct(
@@ -28,24 +32,46 @@ public class ProductsService : IProductsService
         string productName,
         string category,
         string color,
-        string pattern,
+        string? pattern,
         string sizeType,
         List<ProductQuantityDto> quantities,
-        string createdBy
+        string createdBy,
+        IFormFile? image
     )
     {
+        var newProductID = Guid.NewGuid();
+        string imageKey = "";
+        string imageUrl = "";
+
+        if (image != null)
+        {
+            var extension = Path.GetExtension(image.FileName);
+
+            await _fileStorageProvider.UploadImageAsync(
+                newProductID,
+                image.OpenReadStream(),
+                image.ContentType,
+                extension
+            );
+
+            imageKey = $"products/{newProductID}{extension}";
+
+            imageUrl = await _fileStorageProvider.GetImageUrlAsync(imageKey);
+        }
+
         var product = new Product
         {
-            Id = Guid.NewGuid(),
+            Id = newProductID,
             ProductID = productID,
             ProductName = productName,
             Category = category,
             Color = color,
-            Pattern = pattern,
+            Pattern = pattern ?? string.Empty,
             SizeType = sizeType,
             CreatedBy = Guid.Parse(createdBy),
             CreatedAt = _dateTimeProvider.UtcNow,
-            Status = ProductStatus.Pending
+            Status = ProductStatus.Pending,
+            ImageKey = imageKey
         };
 
         await _productsRepository.AddProduct(product);
@@ -80,7 +106,8 @@ public class ProductsService : IProductsService
             productQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
             product.CreatedBy,
             product.CreatedAt,
-            product.Status
+            product.Status,
+            imageUrl
         ));
     }
 
@@ -99,7 +126,8 @@ public class ProductsService : IProductsService
             product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
             product.CreatedBy,
             product.CreatedAt,
-            product.Status
+            product.Status,
+            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result
         )).ToList();
 
         return Result<List<ProductDto>>.Success(productDtos);  

@@ -1,4 +1,5 @@
 using Capstone.Application.Common;
+using Microsoft.AspNetCore.Http;
 
 namespace Capstone.Application.Services.Products;
 
@@ -9,10 +10,11 @@ public interface IProductsService
         string ProductName,
         string category,
         string color,
-        string pattern,
+        string? pattern,
         string sizeType,
         List<ProductQuantityDto> productQuantities,
-        string createdBy
+        string createdBy,
+        IFormFile? image
     );
 
     Task<Result<List<ProductDto>>> GetPendingProductsByUserId(Guid userId);

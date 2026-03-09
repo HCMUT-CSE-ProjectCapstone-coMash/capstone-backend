@@ -11,7 +11,8 @@ public record ProductDto(
     List<ProductQuantityDto> Quantities,
     Guid CreatedBy,
     DateTime CreatedAt,
-    string Status
+    string Status,
+    string ImageURL
 );
 
 public record ProductQuantityDto(

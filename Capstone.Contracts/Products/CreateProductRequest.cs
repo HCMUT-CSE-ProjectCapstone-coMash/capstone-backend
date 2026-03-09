@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+
 namespace Capstone.Contracts.Products;
 
 public record CreateProductRequest(
@@ -5,8 +7,9 @@ public record CreateProductRequest(
     string ProductName,
     string Category,
     string Color,
-    string Pattern,
+    string? Pattern,
     string SizeType,
     List<ProductQuantity> Quantities,
-    string CreatedBy
+    string CreatedBy,
+    IFormFile? Image
 );

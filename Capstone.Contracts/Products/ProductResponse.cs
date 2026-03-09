@@ -11,5 +11,6 @@ public record ProductResponse(
     List<ProductQuantity> Quantities,
     Guid CreatedBy,
     DateTime CreatedAt,
-    string Status
+    string Status,
+    string ImageURL
 );

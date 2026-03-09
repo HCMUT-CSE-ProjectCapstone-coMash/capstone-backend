@@ -1,6 +1,5 @@
 using Capstone.Application.Services.Products;
 using Capstone.Contracts.Products;
-using Capstone.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,7 +18,7 @@ public class ProductsController : ControllerBase
 
     // [Authorize]
     [HttpPost("create")]
-    public async Task<IActionResult> CreateProduct(CreateProductRequest request)
+    public async Task<IActionResult> CreateProduct([FromForm] CreateProductRequest request)
     {
         var result = await _productsSerivce.CreateProduct(
             request.ProductID,
@@ -29,7 +28,8 @@ public class ProductsController : ControllerBase
             request.Pattern,
             request.SizeType,
             request.Quantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
-            request.CreatedBy
+            request.CreatedBy,
+            request.Image
         );
 
         if (result.IsFailure)
@@ -52,7 +52,8 @@ public class ProductsController : ControllerBase
             result.Value.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
             result.Value.CreatedBy,
             result.Value.CreatedAt,
-            result.Value.Status
+            result.Value.Status,
+            result.Value.ImageURL
         ));
     }
 
@@ -84,7 +85,8 @@ public class ProductsController : ControllerBase
             product.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
             product.CreatedBy,
             product.CreatedAt,
-            product.Status
+            product.Status,
+            product.ImageURL
         )).ToList());
     }
 
