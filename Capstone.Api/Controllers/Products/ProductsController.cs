@@ -91,6 +91,7 @@ public class ProductsController : ControllerBase
     [HttpPatch("update/{productId}")]
     public async Task<IActionResult> UpdateProductStatus([FromBody] PatchProductRequest request, [FromRoute] string productId)
     {
+        // To do
         return Ok(request);
     }
 }
