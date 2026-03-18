@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options => options.UseNpgsql(config.GetConnectionString("DefaultConnection")));
         services.Configure<JwtSettings>(config.GetSection("JwtSettings"));
         services.Configure<BucketSettings>(config.GetSection("BucketSettings"));
+        services.Configure<VectorStoreSettings>(config.GetSection("VectorStoreSettings"));
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IProductsRepository, ProductsRepository>();
@@ -33,6 +34,7 @@ public static class DependencyInjection
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddSingleton<IFileStorageProvider, FileStorageProvider>();
 
+        // Image Saving
         services.AddSingleton<IAmazonS3, AmazonS3Client>(sp =>
         {
             var settings = sp.GetRequiredService<IOptions<BucketSettings>>().Value;
@@ -44,6 +46,14 @@ public static class DependencyInjection
             };
 
             return new AmazonS3Client(settings.AccessKey, settings.SecretKey, config);
+        });
+
+        // Vector Store Provider
+        services.AddHttpClient<IVectorStoreProvider, VectorStoreProvider>((sp, client) =>
+        {
+            var settings = sp.GetRequiredService<IOptions<VectorStoreSettings>>().Value;
+            client.BaseAddress = new Uri(settings.DatabaseURL);
+            client.DefaultRequestHeaders.Add("X-API-Key", settings.APIKey);
         });
 
         services.AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)

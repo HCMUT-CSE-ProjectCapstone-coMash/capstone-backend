@@ -49,7 +49,7 @@ public class AuthenticationService : IAuthenticationService
             user.Email,
             user.Role,
             user.CreatedAt,
-            _jwtTokenGenerator.GenerateToken(user.Id, user.FullName)
+            _jwtTokenGenerator.GenerateToken(user.Id, user.FullName, user.Role)
         ));
     }
 
@@ -68,7 +68,7 @@ public class AuthenticationService : IAuthenticationService
             user.Email,
             user.Role,
             user.CreatedAt,
-            _jwtTokenGenerator.GenerateToken(user.Id, user.FullName)
+            _jwtTokenGenerator.GenerateToken(user.Id, user.FullName, user.Role)
         ));
     }
 
