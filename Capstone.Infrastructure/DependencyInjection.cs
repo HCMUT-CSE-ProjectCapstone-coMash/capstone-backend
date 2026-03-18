@@ -33,6 +33,7 @@ public static class DependencyInjection
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddSingleton<IFileStorageProvider, FileStorageProvider>();
+        services.AddSingleton<IVectorStoreProvider, VectorStoreProvider>();
 
         // Image Saving
         services.AddSingleton<IAmazonS3, AmazonS3Client>(sp =>

@@ -13,6 +13,7 @@ public class Product
     public DateTime CreatedAt { get; set; }
     public string Status { get; set; } = string.Empty;
     public string ImageKey { get; set; } = string.Empty;
+    public string VectorId { get; set; } = string.Empty;
 
     public ICollection<ProductQuantities> ProductQuantities { get; set; } = new List<ProductQuantities>();
 }

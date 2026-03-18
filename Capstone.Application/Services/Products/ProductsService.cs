@@ -13,18 +13,21 @@ public class ProductsService : IProductsService
     private readonly IProductQuantitiesRepository _productQuantitiesRepository;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IFileStorageProvider _fileStorageProvider;
+    private readonly IVectorStoreProvider _vectorStoreProvider;
 
     public ProductsService(
         IProductsRepository productsRepository,
         IProductQuantitiesRepository productQuantitiesRepository,
         IDateTimeProvider dateTimeProvider,
-        IFileStorageProvider fileStorageProvider
+        IFileStorageProvider fileStorageProvider,
+        IVectorStoreProvider vectorStoreProvider
     )
     {
         _productsRepository = productsRepository;
         _productQuantitiesRepository = productQuantitiesRepository;
         _dateTimeProvider = dateTimeProvider;
         _fileStorageProvider = fileStorageProvider;
+        _vectorStoreProvider = vectorStoreProvider;
     }
 
     public async Task<Result<ProductDto>> CreateProduct(
@@ -42,6 +45,7 @@ public class ProductsService : IProductsService
         var newProductID = Guid.NewGuid();
         string imageKey = "";
         string imageUrl = "";
+        string vectorId = "";
 
         if (image != null)
         {
@@ -57,6 +61,11 @@ public class ProductsService : IProductsService
             imageKey = $"products/{newProductID}{extension}";
 
             imageUrl = await _fileStorageProvider.GetImageUrlAsync(imageKey);
+
+            vectorId = await _vectorStoreProvider.InsertImageAsync(imageUrl, new
+            {
+                Id = newProductID.ToString(),
+            });
         }
 
         var product = new Product
@@ -71,7 +80,8 @@ public class ProductsService : IProductsService
             CreatedBy = Guid.Parse(createdBy),
             CreatedAt = _dateTimeProvider.UtcNow,
             Status = ProductStatus.Pending,
-            ImageKey = imageKey
+            ImageKey = imageKey,
+            VectorId = vectorId
         };
 
         await _productsRepository.AddProduct(product);
@@ -107,7 +117,8 @@ public class ProductsService : IProductsService
             product.CreatedBy,
             product.CreatedAt,
             product.Status,
-            imageUrl
+            imageUrl,
+            product.VectorId
         ));
     }
 
@@ -127,7 +138,8 @@ public class ProductsService : IProductsService
             product.CreatedBy,
             product.CreatedAt,
             product.Status,
-            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result
+            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
+            product.VectorId
         )).ToList();
 
         return Result<List<ProductDto>>.Success(productDtos);  

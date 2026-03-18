@@ -53,7 +53,8 @@ public class ProductsController : ControllerBase
             result.Value.CreatedBy,
             result.Value.CreatedAt,
             result.Value.Status,
-            result.Value.ImageURL
+            result.Value.ImageURL,
+            result.Value.VectorId
         ));
     }
 
@@ -86,7 +87,8 @@ public class ProductsController : ControllerBase
             product.CreatedBy,
             product.CreatedAt,
             product.Status,
-            product.ImageURL
+            product.ImageURL,
+            product.VectorId
         )).ToList());
     }
 

@@ -12,7 +12,8 @@ public record ProductDto(
     Guid CreatedBy,
     DateTime CreatedAt,
     string Status,
-    string ImageURL
+    string ImageURL,
+    string VectorId
 );
 
 public record ProductQuantityDto(
