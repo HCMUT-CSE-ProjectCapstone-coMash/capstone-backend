@@ -92,6 +92,37 @@ public class ProductsController : ControllerBase
         )).ToList());
     }
 
+    [HttpPost("similar")]
+    public async Task<IActionResult> SearchProductSimilar([FromBody] SearchProductSimilarRequest request)
+    {
+        var result = await _productsSerivce.SearchProductSimilar(request.ImageBase64);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+        
+        return Ok(new ProductResponse(
+            result.Value.Id,
+            result.Value.ProductID,
+            result.Value.ProductName,
+            result.Value.Category,
+            result.Value.Color,
+            result.Value.Pattern,
+            result.Value.SizeType,
+            result.Value.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+            result.Value.CreatedBy,
+            result.Value.CreatedAt,
+            result.Value.Status,
+            result.Value.ImageURL,
+            result.Value.VectorId
+        ));
+    }
+
     [HttpPatch("update/{productId}")]
     public async Task<IActionResult> UpdateProductStatus([FromBody] PatchProductRequest request, [FromRoute] string productId)
     {

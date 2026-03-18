@@ -122,6 +122,44 @@ public class ProductsService : IProductsService
         ));
     }
 
+    public async Task<Result<ProductDto>> SearchProductSimilar(string ImageBase64)
+    {
+        var similarProducts = await _vectorStoreProvider.SearchSimilarProductsAsync(ImageBase64);
+
+        if (similarProducts.Count == 0)
+        {
+            return Result<ProductDto>.Failure(new Error("NoSimilarProducts", "No similar products found."));
+        }
+
+        var mostSimilarProduct = similarProducts.Where(p => p.Metadata != null).MaxBy(p => p.Score);
+
+        if (mostSimilarProduct?.Metadata == null)
+            return Result<ProductDto>.Failure(new Error("NoSimilarProducts", "No similar products found."));
+
+        var product = await _productsRepository.GetProductById(Guid.Parse(mostSimilarProduct.Metadata.Id));
+
+        if (product == null)
+        {
+            return Result<ProductDto>.Failure(new Error("ProductNotFound", "The similar product was not found."));
+        }
+
+        return Result<ProductDto>.Success(new ProductDto(
+            product.Id,
+            product.ProductID,
+            product.ProductName,
+            product.Category,
+            product.Color,
+            product.Pattern,
+            product.SizeType,
+            product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+            product.CreatedBy,
+            product.CreatedAt,
+            product.Status,
+            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
+            product.VectorId
+        ));
+    }
+
     public async Task<Result<List<ProductDto>>> GetPendingProductsByUserId(Guid userId)
     {
         var products = await _productsRepository.GetPendingProductsByUserId(userId);
@@ -142,6 +180,6 @@ public class ProductsService : IProductsService
             product.VectorId
         )).ToList();
 
-        return Result<List<ProductDto>>.Success(productDtos);  
+        return Result<List<ProductDto>>.Success(productDtos);
     } 
 }

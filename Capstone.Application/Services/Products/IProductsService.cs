@@ -17,5 +17,7 @@ public interface IProductsService
         IFormFile? image
     );
 
+    Task<Result<ProductDto>> SearchProductSimilar(string ImageBase64);
+
     Task<Result<List<ProductDto>>> GetPendingProductsByUserId(Guid userId);
 }
