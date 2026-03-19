@@ -17,5 +17,16 @@ public interface IProductsService
         IFormFile? image
     );
 
+    Task<Result<ProductDto>> UpdateProduct(
+        Guid productId,
+        string? productID,
+        string? productName,
+        string? category,
+        string? color,
+        string? pattern,
+        string? sizeType,
+        List<ProductQuantityDto>? quantities
+    );
+
     Task<Result<List<ProductDto>>> GetPendingProductsByUserId(Guid userId);
 }
