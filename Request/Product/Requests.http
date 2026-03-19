@@ -17,3 +17,7 @@ Content-Type: application/json
     "pattern": "",
     "sizeType": "letter"
 }
+
+###
+DELETE  {{host}}/product/delete/d3f863f0-fdea-42ff-864c-9ecbed58b5a0
+Content-Type: application/json

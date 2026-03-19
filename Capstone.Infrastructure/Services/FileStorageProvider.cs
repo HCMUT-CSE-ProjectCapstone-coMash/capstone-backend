@@ -20,8 +20,7 @@ public class FileStorageProvider : IFileStorageProvider
     {
         var key = $"products/{productID}{extension}";
 
-        var uploadRequest = new TransferUtilityUploadRequest
-        {
+        var uploadRequest = new TransferUtilityUploadRequest {
             InputStream = fileStream,
             Key = key,
             BucketName = _bucketSettings.BucketName,
@@ -35,8 +34,7 @@ public class FileStorageProvider : IFileStorageProvider
 
     public Task<string> GetImageUrlAsync(string imageKey, int expirationInMinutes = 60)
     {
-        var request = new Amazon.S3.Model.GetPreSignedUrlRequest
-        {
+        var request = new Amazon.S3.Model.GetPreSignedUrlRequest {
             BucketName = _bucketSettings.BucketName,
             Key = imageKey,
             Expires = DateTime.UtcNow.AddHours(7).AddMinutes(expirationInMinutes)
@@ -46,8 +44,13 @@ public class FileStorageProvider : IFileStorageProvider
         return Task.FromResult(url);
     }
 
-    public Task DeleteImageAsync(string fileUrl)
+    public async Task DeleteImageAsync(string imageKey)
     {
-        throw new NotImplementedException();
+        var request = new Amazon.S3.Model.DeleteObjectRequest {
+            BucketName = _bucketSettings.BucketName,
+            Key = imageKey
+        };
+
+        await _s3Client.DeleteObjectAsync(request);
     }
 }

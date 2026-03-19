@@ -7,6 +7,7 @@ public interface IVectorStoreProvider
 {
     Task<string> InsertImageAsync(string imageUrl, object metadata);
     Task<List<VectorSearchResult>> SearchSimilarProductsAsync(string ImageBase64);
+    Task DeleteImageAsync(string vectorId);
 }
 
 public record VectorSearchResult(

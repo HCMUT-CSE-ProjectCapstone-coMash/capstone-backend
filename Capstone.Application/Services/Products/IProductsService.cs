@@ -20,4 +20,6 @@ public interface IProductsService
     Task<Result<ProductDto>> SearchProductSimilar(string ImageBase64);
 
     Task<Result<List<ProductDto>>> GetPendingProductsByUserId(Guid userId);
+
+    Task<Result<string>> DeleteProductById(Guid productId);
 }

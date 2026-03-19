@@ -16,7 +16,7 @@ public class VectorStoreProvider : IVectorStoreProvider
         _httpClient = httpClient;
         _settings = settings.Value;
     }
-
+    
     public async Task<string> InsertImageAsync(string imageUrl, object metadata)
     {
         var payload = new
@@ -38,12 +38,9 @@ public class VectorStoreProvider : IVectorStoreProvider
 
     public async Task<List<VectorSearchResult>> SearchSimilarProductsAsync(string imageBase64)
     {
-        var base64 = imageBase64.Contains(",")
-            ? imageBase64.Split(",")[1]
-            : imageBase64;
+        var base64 = imageBase64.Contains(",") ? imageBase64.Split(",")[1] : imageBase64;
 
-        var payload = new
-        {
+        var payload = new {
             image = base64,
             top_k = 10
         };
@@ -57,6 +54,15 @@ public class VectorStoreProvider : IVectorStoreProvider
 
         var result = await response.Content.ReadFromJsonAsync<SearchResponse>();
         return result?.Results ?? [];
+    }
+
+    public async Task DeleteImageAsync(string vectorId)
+    {
+        var response = await _httpClient.DeleteAsync(
+            _settings.DatabaseURL + $"/databases/{_settings.DatabaseID}/documents/{vectorId}"
+        );
+
+        response.EnsureSuccessStatusCode();
     }
 }
 

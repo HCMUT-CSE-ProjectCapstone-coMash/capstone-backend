@@ -19,7 +19,7 @@ public class ProductsRepository : IProductsRepository
         _context.Products.Add(product);
         await _context.SaveChangesAsync();
     }
-    
+
     public async Task<Product?> GetProductById(Guid productId)
     {
         return await _context.Products.Include(p => p.ProductQuantities).FirstOrDefaultAsync(p => p.Id == productId);
@@ -31,5 +31,15 @@ public class ProductsRepository : IProductsRepository
             .Include(p => p.ProductQuantities)
             .Where(p => p.CreatedBy == userId && p.Status == ProductStatus.Pending)
             .ToListAsync();
+    }
+    
+    public async Task DeleteProductAsync(Guid productId)
+    {
+        var product = await _context.Products.FindAsync(productId);
+        if (product != null)
+        {
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+        }
     }
 }

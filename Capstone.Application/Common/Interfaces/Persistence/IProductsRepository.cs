@@ -7,4 +7,5 @@ public interface IProductsRepository
     Task AddProduct(Product product);
     Task<Product?> GetProductById(Guid productId);
     Task<List<Product>> GetPendingProductsByUserId(Guid userId);
+    Task DeleteProductAsync(Guid productId);
 }

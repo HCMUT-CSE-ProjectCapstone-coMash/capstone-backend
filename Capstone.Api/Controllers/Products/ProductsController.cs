@@ -16,7 +16,7 @@ public class ProductsController : ControllerBase
         _productsSerivce = productsSerivce;
     }
 
-    // [Authorize]
+    [Authorize]
     [HttpPost("create")]
     public async Task<IActionResult> CreateProduct([FromForm] CreateProductRequest request)
     {
@@ -92,6 +92,7 @@ public class ProductsController : ControllerBase
         )).ToList());
     }
 
+    [Authorize]
     [HttpPost("similar")]
     public async Task<IActionResult> SearchProductSimilar([FromBody] SearchProductSimilarRequest request)
     {
@@ -121,6 +122,23 @@ public class ProductsController : ControllerBase
             result.Value.ImageURL,
             result.Value.VectorId
         ));
+    }
+
+    [HttpDelete("delete/{productId}")]
+    public async Task<IActionResult> DeleteProduct([FromRoute] string productId)
+    {
+        var result = await _productsSerivce.DeleteProductById(Guid.Parse(productId));
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new DeleteProductResponse(result.Value));
     }
 
     [HttpPatch("update/{productId}")]
