@@ -10,11 +10,51 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<ProductQuantities> ProductQuantities => Set<ProductQuantities>();
+    public DbSet<ProductsOrder> ProductsOrders => Set<ProductsOrder>();
+    public DbSet<ProductsOrdersDetail> ProductsOrdersDetails => Set<ProductsOrdersDetail>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
+    {   
+        // User Table
         modelBuilder.Entity<User>().ToTable("users");
-        modelBuilder.Entity<Product>().ToTable("products");
-        modelBuilder.Entity<ProductQuantities>().ToTable("product_quantities");
+
+        // Product Table
+        modelBuilder.Entity<Product>(enity =>
+        {
+            enity.ToTable("products");
+
+            // Product has one User (CreatedBy) and User has many Products
+            enity.HasOne<User>().WithMany().HasForeignKey(p => p.CreatedBy);
+        });
+
+        // ProductQuantities Table
+        modelBuilder.Entity<ProductQuantities>(entity =>
+        {
+            entity.ToTable("product_quantities");
+
+            // ProductQuantities has one Product and Product has many ProductQuantities
+            entity.HasOne(pq => pq.Product).WithMany(p => p.ProductQuantities).HasForeignKey(pq => pq.ProductId).OnDelete(DeleteBehavior.Cascade);;
+        });
+
+        // ProductsOrder Table
+        modelBuilder.Entity<ProductsOrder>(entity =>
+        {
+            entity.ToTable("products_orders");
+
+            // ProductsOrder has one User (CreatedBy) and User has many ProductsOrders
+            entity.HasOne<User>().WithMany().HasForeignKey(po => po.CreatedBy);
+        });
+
+        // ProductsOrdersDetail Table
+        modelBuilder.Entity<ProductsOrdersDetail>(entity =>
+        {
+            entity.ToTable("products_orders_details");
+
+            // ProductsOrdersDetail has one ProductsOrder and ProductsOrder has many ProductsOrdersDetails
+            entity.HasOne<ProductsOrder>().WithMany(po => po.ProductsOrdersDetails).HasForeignKey(pod => pod.ProductsOrderId).OnDelete(DeleteBehavior.Cascade);
+
+            // ProductsOrdersDetail has one Product and Product has many ProductsOrdersDetails
+            entity.HasOne(d => d.Product).WithMany().HasForeignKey(pod => pod.ProductId);
+        });
     }
 }

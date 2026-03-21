@@ -6,7 +6,7 @@ namespace Capstone.Application.Services.Products;
 public interface IProductsService
 {
     Task<Result<ProductDto>> CreateProduct(
-        string productID,
+        string productId,
         string ProductName,
         string category,
         string color,
@@ -14,12 +14,9 @@ public interface IProductsService
         string sizeType,
         List<ProductQuantityDto> productQuantities,
         string createdBy,
-        IFormFile? image
+        IFormFile? image,
+        string orderID
     );
 
     Task<Result<ProductDto>> SearchProductSimilar(string ImageBase64);
-
-    Task<Result<List<ProductDto>>> GetPendingProductsByUserId(Guid userId);
-
-    Task<Result<string>> DeleteProductById(Guid productId);
 }

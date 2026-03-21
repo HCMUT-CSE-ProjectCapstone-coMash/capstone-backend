@@ -17,11 +17,11 @@ public class ProductsController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost("create")]
-    public async Task<IActionResult> CreateProduct([FromForm] CreateProductRequest request)
+    [HttpPost("create/{orderId}")]
+    public async Task<IActionResult> CreateProduct([FromForm] CreateProductRequest request, [FromRoute] string orderId)
     {
         var result = await _productsSerivce.CreateProduct(
-            request.ProductID,
+            request.ProductId,
             request.ProductName,
             request.Category,
             request.Color,
@@ -29,7 +29,8 @@ public class ProductsController : ControllerBase
             request.SizeType,
             request.Quantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
             request.CreatedBy,
-            request.Image
+            request.Image,
+            orderId
         );
 
         if (result.IsFailure)
@@ -43,7 +44,7 @@ public class ProductsController : ControllerBase
 
         return Ok(new ProductResponse(
             result.Value.Id,
-            result.Value.ProductID,
+            result.Value.ProductId,
             result.Value.ProductName,
             result.Value.Category,
             result.Value.Color,
@@ -56,40 +57,6 @@ public class ProductsController : ControllerBase
             result.Value.ImageURL,
             result.Value.VectorId
         ));
-    }
-
-    [Authorize]
-    [HttpGet("pending")]
-    public async Task<IActionResult> GetPendingProductsByUserId()
-    {
-        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-        var result = await _productsSerivce.GetPendingProductsByUserId(Guid.Parse(userId!));
-
-        if (result.IsFailure)
-        {
-            return BadRequest(new
-            {
-                error = result.Error.Code,
-                message = result.Error.Description
-            });
-        }
-
-        return Ok(result.Value.Select(product => new ProductResponse(
-            product.Id,
-            product.ProductID,
-            product.ProductName,
-            product.Category,
-            product.Color,
-            product.Pattern,
-            product.SizeType,
-            product.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
-            product.CreatedBy,
-            product.CreatedAt,
-            product.Status,
-            product.ImageURL,
-            product.VectorId
-        )).ToList());
     }
 
     [Authorize]
@@ -109,7 +76,7 @@ public class ProductsController : ControllerBase
         
         return Ok(new ProductResponse(
             result.Value.Id,
-            result.Value.ProductID,
+            result.Value.ProductId,
             result.Value.ProductName,
             result.Value.Category,
             result.Value.Color,
@@ -122,23 +89,6 @@ public class ProductsController : ControllerBase
             result.Value.ImageURL,
             result.Value.VectorId
         ));
-    }
-
-    [HttpDelete("delete/{productId}")]
-    public async Task<IActionResult> DeleteProduct([FromRoute] string productId)
-    {
-        var result = await _productsSerivce.DeleteProductById(Guid.Parse(productId));
-
-        if (result.IsFailure)
-        {
-            return BadRequest(new
-            {
-                error = result.Error.Code,
-                message = result.Error.Description
-            });
-        }
-
-        return Ok(new DeleteProductResponse(result.Value));
     }
 
     [HttpPatch("update/{productId}")]

@@ -1,0 +1,8 @@
+@host = http://localhost:5194
+
+POST {{host}}/products-orders/fetch/aa5742d7-a3a4-4638-a24d-76be02b85293
+Content-Type: application/json
+
+###
+DELETE  {{host}}/products-orders/delete/ee488270-81f4-4581-af6a-a12336a2356e/b85cfb5c-1035-452b-9ce2-9fff4075ade5
+Content-Type: application/json

@@ -24,14 +24,6 @@ public class ProductsRepository : IProductsRepository
     {
         return await _context.Products.Include(p => p.ProductQuantities).FirstOrDefaultAsync(p => p.Id == productId);
     }
-
-    public async Task<List<Product>> GetPendingProductsByUserId(Guid userId)
-    {
-        return await _context.Products
-            .Include(p => p.ProductQuantities)
-            .Where(p => p.CreatedBy == userId && p.Status == ProductStatus.Pending)
-            .ToListAsync();
-    }
     
     public async Task DeleteProductAsync(Guid productId)
     {

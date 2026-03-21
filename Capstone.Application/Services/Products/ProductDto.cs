@@ -2,7 +2,7 @@ namespace Capstone.Application.Services.Products;
 
 public record ProductDto(
     Guid Id,
-    string ProductID,
+    string ProductId,
     string ProductName,
     string Category,
     string Color,

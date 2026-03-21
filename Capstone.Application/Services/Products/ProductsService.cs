@@ -11,6 +11,7 @@ public class ProductsService : IProductsService
 {
     private readonly IProductsRepository _productsRepository;
     private readonly IProductQuantitiesRepository _productQuantitiesRepository;
+    private readonly IProductsOrdersDetailsRepository _productsOrdersDetailsRepository;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IFileStorageProvider _fileStorageProvider;
     private readonly IVectorStoreProvider _vectorStoreProvider;
@@ -18,6 +19,7 @@ public class ProductsService : IProductsService
     public ProductsService(
         IProductsRepository productsRepository,
         IProductQuantitiesRepository productQuantitiesRepository,
+        IProductsOrdersDetailsRepository productsOrdersDetailsRepository,
         IDateTimeProvider dateTimeProvider,
         IFileStorageProvider fileStorageProvider,
         IVectorStoreProvider vectorStoreProvider
@@ -25,6 +27,7 @@ public class ProductsService : IProductsService
     {
         _productsRepository = productsRepository;
         _productQuantitiesRepository = productQuantitiesRepository;
+        _productsOrdersDetailsRepository = productsOrdersDetailsRepository;
         _dateTimeProvider = dateTimeProvider;
         _fileStorageProvider = fileStorageProvider;
         _vectorStoreProvider = vectorStoreProvider;
@@ -32,7 +35,7 @@ public class ProductsService : IProductsService
 
     // Tạo sản phẩm mới
     public async Task<Result<ProductDto>> CreateProduct(
-        string productID,
+        string productId,
         string productName,
         string category,
         string color,
@@ -40,7 +43,8 @@ public class ProductsService : IProductsService
         string sizeType,
         List<ProductQuantityDto> quantities,
         string createdBy,
-        IFormFile? image
+        IFormFile? image,
+        string orderID
     )
     {
         var newProductID = Guid.NewGuid();
@@ -72,7 +76,7 @@ public class ProductsService : IProductsService
         var product = new Product
         {
             Id = newProductID,
-            ProductID = productID,
+            ProductId = productId,
             ProductName = productName,
             Category = category,
             Color = color,
@@ -96,7 +100,7 @@ public class ProductsService : IProductsService
             var productQuantity = new ProductQuantities
             {
                 Id = Guid.NewGuid(),
-                ProductID = product.Id,
+                ProductId = product.Id,
                 Size = quantity.Size,
                 Quantities = quantity.Quantities
             };
@@ -106,9 +110,18 @@ public class ProductsService : IProductsService
             productQuantities.Add(productQuantity);
         }
 
+        var newProductsOrdersDetail = new ProductsOrdersDetail
+        {
+            Id = Guid.NewGuid(),
+            ProductId = product.Id,
+            ProductsOrderId = Guid.Parse(orderID),
+        };
+
+        await _productsOrdersDetailsRepository.CreateProductsOrdersDetails(newProductsOrdersDetail);
+
         return Result<ProductDto>.Success(new ProductDto(
             product.Id,
-            product.ProductID,
+            product.ProductId,
             product.ProductName,
             product.Category,
             product.Color,
@@ -143,7 +156,7 @@ public class ProductsService : IProductsService
 
         return Result<ProductDto>.Success(new ProductDto(
             product.Id,
-            product.ProductID,
+            product.ProductId,
             product.ProductName,
             product.Category,
             product.Color,
@@ -156,52 +169,5 @@ public class ProductsService : IProductsService
             string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
             product.VectorId
         ));
-    }
-
-    // Lấy danh sách sản phẩm đang chờ duyệt của người dùng
-    public async Task<Result<List<ProductDto>>> GetPendingProductsByUserId(Guid userId)
-    {
-        var products = await _productsRepository.GetPendingProductsByUserId(userId);
-
-        var productDtos = products.Select(product => new ProductDto(
-            product.Id,
-            product.ProductID,
-            product.ProductName,
-            product.Category,
-            product.Color,
-            product.Pattern,
-            product.SizeType,
-            product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
-            product.CreatedBy,
-            product.CreatedAt,
-            product.Status,
-            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
-            product.VectorId
-        )).ToList();
-
-        return Result<List<ProductDto>>.Success(productDtos);
-    }
-
-    // Xóa sản phẩm theo ID
-    public async Task<Result<string>> DeleteProductById(Guid productId)
-    {
-        var product = await _productsRepository.GetProductById(productId);
-
-        if (product == null)
-            return Result<string>.Failure(new Error("ProductNotFound", "The product was not found."));
-
-        if (!string.IsNullOrEmpty(product.ImageKey))
-        {
-            await _fileStorageProvider.DeleteImageAsync(product.ImageKey);
-        }
-
-        if (!string.IsNullOrEmpty(product.VectorId))
-        {
-            await _vectorStoreProvider.DeleteImageAsync(product.VectorId);
-        }
-
-        await _productsRepository.DeleteProductAsync(product.Id);
-
-        return Result<string>.Success(product.Id.ToString());
     }
 }

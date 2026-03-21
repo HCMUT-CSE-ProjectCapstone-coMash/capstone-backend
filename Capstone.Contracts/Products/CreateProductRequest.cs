@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 namespace Capstone.Contracts.Products;
 
 public record CreateProductRequest(
-    string ProductID,
+    string ProductId,
     string ProductName,
     string Category,
     string Color,

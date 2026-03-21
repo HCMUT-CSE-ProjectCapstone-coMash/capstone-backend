@@ -3,7 +3,7 @@ namespace Capstone.Domain.Entities;
 public class Product
 {
     public Guid Id { get; set; }
-    public string ProductID { get; set; } = string.Empty;
+    public string ProductId { get; set; } = string.Empty;
     public string ProductName { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public string Color { get; set; } = string.Empty;
