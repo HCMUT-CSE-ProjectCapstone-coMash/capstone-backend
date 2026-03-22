@@ -67,10 +67,10 @@ public class ProductsService : IProductsService
 
             imageUrl = await _fileStorageProvider.GetImageUrlAsync(imageKey);
 
-            vectorId = await _vectorStoreProvider.InsertImageAsync(imageUrl, new
-            {
-                Id = newProductID.ToString(),
-            });
+            // vectorId = await _vectorStoreProvider.InsertImageAsync(imageUrl, new
+            // {
+            //     Id = newProductID.ToString(),
+            // });
         }
 
         var product = new Product
