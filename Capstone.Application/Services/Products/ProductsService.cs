@@ -172,7 +172,7 @@ public class ProductsService : IProductsService
     }
 
     public async Task<Result<ProductDto>> UpdateProduct(
-        Guid Id,
+        string Id,
         string? productId,
         string? productName,
         string? category,
@@ -182,14 +182,12 @@ public class ProductsService : IProductsService
         List<ProductQuantityDto>? quantities
     )
     {
-        var product = await _productsRepository.GetProductById(Id);
+        var product = await _productsRepository.GetProductById(Guid.Parse(Id));
+        
         if (product is null)
         {
             return Result<ProductDto>.Failure(new Error("NotFound", "Product not found."));
         }
-
-        // Ensure CreatedAt always has a UTC kind before saving 
-        product.CreatedAt = DateTime.SpecifyKind(product.CreatedAt, DateTimeKind.Utc);
 
         if (!string.IsNullOrWhiteSpace(productId))
             product.ProductId = productId;
@@ -215,7 +213,7 @@ public class ProductsService : IProductsService
 
         if (quantities is not null)
         {
-            await _productQuantitiesRepository.DeleteByProductId(product.Id);
+            await _productQuantitiesRepository.DeleteProductQuantitiesByProductId(product.Id);
 
             updatedQuantities = new List<ProductQuantities>();
 
@@ -230,13 +228,10 @@ public class ProductsService : IProductsService
                 };
 
                 await _productQuantitiesRepository.AddProductQuantities(productQuantity);
+
                 updatedQuantities.Add(productQuantity);
             }
         }
-
-        var imageUrl = string.IsNullOrEmpty(product.ImageKey)
-            ? string.Empty
-            : await _fileStorageProvider.GetImageUrlAsync(product.ImageKey);
 
         return Result<ProductDto>.Success(new ProductDto(
             product.Id,
@@ -250,7 +245,7 @@ public class ProductsService : IProductsService
             product.CreatedBy,
             product.CreatedAt,
             product.Status,
-            imageUrl,
+            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
             product.VectorId
         ));
     }

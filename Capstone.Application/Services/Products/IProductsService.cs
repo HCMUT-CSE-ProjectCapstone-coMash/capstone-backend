@@ -19,10 +19,10 @@ public interface IProductsService
     );
 
     Task<Result<ProductDto>> SearchProductSimilar(string ImageBase64);
-    
+
     Task<Result<ProductDto>> UpdateProduct(
-        Guid productId,
-        string? productID,
+        string id,
+        string? productId,
         string? productName,
         string? category,
         string? color,

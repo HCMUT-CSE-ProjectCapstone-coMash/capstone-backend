@@ -91,20 +91,11 @@ public class ProductsController : ControllerBase
         ));
     }
 
-    [HttpPatch("update/{productId}")]
-    public async Task<IActionResult> UpdateProductStatus([FromBody] PatchProductRequest request, [FromRoute] string productId)
+    [HttpPatch("patch/{productId}")]
+    public async Task<IActionResult> PatchProductInProductsOrders([FromBody] PatchProductRequest request, [FromRoute] string productId)
     {
-        if (!Guid.TryParse(productId, out var id))
-        {
-            return BadRequest(new
-            {
-                error = "InvalidId",
-                message = "ProductId must be a valid GUID."
-            });
-        }
-
         var result = await _productsSerivce.UpdateProduct(
-            id,
+            productId,
             request.ProductID,
             request.ProductName,
             request.Category,
@@ -125,7 +116,7 @@ public class ProductsController : ControllerBase
 
         return Ok(new ProductResponse(
             result.Value.Id,
-            result.Value.ProductID,
+            result.Value.ProductId,
             result.Value.ProductName,
             result.Value.Category,
             result.Value.Color,
@@ -135,7 +126,8 @@ public class ProductsController : ControllerBase
             result.Value.CreatedBy,
             result.Value.CreatedAt,
             result.Value.Status,
-            result.Value.ImageURL
+            result.Value.ImageURL,
+            result.Value.VectorId
         ));
     }
 }
