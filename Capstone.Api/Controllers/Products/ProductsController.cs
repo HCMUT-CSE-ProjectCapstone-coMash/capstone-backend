@@ -94,7 +94,48 @@ public class ProductsController : ControllerBase
     [HttpPatch("update/{productId}")]
     public async Task<IActionResult> UpdateProductStatus([FromBody] PatchProductRequest request, [FromRoute] string productId)
     {
-        // To do
-        return Ok(request);
+        if (!Guid.TryParse(productId, out var id))
+        {
+            return BadRequest(new
+            {
+                error = "InvalidId",
+                message = "ProductId must be a valid GUID."
+            });
+        }
+
+        var result = await _productsSerivce.UpdateProduct(
+            id,
+            request.ProductID,
+            request.ProductName,
+            request.Category,
+            request.Color,
+            request.Pattern,
+            request.SizeType,
+            request.Quantities?.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList()
+        );
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new ProductResponse(
+            result.Value.Id,
+            result.Value.ProductID,
+            result.Value.ProductName,
+            result.Value.Category,
+            result.Value.Color,
+            result.Value.Pattern,
+            result.Value.SizeType,
+            result.Value.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+            result.Value.CreatedBy,
+            result.Value.CreatedAt,
+            result.Value.Status,
+            result.Value.ImageURL
+        ));
     }
 }

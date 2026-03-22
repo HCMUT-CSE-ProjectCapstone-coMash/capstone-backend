@@ -20,6 +20,12 @@ public class ProductsRepository : IProductsRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task UpdateProduct(Product product)
+    {
+        _context.Products.Update(product);
+        await _context.SaveChangesAsync();
+    }
+    
     public async Task<Product?> GetProductById(Guid productId)
     {
         return await _context.Products.Include(p => p.ProductQuantities).FirstOrDefaultAsync(p => p.Id == productId);
