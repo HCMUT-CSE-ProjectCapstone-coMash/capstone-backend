@@ -4,6 +4,6 @@ namespace Capstone.Application.Common.Interfaces.Persistence;
 
 public interface IProductQuantitiesRepository
 {
-    Task AddProductQuantities(ProductQuantities productQuantities);
+    Task AddProductQuantities(ProductQuantity productQuantities);
     Task DeleteProductQuantitiesByProductId(Guid productId);
 }

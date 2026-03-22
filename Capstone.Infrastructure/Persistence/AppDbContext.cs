@@ -9,7 +9,7 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Product> Products => Set<Product>();
-    public DbSet<ProductQuantities> ProductQuantities => Set<ProductQuantities>();
+    public DbSet<ProductQuantity> ProductQuantities => Set<ProductQuantity>();
     public DbSet<ProductsOrder> ProductsOrders => Set<ProductsOrder>();
     public DbSet<ProductsOrdersDetail> ProductsOrdersDetails => Set<ProductsOrdersDetail>();
 
@@ -28,7 +28,7 @@ public class AppDbContext : DbContext
         });
 
         // ProductQuantities Table
-        modelBuilder.Entity<ProductQuantities>(entity =>
+        modelBuilder.Entity<ProductQuantity>(entity =>
         {
             entity.ToTable("product_quantities");
 

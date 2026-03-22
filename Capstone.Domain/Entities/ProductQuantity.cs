@@ -1,6 +1,6 @@
 namespace Capstone.Domain.Entities;
 
-public class ProductQuantities
+public class ProductQuantity
 {
     public Guid Id { get; set; }
     public Guid ProductId { get; set; }

@@ -15,5 +15,5 @@ public class Product
     public string ImageKey { get; set; } = string.Empty;
     public string VectorId { get; set; } = string.Empty;
 
-    public ICollection<ProductQuantities> ProductQuantities { get; set; } = new List<ProductQuantities>();
+    public ICollection<ProductQuantity> ProductQuantities { get; set; } = new List<ProductQuantity>();
 }

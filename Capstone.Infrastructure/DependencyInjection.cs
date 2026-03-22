@@ -25,7 +25,7 @@ public static class DependencyInjection
         services.Configure<BucketSettings>(config.GetSection("BucketSettings"));
         services.Configure<VectorStoreSettings>(config.GetSection("VectorStoreSettings"));
 
-        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUsersRepository, UsersRepository>();
         services.AddScoped<IProductsRepository, ProductsRepository>();
         services.AddScoped<IProductQuantitiesRepository, ProductQuantitiesRepository>();
         services.AddScoped<IProductsOrdersRepository, ProductsOrdersRepository>();

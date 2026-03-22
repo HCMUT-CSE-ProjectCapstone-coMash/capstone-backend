@@ -9,12 +9,12 @@ namespace Capstone.Application.Services.Authentication;
 
 public class AuthenticationService : IAuthenticationService
 {
-    private readonly IUserRepository _userRepository;
+    private readonly IUsersRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
 
-    public AuthenticationService(IUserRepository userRepository, IPasswordHasher passwordHasher, IDateTimeProvider dateTimeProvider, IJwtTokenGenerator jwtTokenGenerator)
+    public AuthenticationService(IUsersRepository userRepository, IPasswordHasher passwordHasher, IDateTimeProvider dateTimeProvider, IJwtTokenGenerator jwtTokenGenerator)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;

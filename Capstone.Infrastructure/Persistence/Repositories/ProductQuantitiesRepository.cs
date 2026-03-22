@@ -13,7 +13,7 @@ public class ProductQuantitiesRepository : IProductQuantitiesRepository
         _context = context;
     }
 
-    public async Task AddProductQuantities(ProductQuantities productQuantities)
+    public async Task AddProductQuantities(ProductQuantity productQuantities)
     {
         _context.ProductQuantities.Add(productQuantities);
         await _context.SaveChangesAsync();

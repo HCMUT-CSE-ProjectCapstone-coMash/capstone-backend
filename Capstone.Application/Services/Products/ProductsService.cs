@@ -91,13 +91,13 @@ public class ProductsService : IProductsService
 
         await _productsRepository.AddProduct(product);
 
-        var productQuantities = new List<ProductQuantities>();
+        var productQuantities = new List<ProductQuantity>();
 
         for (int i = 0; i < quantities.Count; i++)
         {
             var quantity = quantities[i];
 
-            var productQuantity = new ProductQuantities
+            var productQuantity = new ProductQuantity
             {
                 Id = Guid.NewGuid(),
                 ProductId = product.Id,
@@ -215,11 +215,11 @@ public class ProductsService : IProductsService
         {
             await _productQuantitiesRepository.DeleteProductQuantitiesByProductId(product.Id);
 
-            updatedQuantities = new List<ProductQuantities>();
+            updatedQuantities = new List<ProductQuantity>();
 
             foreach (var quantity in quantities)
             {
-                var productQuantity = new ProductQuantities
+                var productQuantity = new ProductQuantity
                 {
                     Id = Guid.NewGuid(),
                     ProductId = product.Id,
