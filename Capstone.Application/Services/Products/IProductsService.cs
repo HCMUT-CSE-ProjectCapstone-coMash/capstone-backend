@@ -20,7 +20,7 @@ public interface IProductsService
 
     Task<Result<ProductDto>> SearchProductSimilar(string ImageBase64);
 
-    Task<Result<ProductDto>> UpdateProduct(
+    Task<Result<ProductDto>> PatchProductInProductsOrders(
         string id,
         string? productId,
         string? productName,

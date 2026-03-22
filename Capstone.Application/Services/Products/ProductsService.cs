@@ -171,7 +171,7 @@ public class ProductsService : IProductsService
         ));
     }
 
-    public async Task<Result<ProductDto>> UpdateProduct(
+    public async Task<Result<ProductDto>> PatchProductInProductsOrders(
         string Id,
         string? productId,
         string? productName,

@@ -94,7 +94,7 @@ public class ProductsController : ControllerBase
     [HttpPatch("patch/{productId}")]
     public async Task<IActionResult> PatchProductInProductsOrders([FromBody] PatchProductRequest request, [FromRoute] string productId)
     {
-        var result = await _productsSerivce.UpdateProduct(
+        var result = await _productsSerivce.PatchProductInProductsOrders(
             productId,
             request.ProductID,
             request.ProductName,
