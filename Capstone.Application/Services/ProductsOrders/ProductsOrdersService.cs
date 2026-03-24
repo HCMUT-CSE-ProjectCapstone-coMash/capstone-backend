@@ -126,4 +126,27 @@ public class ProductsOrdersService : IProductsOrdersService
 
         return Result<string>.Success(product.Id.ToString());
     }
+
+    public async Task<Result<string>> PatchProductsOrders(string orderId, string? orderName, string? OrderDescription, string? OrderStatus)
+    {
+        var productsOrder = await _productsOrdersRepository.GetProductsOrdersByOrderId(Guid.Parse(orderId));
+
+        if (productsOrder is null)
+        {
+            return Result<string>.Failure(new Error("NotFound", "ProductsOrders not found."));
+        }
+
+        if (!string.IsNullOrWhiteSpace(orderName))
+            productsOrder.OrderName = orderName;
+
+        if (!string.IsNullOrWhiteSpace(OrderDescription))
+            productsOrder.OrderDescription = OrderDescription;
+
+        if (!string.IsNullOrWhiteSpace(OrderStatus))
+            productsOrder.OrderStatus = OrderStatus;
+
+        await _productsOrdersRepository.PatchProductsOrders(productsOrder);
+
+        return Result<string>.Success(productsOrder.Id.ToString());
+    }
 }

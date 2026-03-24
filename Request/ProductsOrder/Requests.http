@@ -6,3 +6,12 @@ Content-Type: application/json
 ###
 DELETE  {{host}}/products-orders/delete/ee488270-81f4-4581-af6a-a12336a2356e/b85cfb5c-1035-452b-9ce2-9fff4075ade5
 Content-Type: application/json
+
+###
+PATCH {{host}}/products-orders/patch/77745930-3a27-44f3-81b4-88dda48eff44
+Content-Type: application/json
+
+{
+    "OrderName": "San pham thang 3",
+    "OrderStatus": "Sending"
+}

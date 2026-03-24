@@ -68,8 +68,23 @@ public class ProductsOrdersController : ControllerBase
             });
         }
 
-        return Ok(new DeleteProductFromProductsOrdersResponse(
-            result.Value
-        ));
+        return Ok(new DeleteProductFromProductsOrdersResponse(result.Value));
+    }
+
+    [HttpPatch("patch/{orderId}")]
+    public async Task<IActionResult> PatchProductsOrders([FromRoute] string orderId, [FromBody] PatchProductsOrders request)
+    {
+        var result = await _productsOrdersService.PatchProductsOrders(orderId, request.OrderName, request.OrderDescription, request.OrderStatus);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new PatchProductsOrdersResponse(result.Value));
     }
 }

@@ -22,10 +22,21 @@ public class ProductsOrdersRepository : IProductsOrdersRepository
             .AsSplitQuery()
             .FirstOrDefaultAsync(po => po.CreatedBy == createdBy && po.OrderStatus == status);
     }
-    
+
     public async Task CreateProductsOrders(ProductsOrder ProductsOrder)
     {
         _context.ProductsOrders.Add(ProductsOrder);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<ProductsOrder?> GetProductsOrdersByOrderId(Guid orderId)
+    {
+        return await _context.ProductsOrders.FirstOrDefaultAsync(po => po.Id == orderId);
+    }
+
+    public async Task PatchProductsOrders(ProductsOrder productsOrder)
+    {
+        _context.ProductsOrders.Update(productsOrder);
         await _context.SaveChangesAsync();
     }
 }
