@@ -10,6 +10,16 @@ public record ProductsOrdersResponse(
     List<ProductResponse> Products
 );
 
+public record ProductsOrdersListResponse(
+    Guid Id,
+    Guid CreatedBy,
+    string CreatedByName,
+    DateTime CreatedAt,
+    string OrderName,
+    string OrderDescription,
+    string OrderStatus
+);
+
 public record ProductResponse(
     Guid Id,
     string ProductId,

@@ -11,3 +11,13 @@ public record ProductsOrdersDto(
     string OrderStatus,
     List<ProductDto> Products
 );
+
+public record ProductsOrdersListDto(
+    Guid Id,
+    Guid CreatedBy,
+    string CreatedByName,
+    DateTime CreatedAt,
+    string OrderName,
+    string OrderDescription,
+    string OrderStatus
+);

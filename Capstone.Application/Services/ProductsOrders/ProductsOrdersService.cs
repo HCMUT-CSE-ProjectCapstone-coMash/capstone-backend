@@ -15,6 +15,7 @@ public class ProductsOrdersService : IProductsOrdersService
     private readonly IProductsOrdersRepository _productsOrdersRepository;
     private readonly IProductsOrdersDetailsRepository _productsOrdersDetailsRepository;
     private readonly IProductsRepository _productsRepository;
+    private readonly IUsersRepository _usersRepository;
 
 
 
@@ -24,7 +25,8 @@ public class ProductsOrdersService : IProductsOrdersService
         IVectorStoreProvider vectorStoreProvider,
         IProductsOrdersRepository productsOrdersRepository,
         IProductsOrdersDetailsRepository productsOrdersDetailsRepository,
-        IProductsRepository productsRepository
+        IProductsRepository productsRepository,
+        IUsersRepository usersRepository
     )
     {
         _dateTimeProvider = dateTimeProvider;
@@ -33,6 +35,7 @@ public class ProductsOrdersService : IProductsOrdersService
         _productsOrdersRepository = productsOrdersRepository;
         _productsOrdersDetailsRepository = productsOrdersDetailsRepository;
         _productsRepository = productsRepository;
+        _usersRepository = usersRepository;
     }
 
     public async Task<Result<ProductsOrdersDto>> FetchOrCreateProductsOrders(string createdBy)
@@ -92,6 +95,30 @@ public class ProductsOrdersService : IProductsOrdersService
         );
 
         return Result<ProductsOrdersDto>.Success(newProductsOrdersDto);
+    }
+
+    public async Task<Result<List<ProductsOrdersListDto>>> GetAllProductsOrders()
+    {
+        var productsOrders = await _productsOrdersRepository.GetAllProductsOrders();
+        var productsOrdersDtos = new List<ProductsOrdersListDto>();
+
+        foreach (var productsOrder in productsOrders)
+        {
+            var createdByUser = await _usersRepository.GetUserById(productsOrder.CreatedBy);
+            var createdByName = createdByUser?.FullName ?? string.Empty;
+
+            productsOrdersDtos.Add(new ProductsOrdersListDto(
+                Id: productsOrder.Id,
+                CreatedBy: productsOrder.CreatedBy,
+                CreatedByName: createdByName,
+                CreatedAt: productsOrder.CreatedAt,
+                OrderName: productsOrder.OrderName,
+                OrderDescription: productsOrder.OrderDescription,
+                OrderStatus: productsOrder.OrderStatus
+            ));
+        }
+
+        return Result<List<ProductsOrdersListDto>>.Success(productsOrdersDtos);
     }
 
     public async Task<Result<string>> DeleteProductFromProductsOrders(string orderId, string productId)

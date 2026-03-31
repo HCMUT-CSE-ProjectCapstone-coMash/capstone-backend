@@ -23,6 +23,16 @@ public class ProductsOrdersRepository : IProductsOrdersRepository
             .FirstOrDefaultAsync(po => po.CreatedBy == createdBy && po.OrderStatus == status);
     }
 
+    public async Task<List<ProductsOrder>> GetAllProductsOrders()
+    {
+        return await _context.ProductsOrders
+            .Include(po => po.ProductsOrdersDetails)
+            .ThenInclude(detail => detail.Product)
+            .ThenInclude(p => p.ProductQuantities)
+            .AsSplitQuery()
+            .ToListAsync();
+    }
+
     public async Task CreateProductsOrders(ProductsOrder ProductsOrder)
     {
         _context.ProductsOrders.Add(ProductsOrder);
