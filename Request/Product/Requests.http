@@ -17,3 +17,6 @@ Content-Type: application/json
     "pattern": "",
     "sizeType": "letter"
 }
+
+###
+GET {{host}}/product/fetch-by-name/Váy

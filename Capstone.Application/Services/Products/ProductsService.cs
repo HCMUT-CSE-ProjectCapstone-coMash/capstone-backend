@@ -276,12 +276,35 @@ public class ProductsService : IProductsService
         ));
     }
 
+    public async Task<Result<List<ProductDto>>> FetchProductByName(string productName)
+    {
+        var products = await _productsRepository.FetchProductByName(productName);
+
+        var productDtos = products.Select(product => new ProductDto(
+            product.Id,
+            product.ProductId,
+            product.ProductName,
+            product.Category,
+            product.Color,
+            product.Pattern,
+            product.SizeType,
+            product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+            product.CreatedBy,
+            product.CreatedAt,
+            product.Status,
+            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
+            product.VectorId
+        )).ToList();
+
+        return Result<List<ProductDto>>.Success(productDtos);
+    }
+
     private static string GetCategoryPrefix(string category) => category switch
     {
-        "Váy"  => "VAY",
-        "Đầm"  => "DAM",
-        "Áo"   => "AO",
+        "Váy" => "VAY",
+        "Đầm" => "DAM",
+        "Áo" => "AO",
         "Quần" => "QUAN",
-        _      => "PRD"
+        _ => "PRD"
     };
 }

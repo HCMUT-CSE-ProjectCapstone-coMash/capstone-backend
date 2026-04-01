@@ -32,4 +32,6 @@ public interface IProductsService
         string? sizeType,
         List<ProductQuantityDto>? quantities
     );
+
+    Task<Result<List<ProductDto>>> FetchProductByName(string productName);
 }

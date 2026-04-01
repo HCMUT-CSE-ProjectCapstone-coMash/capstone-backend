@@ -73,7 +73,7 @@ public class ProductsController : ControllerBase
                 message = result.Error.Description
             });
         }
-        
+
         return Ok(new ProductResponse(
             result.Value.Id,
             result.Value.ProductId,
@@ -152,5 +152,36 @@ public class ProductsController : ControllerBase
             result.Value.ImageURL,
             result.Value.VectorId
         ));
+    }
+
+    [HttpGet("fetch-by-name/{productName}")]
+    public async Task<IActionResult> FetchProductByName([FromRoute] string productName)
+    {
+        var result = await _productsSerivce.FetchProductByName(productName);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value.Select(p => new ProductResponse(
+            p.Id,
+            p.ProductId,
+            p.ProductName,
+            p.Category,
+            p.Color,
+            p.Pattern,
+            p.SizeType,
+            p.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+            p.CreatedBy,
+            p.CreatedAt,
+            p.Status,
+            p.ImageURL,
+            p.VectorId
+        )).ToList());
     }
 }

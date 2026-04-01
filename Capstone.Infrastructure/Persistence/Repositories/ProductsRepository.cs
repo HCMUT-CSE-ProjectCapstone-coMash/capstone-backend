@@ -40,7 +40,7 @@ public class ProductsRepository : IProductsRepository
             await _context.SaveChangesAsync();
         }
     }
-    
+
     public async Task<int> GetMaxIdNumberByCategoryAsync(string prefix)
     {
         var numberStrings = await _context.Products
@@ -51,5 +51,14 @@ public class ProductsRepository : IProductsRepository
         if (!numberStrings.Any()) return 0;
 
         return numberStrings.Select(n => int.TryParse(n, out var num) ? num : 0).Max();
+    }
+    
+    public Task<List<Product>> FetchProductByName(string productName)
+    {
+        return _context.Products
+            .Include(p => p.ProductQuantities)
+            .Where(p => p.ProductName.Contains(productName))
+            .Take(3)
+            .ToListAsync();
     }
 }
