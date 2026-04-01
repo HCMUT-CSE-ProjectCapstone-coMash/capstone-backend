@@ -91,29 +91,6 @@ public class ProductsController : ControllerBase
         ));
     }
 
-    [HttpPost("analyze")]
-    public async Task<IActionResult> AnalyzeImage([FromBody] AnalyzeImageRequest request)
-    {
-        var result = await _productsSerivce.AnalyzeImage(request.ImageBase64);
-
-        if (result.IsFailure)
-        {
-            return BadRequest(new
-            {
-                error = result.Error.Code,
-                message = result.Error.Description
-            });
-        }
-
-        return Ok(new AnalyzeImageResponse(
-            result.Value.ProductId,
-            result.Value.ProductName,
-            result.Value.Category,
-            result.Value.Color,
-            result.Value.Pattern
-        ));
-    }
-
     [HttpPatch("patch/{productId}")]
     public async Task<IActionResult> PatchProductInProductsOrders([FromBody] PatchProductRequest request, [FromRoute] string productId)
     {
