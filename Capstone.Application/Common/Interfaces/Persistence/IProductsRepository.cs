@@ -8,5 +8,4 @@ public interface IProductsRepository
     Task<Product?> GetProductById(Guid productId);
     Task DeleteProductAsync(Guid productId);
     Task UpdateProduct(Product product);
-    Task<int>GetMaxIdNumberByCategoryAsync(string prefix);
 }

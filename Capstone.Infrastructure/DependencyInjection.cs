@@ -24,7 +24,6 @@ public static class DependencyInjection
         services.Configure<JwtSettings>(config.GetSection("JwtSettings"));
         services.Configure<BucketSettings>(config.GetSection("BucketSettings"));
         services.Configure<VectorStoreSettings>(config.GetSection("VectorStoreSettings"));
-        services.Configure<GeminiSettings>(config.GetSection("GeminiSettings"));
 
         services.AddScoped<IUsersRepository, UsersRepository>();
         services.AddScoped<IProductsRepository, ProductsRepository>();
@@ -37,7 +36,6 @@ public static class DependencyInjection
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddSingleton<IFileStorageProvider, FileStorageProvider>();
         services.AddSingleton<IVectorStoreProvider, VectorStoreProvider>();
-        services.AddSingleton<IPromptProvider, PromptProvider>();
 
         // Image Saving
         services.AddSingleton<IAmazonS3, AmazonS3Client>(sp =>
