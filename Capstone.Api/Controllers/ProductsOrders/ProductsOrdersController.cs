@@ -15,6 +15,31 @@ public class ProductsOrdersController : ControllerBase
         _productsOrdersService = productsOrdersService;
     }
 
+    [HttpGet("fetch-excluding-pending")]
+    public async Task<IActionResult> GetAllProductsOrdersExcludingPending()
+    {
+        var result = await _productsOrdersService.GetAllProductsOrdersExcludingPending();
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value.Select(order => new ProductsOrdersListResponse(
+            order.Id,
+            order.CreatedBy,
+            order.CreatedByName,
+            order.CreatedAt,
+            order.OrderName,
+            order.OrderDescription,
+            order.OrderStatus
+        )));
+    }
+
     [HttpPost("fetch/{createdBy}")]
     public async Task<IActionResult> FetchOrCreateProductsOrders([FromRoute] string createdBy)
     {
