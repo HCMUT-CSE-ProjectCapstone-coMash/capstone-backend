@@ -97,7 +97,7 @@ public class ProductsOrdersService : IProductsOrdersService
         return Result<ProductsOrdersDto>.Success(newProductsOrdersDto);
     }
 
-    public async Task<Result<List<ProductsOrdersListDto>>> GetAllProductsOrders()
+    public async Task<Result<List<ProductsOrdersListDto>>> GetAllProductsOrdersExcludingPending()
     {
         var productsOrders = await _productsOrdersRepository.GetProductsOrdersExcludingPending();
         var productsOrdersDtos = new List<ProductsOrdersListDto>();

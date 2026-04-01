@@ -1,6 +1,6 @@
 @host = http://localhost:5194
 
-GET {{host}}/products-orders
+GET {{host}}/products-orders/fetch-excluding-pending
 
 ###
 POST {{host}}/products-orders/fetch/aa5742d7-a3a4-4638-a24d-76be02b85293

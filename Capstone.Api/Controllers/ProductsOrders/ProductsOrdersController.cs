@@ -15,10 +15,10 @@ public class ProductsOrdersController : ControllerBase
         _productsOrdersService = productsOrdersService;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetAllProductsOrders()
+    [HttpGet("fetch-excluding-pending")]
+    public async Task<IActionResult> GetAllProductsOrdersExcludingPending()
     {
-        var result = await _productsOrdersService.GetAllProductsOrders();
+        var result = await _productsOrdersService.GetAllProductsOrdersExcludingPending();
 
         if (result.IsFailure)
         {
