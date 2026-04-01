@@ -99,7 +99,7 @@ public class ProductsOrdersService : IProductsOrdersService
 
     public async Task<Result<List<ProductsOrdersListDto>>> GetAllProductsOrders()
     {
-        var productsOrders = await _productsOrdersRepository.GetAllProductsOrders();
+        var productsOrders = await _productsOrdersRepository.GetProductsOrdersExcludingPending();
         var productsOrdersDtos = new List<ProductsOrdersListDto>();
 
         foreach (var productsOrder in productsOrders)

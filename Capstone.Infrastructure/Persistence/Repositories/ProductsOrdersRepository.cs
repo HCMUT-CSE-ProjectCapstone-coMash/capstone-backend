@@ -23,14 +23,9 @@ public class ProductsOrdersRepository : IProductsOrdersRepository
             .FirstOrDefaultAsync(po => po.CreatedBy == createdBy && po.OrderStatus == status);
     }
 
-    public async Task<List<ProductsOrder>> GetAllProductsOrders()
+    public async Task<List<ProductsOrder>> GetProductsOrdersExcludingPending()
     {
-        return await _context.ProductsOrders
-            .Include(po => po.ProductsOrdersDetails)
-            .ThenInclude(detail => detail.Product)
-            .ThenInclude(p => p.ProductQuantities)
-            .AsSplitQuery()
-            .ToListAsync();
+        return await _context.ProductsOrders.Where(po => po.OrderStatus != "Pending").ToListAsync();
     }
 
     public async Task CreateProductsOrders(ProductsOrder ProductsOrder)
