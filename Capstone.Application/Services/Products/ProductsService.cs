@@ -15,6 +15,7 @@ public class ProductsService : IProductsService
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IFileStorageProvider _fileStorageProvider;
     private readonly IVectorStoreProvider _vectorStoreProvider;
+    private readonly IPromptProvider _promptProvider;
 
     public ProductsService(
         IProductsRepository productsRepository,
@@ -22,7 +23,8 @@ public class ProductsService : IProductsService
         IProductsOrdersDetailsRepository productsOrdersDetailsRepository,
         IDateTimeProvider dateTimeProvider,
         IFileStorageProvider fileStorageProvider,
-        IVectorStoreProvider vectorStoreProvider
+        IVectorStoreProvider vectorStoreProvider,
+        IPromptProvider promptProvider
     )
     {
         _productsRepository = productsRepository;
@@ -31,6 +33,7 @@ public class ProductsService : IProductsService
         _dateTimeProvider = dateTimeProvider;
         _fileStorageProvider = fileStorageProvider;
         _vectorStoreProvider = vectorStoreProvider;
+        _promptProvider = promptProvider;
     }
 
     // Tạo sản phẩm mới
@@ -171,6 +174,29 @@ public class ProductsService : IProductsService
         ));
     }
 
+    public async Task<Result<AnalyzeProductDto>> AnalyzeImage(string ImageBase64)
+    {
+        string[] AllowedCategories = ["Đầm", "Áo", "Quần", "Váy"];
+        string[] AllowedColors = ["Đỏ", "Đen", "Trắng", "Cam", "Vàng", "Xanh Lá", "Xanh Dương", "Tím", "Hồng", "Nâu"];
+        string[] AllowedPatterns = ["Trơn", "Sọc Dọc", "Sọc Ngang", "Caro", "Hoa Văn"];
+
+        var analyzedProduct = await _promptProvider.AnalyzeImage(ImageBase64, AllowedCategories, AllowedColors, AllowedPatterns);
+
+        var prefix = GetCategoryPrefix(analyzedProduct.Category);
+        var maxNumber = await _productsRepository.GetMaxIdNumberByCategoryAsync(prefix);
+        var productId = $"{prefix}-{maxNumber + 1}";
+
+        var productName = analyzedProduct.Category + " " + analyzedProduct.Color + " " + analyzedProduct.Pattern;
+
+        return Result<AnalyzeProductDto>.Success(new AnalyzeProductDto(
+            productId,
+            productName,
+            analyzedProduct.Category,
+            analyzedProduct.Color,
+            analyzedProduct.Pattern
+        ));
+    }
+
     public async Task<Result<ProductDto>> PatchProductInProductsOrders(
         string Id,
         string? productId,
@@ -183,7 +209,7 @@ public class ProductsService : IProductsService
     )
     {
         var product = await _productsRepository.GetProductById(Guid.Parse(Id));
-        
+
         if (product is null)
         {
             return Result<ProductDto>.Failure(new Error("NotFound", "Product not found."));
@@ -249,4 +275,13 @@ public class ProductsService : IProductsService
             product.VectorId
         ));
     }
+
+    private static string GetCategoryPrefix(string category) => category switch
+    {
+        "Váy"  => "VAY",
+        "Đầm"  => "DAM",
+        "Áo"   => "AO",
+        "Quần" => "QUAN",
+        _      => "PRD"
+    };
 }

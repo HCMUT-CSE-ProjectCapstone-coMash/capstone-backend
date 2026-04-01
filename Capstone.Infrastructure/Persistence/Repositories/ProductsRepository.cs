@@ -25,12 +25,12 @@ public class ProductsRepository : IProductsRepository
         _context.Products.Update(product);
         await _context.SaveChangesAsync();
     }
-    
+
     public async Task<Product?> GetProductById(Guid productId)
     {
         return await _context.Products.Include(p => p.ProductQuantities).FirstOrDefaultAsync(p => p.Id == productId);
     }
-    
+
     public async Task DeleteProductAsync(Guid productId)
     {
         var product = await _context.Products.FindAsync(productId);
@@ -39,5 +39,17 @@ public class ProductsRepository : IProductsRepository
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
         }
+    }
+    
+    public async Task<int> GetMaxIdNumberByCategoryAsync(string prefix)
+    {
+        var numberStrings = await _context.Products
+            .Where(p => p.ProductId.StartsWith(prefix + "-"))
+            .Select(p => p.ProductId.Substring(prefix.Length + 1))
+            .ToListAsync();
+
+        if (!numberStrings.Any()) return 0;
+
+        return numberStrings.Select(n => int.TryParse(n, out var num) ? num : 0).Max();
     }
 }
