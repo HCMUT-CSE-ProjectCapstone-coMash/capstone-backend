@@ -96,6 +96,7 @@ public class ProductsOrdersController : ControllerBase
         return Ok(new DeleteProductFromProductsOrdersResponse(result.Value));
     }
 
+    // Nhân viên gửi đơn hàng cho chủ cửa hàng duyệt
     [HttpPatch("patch/{orderId}")]
     public async Task<IActionResult> PatchProductsOrders([FromRoute] string orderId, [FromBody] PatchProductsOrders request)
     {
