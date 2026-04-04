@@ -13,5 +13,19 @@ public record ProductResponse(
     DateTime CreatedAt,
     string Status,
     string ImageURL,
-    string VectorId
+    string VectorId,
+    decimal? SalePrice = null,
+    decimal? ImportPrice = null,
+    List<ProductQuantityChange>? QuantityChanges = null
+);
+
+public record ProductQuantity(
+    string Size,
+    int Quantities
+);
+
+public record ProductQuantityChange(
+    string Size,
+    int OldQuantity,
+    int NewQuantity
 );

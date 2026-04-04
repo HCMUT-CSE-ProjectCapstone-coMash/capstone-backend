@@ -1,4 +1,5 @@
 using Capstone.Application.Services.ProductsOrders;
+using Capstone.Contracts.Products;
 using Capstone.Contracts.ProductsOrders;
 using Microsoft.AspNetCore.Mvc;
 
@@ -69,13 +70,15 @@ public class ProductsOrdersController : ControllerBase
                 p.Product.Color,
                 p.Product.Pattern,
                 p.Product.SizeType,
-                p.Product.Quantities.Select(q => new ProductQuantityResponse(q.Size, q.Quantities)).ToList(),
+                p.Product.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
                 p.Product.CreatedBy,
                 p.Product.CreatedAt,
                 p.Product.Status,
                 p.Product.ImageURL,
                 p.Product.VectorId,
-                p.QuantityChanges.Select(qc => new ProductQuantityChangeResponse(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
+                null,
+                null,
+                p.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
             )).ToList()
         ));
     }

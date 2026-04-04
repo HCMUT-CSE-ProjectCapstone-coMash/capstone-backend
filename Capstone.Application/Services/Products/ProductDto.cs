@@ -13,7 +13,9 @@ public record ProductDto(
     DateTime CreatedAt,
     string Status,
     string ImageURL,
-    string VectorId
+    string VectorId,
+    decimal? SalePrice = null,
+    decimal? ImportPrice = null
 );
 
 public record ProductQuantityDto(

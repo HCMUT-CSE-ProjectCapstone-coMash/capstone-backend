@@ -226,7 +226,7 @@ public class ProductsController : ControllerBase
             });
         }
 
-        return Ok(new ProductWithQuantityChangesResponse(
+        return Ok(new ProductResponse(
             result.Value.Product.Id,
             result.Value.Product.ProductId,
             result.Value.Product.ProductName,
@@ -240,7 +240,9 @@ public class ProductsController : ControllerBase
             result.Value.Product.Status,
             result.Value.Product.ImageURL,
             result.Value.Product.VectorId,
-            result.Value.QuantityChanges.Select(qc => new ProductQuantityChangeResponse(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
+            null,
+            null,
+            result.Value.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
         ));
     }
 }

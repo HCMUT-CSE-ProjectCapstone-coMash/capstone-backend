@@ -1,3 +1,5 @@
+using Capstone.Contracts.Products;
+
 namespace Capstone.Contracts.ProductsOrders;
 
 public record ProductsOrdersResponse(
@@ -18,32 +20,4 @@ public record ProductsOrdersListResponse(
     string OrderName,
     string OrderDescription,
     string OrderStatus
-);
-
-public record ProductResponse(
-    Guid Id,
-    string ProductId,
-    string ProductName,
-    string Category,
-    string Color,
-    string Pattern,
-    string SizeType,
-    List<ProductQuantityResponse> Quantities,
-    Guid CreatedBy,
-    DateTime CreatedAt,
-    string Status,
-    string ImageURL,
-    string VectorId,
-    List<ProductQuantityChangeResponse> QuantityChanges
-);
-
-public record ProductQuantityChangeResponse(
-    string Size,
-    int OldQuantity,
-    int NewQuantity
-);
-
-public record ProductQuantityResponse(
-    string Size,
-    int Quantities
 );
