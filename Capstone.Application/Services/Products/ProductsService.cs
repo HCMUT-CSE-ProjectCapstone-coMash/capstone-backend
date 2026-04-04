@@ -11,6 +11,7 @@ public class ProductsService : IProductsService
 {
     private readonly IProductsRepository _productsRepository;
     private readonly IProductQuantitiesRepository _productQuantitiesRepository;
+    private readonly IProductsOrdersRepository _productsOrdersRepository;
     private readonly IProductsOrdersDetailsRepository _productsOrdersDetailsRepository;
     private readonly IProductsOrdersDetailsQuantityChangesRepository _productsOrdersDetailsQuantityChangesRepository;
     private readonly IDateTimeProvider _dateTimeProvider;
@@ -21,6 +22,7 @@ public class ProductsService : IProductsService
     public ProductsService(
         IProductsRepository productsRepository,
         IProductQuantitiesRepository productQuantitiesRepository,
+        IProductsOrdersRepository productsOrdersRepository,
         IProductsOrdersDetailsRepository productsOrdersDetailsRepository,
         IProductsOrdersDetailsQuantityChangesRepository productsOrdersDetailsQuantityChangesRepository,
         IDateTimeProvider dateTimeProvider,
@@ -31,6 +33,7 @@ public class ProductsService : IProductsService
     {
         _productsRepository = productsRepository;
         _productQuantitiesRepository = productQuantitiesRepository;
+        _productsOrdersRepository = productsOrdersRepository;
         _productsOrdersDetailsRepository = productsOrdersDetailsRepository;
         _productsOrdersDetailsQuantityChangesRepository = productsOrdersDetailsQuantityChangesRepository;
         _dateTimeProvider = dateTimeProvider;
@@ -283,21 +286,25 @@ public class ProductsService : IProductsService
     {
         var products = await _productsRepository.FetchApprovedProductByName(productName);
 
-        var productDtos = products.Select(product => new ProductDto(
-            product.Id,
-            product.ProductId,
-            product.ProductName,
-            product.Category,
-            product.Color,
-            product.Pattern,
-            product.SizeType,
-            product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
-            product.CreatedBy,
-            product.CreatedAt,
-            product.Status,
-            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
-            product.VectorId
-        )).ToList();
+        var productIdsInPendingOrders = await _productsOrdersRepository.GetProductIdsInPendingOrders();
+
+        var productDtos = products
+            .Where(product => !productIdsInPendingOrders.Contains(product.Id))
+            .Select(product => new ProductDto(
+                product.Id,
+                product.ProductId,
+                product.ProductName,
+                product.Category,
+                product.Color,
+                product.Pattern,
+                product.SizeType,
+                product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+                product.CreatedBy,
+                product.CreatedAt,
+                product.Status,
+                string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
+                product.VectorId
+            )).ToList();
 
         return Result<List<ProductDto>>.Success(productDtos);
     }

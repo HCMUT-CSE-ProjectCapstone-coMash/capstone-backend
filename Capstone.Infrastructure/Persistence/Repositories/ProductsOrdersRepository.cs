@@ -48,4 +48,13 @@ public class ProductsOrdersRepository : IProductsOrdersRepository
         _context.ProductsOrders.Update(productsOrder);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<List<Guid>> GetProductIdsInPendingOrders()
+    {
+        return await _context.ProductsOrders
+            .Where(po => po.OrderStatus == ProductsOrderStatus.Pending)
+            .SelectMany(po => po.ProductsOrdersDetails.Select(detail => detail.ProductId))
+            .Distinct()
+            .ToListAsync();
+    }
 }

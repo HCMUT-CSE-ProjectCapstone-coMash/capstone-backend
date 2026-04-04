@@ -141,25 +141,27 @@ public class ProductsOrdersService : IProductsOrdersService
             return Result<string>.Failure(new Error("ProductsOrdersDetailNotFound", "The product order detail was not found."));
         }
 
-        await _productsOrdersDetailsRepository.DeleteProductsOrdersDetails(productsOrdersDetail.Id);
-
-        // Kiếm xem có tồn tại Product với productId hay không và xoá
         var product = await _productsRepository.GetProductById(Guid.Parse(productId));
 
         if (product == null)
             return Result<string>.Failure(new Error("ProductNotFound", "The product was not found."));
 
-        if (!string.IsNullOrEmpty(product.ImageKey))
+        if (product.Status == ProductStatus.Pending)
         {
-            await _fileStorageProvider.DeleteImageAsync(product.ImageKey);
+            if (!string.IsNullOrEmpty(product.ImageKey))
+            {
+                await _fileStorageProvider.DeleteImageAsync(product.ImageKey);
+            }
+
+            if (!string.IsNullOrEmpty(product.VectorId))
+            {
+                await _vectorStoreProvider.DeleteImageAsync(product.VectorId);
+            }
+
+            await _productsRepository.DeleteProductAsync(product.Id);
         }
 
-        if (!string.IsNullOrEmpty(product.VectorId))
-        {
-            await _vectorStoreProvider.DeleteImageAsync(product.VectorId);
-        }
-
-        await _productsRepository.DeleteProductAsync(product.Id);
+        await _productsOrdersDetailsRepository.DeleteProductsOrdersDetails(productsOrdersDetail.Id);
 
         return Result<string>.Success(product.Id.ToString());
     }
