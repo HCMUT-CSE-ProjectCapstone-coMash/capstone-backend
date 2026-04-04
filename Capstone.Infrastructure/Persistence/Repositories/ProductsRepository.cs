@@ -53,11 +53,11 @@ public class ProductsRepository : IProductsRepository
         return numberStrings.Select(n => int.TryParse(n, out var num) ? num : 0).Max();
     }
     
-    public Task<List<Product>> FetchProductByName(string productName)
+    public Task<List<Product>> FetchApprovedProductByName(string productName)
     {
         return _context.Products
             .Include(p => p.ProductQuantities)
-            .Where(p => p.ProductName.Contains(productName))
+            .Where(p => p.ProductName.Contains(productName) && p.Status == ProductStatus.Approved)
             .Take(3)
             .ToListAsync();
     }

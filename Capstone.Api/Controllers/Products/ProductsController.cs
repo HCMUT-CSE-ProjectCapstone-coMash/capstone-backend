@@ -155,9 +155,9 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("fetch-by-name/{productName}")]
-    public async Task<IActionResult> FetchProductByName([FromRoute] string productName)
+    public async Task<IActionResult> FetchApprovedProductByName([FromRoute] string productName)
     {
-        var result = await _productsSerivce.FetchProductByName(productName);
+        var result = await _productsSerivce.FetchApprovedProductByName(productName);
 
         if (result.IsFailure)
         {
@@ -183,5 +183,64 @@ public class ProductsController : ControllerBase
             p.ImageURL,
             p.VectorId
         )).ToList());
+    }
+
+    [HttpGet("create-product-id-by-category/{category}")]
+    public async Task<IActionResult> CreateProductIdByCategory([FromRoute] string category)
+    {
+        var result = await _productsSerivce.CreateProductIdByCategory(category);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new CreateProductIdByCategoryResponse(
+            result.Value
+        ));
+    }
+
+    [HttpPost("create-detail-for-approved-product/{productId}/{productsOrderId}")]
+    public async Task<IActionResult> CreateDetailForApprovedProduct(
+        [FromForm] CreateDetailForApprovedProductRequest request,
+        [FromRoute] string productsOrderId,
+        [FromRoute] string productId
+    )
+    {
+        var result = await _productsSerivce.CreateDetailForApprovedProduct(
+            productId,
+            productsOrderId,
+            request.Quantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList()
+        );
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new ProductWithQuantityChangesResponse(
+            result.Value.Product.Id,
+            result.Value.Product.ProductId,
+            result.Value.Product.ProductName,
+            result.Value.Product.Category,
+            result.Value.Product.Color,
+            result.Value.Product.Pattern,
+            result.Value.Product.SizeType,
+            result.Value.Product.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+            result.Value.Product.CreatedBy,
+            result.Value.Product.CreatedAt,
+            result.Value.Product.Status,
+            result.Value.Product.ImageURL,
+            result.Value.Product.VectorId,
+            result.Value.QuantityChanges.Select(qc => new ProductQuantityChangeResponse(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
+        ));
     }
 }

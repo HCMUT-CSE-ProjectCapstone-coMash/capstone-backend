@@ -7,6 +7,5 @@ public record PatchProductRequest(
     string? Color,
     string? Pattern,
     string? SizeType,
-    List<ProductQuantity>? Quantities,
-    string? CreatedBy
+    List<ProductQuantity>? Quantities
 );

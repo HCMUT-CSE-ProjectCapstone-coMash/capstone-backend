@@ -12,9 +12,10 @@ public class AppDbContext : DbContext
     public DbSet<ProductQuantity> ProductQuantities => Set<ProductQuantity>();
     public DbSet<ProductsOrder> ProductsOrders => Set<ProductsOrder>();
     public DbSet<ProductsOrdersDetail> ProductsOrdersDetails => Set<ProductsOrdersDetail>();
+    public DbSet<ProductsOrdersDetailQuantityChange> ProductsOrdersDetailQuantityChanges => Set<ProductsOrdersDetailQuantityChange>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {   
+    {
         // User Table
         modelBuilder.Entity<User>().ToTable("users");
 
@@ -33,7 +34,7 @@ public class AppDbContext : DbContext
             entity.ToTable("product_quantities");
 
             // ProductQuantities has one Product and Product has many ProductQuantities
-            entity.HasOne(pq => pq.Product).WithMany(p => p.ProductQuantities).HasForeignKey(pq => pq.ProductId).OnDelete(DeleteBehavior.Cascade);;
+            entity.HasOne(pq => pq.Product).WithMany(p => p.ProductQuantities).HasForeignKey(pq => pq.ProductId).OnDelete(DeleteBehavior.Cascade); ;
         });
 
         // ProductsOrder Table
@@ -55,6 +56,15 @@ public class AppDbContext : DbContext
 
             // ProductsOrdersDetail has one Product and Product has many ProductsOrdersDetails
             entity.HasOne(d => d.Product).WithMany().HasForeignKey(pod => pod.ProductId);
+        });
+
+        // ProductsOrdersDetailQuantityChange Table
+        modelBuilder.Entity<ProductsOrdersDetailQuantityChange>(entity =>
+        {
+            entity.ToTable("products_orders_detail_quantity_changes");
+
+            // ProductsOrdersDetailQuantityChange has one ProductsOrdersDetail and ProductsOrdersDetail has many ProductsOrdersDetailQuantityChanges
+            entity.HasOne(podqc => podqc.ProductsOrdersDetail).WithMany(pod => pod.QuantityChanges).HasForeignKey(podqc => podqc.ProductsOrdersDetailId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

@@ -7,4 +7,5 @@ public class ProductsOrdersDetail
     public Guid ProductId { get; set; }
 
     public Product Product { get; set; } = null!;
+    public ICollection<ProductsOrdersDetailQuantityChange> QuantityChanges { get; set; } = new List<ProductsOrdersDetailQuantityChange>();
 }

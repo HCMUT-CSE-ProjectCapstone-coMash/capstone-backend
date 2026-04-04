@@ -9,5 +9,5 @@ public interface IProductsRepository
     Task DeleteProductAsync(Guid productId);
     Task UpdateProduct(Product product);
     Task<int> GetMaxIdNumberByCategoryAsync(string prefix);
-    Task<List<Product>> FetchProductByName(string productName);
+    Task<List<Product>> FetchApprovedProductByName(string productName);
 }

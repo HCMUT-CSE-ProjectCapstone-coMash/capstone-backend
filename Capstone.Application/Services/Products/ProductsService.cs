@@ -12,6 +12,7 @@ public class ProductsService : IProductsService
     private readonly IProductsRepository _productsRepository;
     private readonly IProductQuantitiesRepository _productQuantitiesRepository;
     private readonly IProductsOrdersDetailsRepository _productsOrdersDetailsRepository;
+    private readonly IProductsOrdersDetailsQuantityChangesRepository _productsOrdersDetailsQuantityChangesRepository;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IFileStorageProvider _fileStorageProvider;
     private readonly IVectorStoreProvider _vectorStoreProvider;
@@ -21,6 +22,7 @@ public class ProductsService : IProductsService
         IProductsRepository productsRepository,
         IProductQuantitiesRepository productQuantitiesRepository,
         IProductsOrdersDetailsRepository productsOrdersDetailsRepository,
+        IProductsOrdersDetailsQuantityChangesRepository productsOrdersDetailsQuantityChangesRepository,
         IDateTimeProvider dateTimeProvider,
         IFileStorageProvider fileStorageProvider,
         IVectorStoreProvider vectorStoreProvider,
@@ -30,6 +32,7 @@ public class ProductsService : IProductsService
         _productsRepository = productsRepository;
         _productQuantitiesRepository = productQuantitiesRepository;
         _productsOrdersDetailsRepository = productsOrdersDetailsRepository;
+        _productsOrdersDetailsQuantityChangesRepository = productsOrdersDetailsQuantityChangesRepository;
         _dateTimeProvider = dateTimeProvider;
         _fileStorageProvider = fileStorageProvider;
         _vectorStoreProvider = vectorStoreProvider;
@@ -276,9 +279,9 @@ public class ProductsService : IProductsService
         ));
     }
 
-    public async Task<Result<List<ProductDto>>> FetchProductByName(string productName)
+    public async Task<Result<List<ProductDto>>> FetchApprovedProductByName(string productName)
     {
-        var products = await _productsRepository.FetchProductByName(productName);
+        var products = await _productsRepository.FetchApprovedProductByName(productName);
 
         var productDtos = products.Select(product => new ProductDto(
             product.Id,
@@ -297,6 +300,79 @@ public class ProductsService : IProductsService
         )).ToList();
 
         return Result<List<ProductDto>>.Success(productDtos);
+    }
+
+    public async Task<Result<string>> CreateProductIdByCategory(string category)
+    {
+        var prefix = GetCategoryPrefix(category);
+        var maxNumber = await _productsRepository.GetMaxIdNumberByCategoryAsync(prefix);
+
+        var newProductId = $"{prefix}-{maxNumber + 1}";
+
+        return Result<string>.Success(newProductId);
+    }
+
+    public async Task<Result<ProductWithQuantityChangesDto>> CreateDetailForApprovedProduct(string productId, string productsOrderId, List<ProductQuantityDto> productQuantities)
+    {
+        var product = await _productsRepository.GetProductById(Guid.Parse(productId));
+
+        if (product is null)
+        {
+            return Result<ProductWithQuantityChangesDto>.Failure(new Error("NotFound", "Product not found."));
+        }
+
+        var newProductsOrdersDetail = new ProductsOrdersDetail
+        {
+            Id = Guid.NewGuid(),
+            ProductId = Guid.Parse(productId),
+            ProductsOrderId = Guid.Parse(productsOrderId),
+        };
+
+        await _productsOrdersDetailsRepository.CreateProductsOrdersDetails(newProductsOrdersDetail);
+
+        var newChanges = new List<ProductsOrdersDetailQuantityChange>();
+
+        foreach (var quantity in product.ProductQuantities)
+        {
+            var requestedQuantity = productQuantities.FirstOrDefault(q => q.Size == quantity.Size);
+
+            if (requestedQuantity is null) continue;
+
+            if (requestedQuantity.Quantities == quantity.Quantities) continue;
+
+            var newQuantityChane = new ProductsOrdersDetailQuantityChange
+            {
+                Id = Guid.NewGuid(),
+                ProductsOrdersDetailId = newProductsOrdersDetail.Id,
+                Size = quantity.Size,
+                OldQuantity = quantity.Quantities,
+                NewQuantity = requestedQuantity.Quantities,
+            };
+
+            await _productsOrdersDetailsQuantityChangesRepository.AddQuantityChange(newQuantityChane);
+
+            newChanges.Add(newQuantityChane);
+        }
+
+        var productDto = new ProductDto(
+            product.Id,
+            product.ProductId,
+            product.ProductName,
+            product.Category,
+            product.Color,
+            product.Pattern,
+            product.SizeType,
+            product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+            product.CreatedBy,
+            product.CreatedAt,
+            product.Status,
+            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
+            product.VectorId
+        );
+
+        var quantityChanges = newChanges.Select(c => new ProductQuantityChangeDto(c.Size, c.OldQuantity, c.NewQuantity)).ToList();
+
+        return Result<ProductWithQuantityChangesDto>.Success(new ProductWithQuantityChangesDto(productDto, quantityChanges));
     }
 
     private static string GetCategoryPrefix(string category) => category switch

@@ -33,5 +33,13 @@ public interface IProductsService
         List<ProductQuantityDto>? quantities
     );
 
-    Task<Result<List<ProductDto>>> FetchProductByName(string productName);
+    Task<Result<List<ProductDto>>> FetchApprovedProductByName(string productName);
+
+    Task<Result<string>> CreateProductIdByCategory(string category);
+
+    Task<Result<ProductWithQuantityChangesDto>> CreateDetailForApprovedProduct(
+        string productId,
+        string productsOrderId,
+        List<ProductQuantityDto> productQuantities
+    );
 }
