@@ -14,8 +14,8 @@ public record ProductResponse(
     string Status,
     string ImageURL,
     string VectorId,
-    decimal? SalePrice = null,
-    decimal? ImportPrice = null,
+    decimal SalePrice,
+    decimal ImportPrice,
     List<ProductQuantityChange>? QuantityChanges = null
 );
 

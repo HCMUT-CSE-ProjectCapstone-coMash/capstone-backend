@@ -95,7 +95,9 @@ public class ProductsService : IProductsService
             CreatedAt = _dateTimeProvider.UtcNow,
             Status = ProductStatus.Pending,
             ImageKey = imageKey,
-            VectorId = vectorId
+            VectorId = vectorId,
+            SalePrice = 0,
+            ImportPrice = 0
         };
 
         await _productsRepository.AddProduct(product);
@@ -141,7 +143,9 @@ public class ProductsService : IProductsService
             product.CreatedAt,
             product.Status,
             imageUrl,
-            product.VectorId
+            product.VectorId,
+            product.SalePrice,
+            product.ImportPrice
         ));
     }
 
@@ -176,7 +180,9 @@ public class ProductsService : IProductsService
             product.CreatedAt,
             product.Status,
             string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
-            product.VectorId
+            product.VectorId,
+            product.SalePrice,
+            product.ImportPrice
         ));
     }
 
@@ -278,7 +284,9 @@ public class ProductsService : IProductsService
             product.CreatedAt,
             product.Status,
             string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
-            product.VectorId
+            product.VectorId,
+            product.SalePrice,
+            product.ImportPrice
         ));
     }
 
@@ -303,7 +311,9 @@ public class ProductsService : IProductsService
                 product.CreatedAt,
                 product.Status,
                 string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
-                product.VectorId
+                product.VectorId,
+                product.SalePrice,
+                product.ImportPrice
             )).ToList();
 
         return Result<List<ProductDto>>.Success(productDtos);
@@ -392,7 +402,9 @@ public class ProductsService : IProductsService
             product.CreatedAt,
             product.Status,
             string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
-            product.VectorId
+            product.VectorId,
+            product.SalePrice,
+            product.ImportPrice
         );
 
         var quantityChanges = newChanges.Select(c => new ProductQuantityChangeDto(c.Size, c.OldQuantity, c.NewQuantity)).ToList();

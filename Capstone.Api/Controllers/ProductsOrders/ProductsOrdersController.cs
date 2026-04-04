@@ -76,8 +76,8 @@ public class ProductsOrdersController : ControllerBase
                 p.Product.Status,
                 p.Product.ImageURL,
                 p.Product.VectorId,
-                null,
-                null,
+                p.Product.SalePrice,
+                p.Product.ImportPrice,
                 p.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
             )).ToList()
         ));

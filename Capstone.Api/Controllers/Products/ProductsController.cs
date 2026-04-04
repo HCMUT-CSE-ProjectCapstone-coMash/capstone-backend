@@ -55,7 +55,9 @@ public class ProductsController : ControllerBase
             result.Value.CreatedAt,
             result.Value.Status,
             result.Value.ImageURL,
-            result.Value.VectorId
+            result.Value.VectorId,
+            result.Value.SalePrice,
+            result.Value.ImportPrice
         ));
     }
 
@@ -87,7 +89,9 @@ public class ProductsController : ControllerBase
             result.Value.CreatedAt,
             result.Value.Status,
             result.Value.ImageURL,
-            result.Value.VectorId
+            result.Value.VectorId,
+            result.Value.SalePrice,
+            result.Value.ImportPrice
         ));
     }
 
@@ -150,7 +154,9 @@ public class ProductsController : ControllerBase
             result.Value.CreatedAt,
             result.Value.Status,
             result.Value.ImageURL,
-            result.Value.VectorId
+            result.Value.VectorId,
+            result.Value.SalePrice,
+            result.Value.ImportPrice
         ));
     }
 
@@ -181,7 +187,9 @@ public class ProductsController : ControllerBase
             p.CreatedAt,
             p.Status,
             p.ImageURL,
-            p.VectorId
+            p.VectorId,
+            p.SalePrice,
+            p.ImportPrice
         )).ToList());
     }
 
@@ -240,8 +248,8 @@ public class ProductsController : ControllerBase
             result.Value.Product.Status,
             result.Value.Product.ImageURL,
             result.Value.Product.VectorId,
-            null,
-            null,
+            result.Value.Product.SalePrice,
+            result.Value.Product.ImportPrice,
             result.Value.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
         ));
     }
