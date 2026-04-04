@@ -3,7 +3,7 @@
 GET {{host}}/products-orders/fetch-excluding-pending
 
 ###
-POST {{host}}/products-orders/fetch/aa5742d7-a3a4-4638-a24d-76be02b85293
+POST {{host}}/products-orders/fetch/e6949a81-9064-4ec0-9b7d-be11a08b197c
 Content-Type: application/json
 
 ###

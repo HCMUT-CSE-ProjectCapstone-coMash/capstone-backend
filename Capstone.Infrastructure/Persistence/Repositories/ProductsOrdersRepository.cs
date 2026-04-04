@@ -1,4 +1,5 @@
 using Capstone.Application.Common.Interfaces.Persistence;
+using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,14 +14,17 @@ public class ProductsOrdersRepository : IProductsOrdersRepository
         _context = context;
     }
 
-    public async Task<ProductsOrder?> GetProductsOrdersByCreatedByAndStatus(Guid createdBy, string status)
+    public async Task<ProductsOrder?> GetProductsOrdersByCreatedBy(Guid createdBy)
     {
         return await _context.ProductsOrders
             .Include(po => po.ProductsOrdersDetails)
-            .ThenInclude(detail => detail.Product)
-            .ThenInclude(p => p.ProductQuantities)
+                .ThenInclude(detail => detail.Product)
+                    .ThenInclude(p => p.ProductQuantities)
+            .Include(po => po.ProductsOrdersDetails)
+                .ThenInclude(detail => detail.QuantityChanges)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(po => po.CreatedBy == createdBy && po.OrderStatus == status);
+            .FirstOrDefaultAsync(po => po.CreatedBy == createdBy
+                && po.OrderStatus == ProductsOrderStatus.Pending);
     }
 
     public async Task<List<ProductsOrder>> GetProductsOrdersExcludingPending()

@@ -33,7 +33,14 @@ public record ProductResponse(
     DateTime CreatedAt,
     string Status,
     string ImageURL,
-    string VectorId
+    string VectorId,
+    List<ProductQuantityChangeResponse> QuantityChanges
+);
+
+public record ProductQuantityChangeResponse(
+    string Size,
+    int OldQuantity,
+    int NewQuantity
 );
 
 public record ProductQuantityResponse(

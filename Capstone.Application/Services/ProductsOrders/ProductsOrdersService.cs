@@ -40,19 +40,17 @@ public class ProductsOrdersService : IProductsOrdersService
 
     public async Task<Result<ProductsOrdersDto>> FetchOrCreateProductsOrders(string createdBy)
     {
-        var productsOrders = await _productsOrdersRepository.GetProductsOrdersByCreatedByAndStatus(Guid.Parse(createdBy), ProductsOrderStatus.Pending);
+        var productsOrders = await _productsOrdersRepository.GetProductsOrdersByCreatedBy(Guid.Parse(createdBy));
 
         if (productsOrders != null)
         {
-            var productsOrdersDto = new ProductsOrdersDto(
-                Id: productsOrders.Id,
-                CreatedBy: productsOrders.CreatedBy,
-                CreatedAt: productsOrders.CreatedAt,
-                OrderName: productsOrders.OrderName,
-                OrderDescription: productsOrders.OrderDescription,
-                OrderStatus: productsOrders.OrderStatus,
-                Products: productsOrders.ProductsOrdersDetails.Select(detail => new ProductDto
-                (
+            var products = new List<ProductWithQuantityChangesDto>();
+
+            foreach (var detail in productsOrders.ProductsOrdersDetails)
+            {
+                var imageUrl = detail.Product.ImageKey != null ? await _fileStorageProvider.GetImageUrlAsync(detail.Product.ImageKey) : "";
+
+                var productDto = new ProductDto(
                     Id: detail.Product.Id,
                     ProductId: detail.Product.ProductId,
                     ProductName: detail.Product.ProductName,
@@ -64,12 +62,24 @@ public class ProductsOrdersService : IProductsOrdersService
                     CreatedBy: detail.Product.CreatedBy,
                     CreatedAt: detail.Product.CreatedAt,
                     Status: detail.Product.Status,
-                    ImageURL: detail.Product.ImageKey != null ? _fileStorageProvider.GetImageUrlAsync(detail.Product.ImageKey).Result : "",
+                    ImageURL: imageUrl,
                     VectorId: detail.Product.VectorId
-                )).ToList()
-            );
+                );
 
-            return Result<ProductsOrdersDto>.Success(productsOrdersDto);
+                var quantityChanges = detail.QuantityChanges.Select(qc => new ProductQuantityChangeDto(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList();
+
+                products.Add(new ProductWithQuantityChangesDto(productDto, quantityChanges));
+            }
+
+            return Result<ProductsOrdersDto>.Success(new ProductsOrdersDto(
+                Id: productsOrders.Id,
+                CreatedBy: productsOrders.CreatedBy,
+                CreatedAt: productsOrders.CreatedAt,
+                OrderName: productsOrders.OrderName,
+                OrderDescription: productsOrders.OrderDescription,
+                OrderStatus: productsOrders.OrderStatus,
+                Products: products
+            ));
         }
 
         var newProductsOrder = new ProductsOrder
@@ -91,7 +101,7 @@ public class ProductsOrdersService : IProductsOrdersService
             OrderName: newProductsOrder.OrderName,
             OrderDescription: newProductsOrder.OrderDescription,
             OrderStatus: newProductsOrder.OrderStatus,
-            Products: new List<ProductDto>()
+            Products: new List<ProductWithQuantityChangesDto>()
         );
 
         return Result<ProductsOrdersDto>.Success(newProductsOrdersDto);

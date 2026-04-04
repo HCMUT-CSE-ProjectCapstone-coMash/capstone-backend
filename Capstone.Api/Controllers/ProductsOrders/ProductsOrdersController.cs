@@ -62,19 +62,20 @@ public class ProductsOrdersController : ControllerBase
             result.Value.OrderDescription,
             result.Value.OrderStatus,
             result.Value.Products.Select(p => new ProductResponse(
-                p.Id,
-                p.ProductId,
-                p.ProductName,
-                p.Category,
-                p.Color,
-                p.Pattern,
-                p.SizeType,
-                p.Quantities.Select(q => new ProductQuantityResponse(q.Size, q.Quantities)).ToList(),
-                p.CreatedBy,
-                p.CreatedAt,
-                p.Status,
-                p.ImageURL,
-                p.VectorId
+                p.Product.Id,
+                p.Product.ProductId,
+                p.Product.ProductName,
+                p.Product.Category,
+                p.Product.Color,
+                p.Product.Pattern,
+                p.Product.SizeType,
+                p.Product.Quantities.Select(q => new ProductQuantityResponse(q.Size, q.Quantities)).ToList(),
+                p.Product.CreatedBy,
+                p.Product.CreatedAt,
+                p.Product.Status,
+                p.Product.ImageURL,
+                p.Product.VectorId,
+                p.QuantityChanges.Select(qc => new ProductQuantityChangeResponse(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
             )).ToList()
         ));
     }

@@ -4,7 +4,7 @@ namespace Capstone.Application.Common.Interfaces.Persistence;
 
 public interface IProductsOrdersRepository
 {
-    Task<ProductsOrder?> GetProductsOrdersByCreatedByAndStatus(Guid createdBy, string status);
+    Task<ProductsOrder?> GetProductsOrdersByCreatedBy(Guid createdBy);
     Task<List<ProductsOrder>> GetProductsOrdersExcludingPending();
     Task CreateProductsOrders(ProductsOrder productsOrder);
     Task<ProductsOrder?> GetProductsOrdersByOrderId(Guid orderId);

@@ -9,7 +9,18 @@ public record ProductsOrdersDto(
     string OrderName,
     string OrderDescription,
     string OrderStatus,
-    List<ProductDto> Products
+    List<ProductWithQuantityChangesDto> Products
+);
+
+public record ProductWithQuantityChangesDto(
+    ProductDto Product,
+    List<ProductQuantityChangeDto> QuantityChanges
+);
+
+public record ProductQuantityChangeDto(
+    string Size,
+    int OldQuantity,
+    int NewQuantity
 );
 
 public record ProductsOrdersListDto(
