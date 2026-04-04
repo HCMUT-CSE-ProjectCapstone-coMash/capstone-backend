@@ -207,8 +207,8 @@ public class ProductsController : ControllerBase
     [HttpPost("create-detail-for-approved-product/{productId}/{productsOrderId}")]
     public async Task<IActionResult> CreateDetailForApprovedProduct(
         [FromForm] CreateDetailForApprovedProductRequest request,
-        [FromRoute] string productsOrderId,
-        [FromRoute] string productId
+        [FromRoute] string productId,
+        [FromRoute] string productsOrderId
     )
     {
         var result = await _productsSerivce.CreateDetailForApprovedProduct(

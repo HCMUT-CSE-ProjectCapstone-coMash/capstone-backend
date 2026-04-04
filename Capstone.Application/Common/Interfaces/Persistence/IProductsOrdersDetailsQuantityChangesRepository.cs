@@ -5,4 +5,5 @@ namespace Capstone.Application.Common.Interfaces.Persistence;
 public interface IProductsOrdersDetailsQuantityChangesRepository
 {
     Task AddQuantityChange(ProductsOrdersDetailQuantityChange quantityChange);
+    Task DeleteQuantityChangesByProductsOrdersDetailId(Guid productsOrdersDetailId);
 }

@@ -2,7 +2,7 @@ namespace Capstone.Contracts.Products;
 
 public record ProductWithQuantityChangesResponse(
     Guid Id,
-    string ProductID,
+    string ProductId,
     string ProductName,
     string Category,
     string Color,

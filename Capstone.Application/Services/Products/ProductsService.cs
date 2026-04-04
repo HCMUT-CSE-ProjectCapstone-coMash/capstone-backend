@@ -321,32 +321,50 @@ public class ProductsService : IProductsService
             return Result<ProductWithQuantityChangesDto>.Failure(new Error("NotFound", "Product not found."));
         }
 
-        var newProductsOrdersDetail = new ProductsOrdersDetail
+        var existingDetail = await _productsOrdersDetailsRepository.GetProductsOrdersDetailsByOrderIdAndProductId(Guid.Parse(productsOrderId), Guid.Parse(productId));
+
+        ProductsOrdersDetail detail;
+        List<ProductsOrdersDetailQuantityChange> newChanges = new();
+
+        if (existingDetail is not null)
         {
-            Id = Guid.NewGuid(),
-            ProductId = Guid.Parse(productId),
-            ProductsOrderId = Guid.Parse(productsOrderId),
-        };
+            detail = existingDetail;
 
-        await _productsOrdersDetailsRepository.CreateProductsOrdersDetails(newProductsOrdersDetail);
-
-        var newChanges = new List<ProductsOrdersDetailQuantityChange>();
-
-        foreach (var quantity in product.ProductQuantities)
+            await _productsOrdersDetailsQuantityChangesRepository.DeleteQuantityChangesByProductsOrdersDetailId(detail.Id);
+        }
+        else
         {
-            var requestedQuantity = productQuantities.FirstOrDefault(q => q.Size == quantity.Size);
+            detail = new ProductsOrdersDetail
+            {
+                Id = Guid.NewGuid(),
+                ProductId = Guid.Parse(productId),
+                ProductsOrderId = Guid.Parse(productsOrderId),
+            };
+
+            await _productsOrdersDetailsRepository.CreateProductsOrdersDetails(detail);
+        }
+
+        var allSizes = product.ProductQuantities.Select(q => q.Size).Union(productQuantities.Select(q => q.Size));
+
+        foreach (var size in allSizes)
+        {
+            var currentQuantity = product.ProductQuantities.FirstOrDefault(q => q.Size == size);
+            var requestedQuantity = productQuantities.FirstOrDefault(q => q.Size == size);
 
             if (requestedQuantity is null) continue;
 
-            if (requestedQuantity.Quantities == quantity.Quantities) continue;
+            var oldQty = currentQuantity?.Quantities ?? 0;
+            var newQty = requestedQuantity.Quantities;
+
+            if (oldQty == newQty) continue;
 
             var newQuantityChane = new ProductsOrdersDetailQuantityChange
             {
                 Id = Guid.NewGuid(),
-                ProductsOrdersDetailId = newProductsOrdersDetail.Id,
-                Size = quantity.Size,
-                OldQuantity = quantity.Quantities,
-                NewQuantity = requestedQuantity.Quantities,
+                ProductsOrdersDetailId = detail.Id,
+                Size = size,
+                OldQuantity = oldQty,
+                NewQuantity = newQty,
             };
 
             await _productsOrdersDetailsQuantityChangesRepository.AddQuantityChange(newQuantityChane);

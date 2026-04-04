@@ -17,4 +17,11 @@ public class productsOrdersDetailsQuantityChangesRepository : IProductsOrdersDet
         _context.ProductsOrdersDetailQuantityChanges.Add(quantityChange);
         return _context.SaveChangesAsync();
     }
+
+    public Task DeleteQuantityChangesByProductsOrdersDetailId(Guid productsOrdersDetailId)
+    {
+        var quantityChanges = _context.ProductsOrdersDetailQuantityChanges.Where(qc => qc.ProductsOrdersDetailId == productsOrdersDetailId);
+        _context.ProductsOrdersDetailQuantityChanges.RemoveRange(quantityChanges);
+        return _context.SaveChangesAsync();
+    }
 }
