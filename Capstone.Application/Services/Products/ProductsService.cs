@@ -286,7 +286,7 @@ public class ProductsService : IProductsService
     {
         var products = await _productsRepository.FetchApprovedProductByName(productName);
 
-        var productIdsInPendingOrders = await _productsOrdersRepository.GetProductIdsInPendingOrders();
+        var productIdsInPendingOrders = await _productsOrdersRepository.GetProductIdsInPendingAndSendingOrders();
 
         var productDtos = products
             .Where(product => !productIdsInPendingOrders.Contains(product.Id))

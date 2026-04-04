@@ -49,10 +49,10 @@ public class ProductsOrdersRepository : IProductsOrdersRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<Guid>> GetProductIdsInPendingOrders()
+    public async Task<List<Guid>> GetProductIdsInPendingAndSendingOrders()
     {
         return await _context.ProductsOrders
-            .Where(po => po.OrderStatus == ProductsOrderStatus.Pending)
+            .Where(po => po.OrderStatus == ProductsOrderStatus.Pending || po.OrderStatus == ProductsOrderStatus.Sending)
             .SelectMany(po => po.ProductsOrdersDetails.Select(detail => detail.ProductId))
             .Distinct()
             .ToListAsync();
