@@ -188,4 +188,51 @@ public class ProductsOrdersService : IProductsOrdersService
 
         return Result<string>.Success(productsOrder.Id.ToString());
     }
+
+    public async Task<Result<ProductsOrdersDto>> GetProductsOrderById(string orderId)
+    {
+        var productsOrders = await _productsOrdersRepository.GetProductsOrdersByOrderId(Guid.Parse(orderId));
+
+        if (productsOrders == null)
+        {
+            return Result<ProductsOrdersDto>.Failure(new Error("NotFound", "ProductsOrders not found."));
+        }
+
+        var products = new List<ProductWithQuantityChangesDto>();
+
+        foreach (var detail in productsOrders.ProductsOrdersDetails)
+        {
+            var imageUrl = detail.Product.ImageKey != null ? await _fileStorageProvider.GetImageUrlAsync(detail.Product.ImageKey) : "";
+
+            var productDto = new ProductDto(
+                Id: detail.Product.Id,
+                ProductId: detail.Product.ProductId,
+                ProductName: detail.Product.ProductName,
+                Category: detail.Product.Category,
+                Color: detail.Product.Color,
+                Pattern: detail.Product.Pattern,
+                SizeType: detail.Product.SizeType,
+                Quantities: detail.Product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+                CreatedBy: detail.Product.CreatedBy,
+                CreatedAt: detail.Product.CreatedAt,
+                Status: detail.Product.Status,
+                ImageURL: imageUrl,
+                VectorId: detail.Product.VectorId
+            );
+
+            var quantityChanges = detail.QuantityChanges.Select(qc => new ProductQuantityChangeDto(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList();
+
+            products.Add(new ProductWithQuantityChangesDto(productDto, quantityChanges));
+        }
+
+        return Result<ProductsOrdersDto>.Success(new ProductsOrdersDto(
+            Id: productsOrders.Id,
+            CreatedBy: productsOrders.CreatedBy,
+            CreatedAt: productsOrders.CreatedAt,
+            OrderName: productsOrders.OrderName,
+            OrderDescription: productsOrders.OrderDescription,
+            OrderStatus: productsOrders.OrderStatus,
+            Products: products
+        ));
+    }
 }
