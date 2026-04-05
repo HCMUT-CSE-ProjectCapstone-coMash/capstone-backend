@@ -52,7 +52,7 @@ public class ProductsRepository : IProductsRepository
 
         return numberStrings.Select(n => int.TryParse(n, out var num) ? num : 0).Max();
     }
-    
+
     public Task<List<Product>> FetchApprovedProductByName(string productName)
     {
         return _context.Products
@@ -60,5 +60,23 @@ public class ProductsRepository : IProductsRepository
             .Where(p => p.ProductName.Contains(productName) && p.Status == ProductStatus.Approved)
             .Take(3)
             .ToListAsync();
+    }
+
+    public async Task<(List<Product> Items, int Total)> FetchAllProducts(int page, int pageSize)
+    {
+        var query = _context.Products
+            .Include(p => p.ProductQuantities)
+            .Where(p => p.Status == ProductStatus.Approved)
+            .AsQueryable();
+
+        var total = await query.CountAsync();
+
+        var items = await query
+            .OrderByDescending(p => p.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, total);
     }
 }

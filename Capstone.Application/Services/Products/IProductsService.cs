@@ -69,4 +69,6 @@ public interface IProductsService
         decimal? salePrice,
         decimal? importPrice
     );
+
+    Task<Result<(List<ProductDto> Items, int Total)>> FetchAllProducts(int currentPage, int pageSize);
 }

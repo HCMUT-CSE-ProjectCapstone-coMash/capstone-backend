@@ -342,4 +342,40 @@ public class ProductsController : ControllerBase
             result.Value.ImportPrice
         ));
     }
+
+    [HttpGet("fetch-all")]
+    public async Task<IActionResult> FetchAllProducts([FromQuery] int currentPage = 1, [FromQuery] int pageSize = 10)
+    {
+        var result = await _productsSerivce.FetchAllProducts(currentPage, pageSize);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new GetProductsResponse(
+            result.Value.Items.Select(p => new ProductResponse(
+                p.Id,
+                p.ProductId,
+                p.ProductName,
+                p.Category,
+                p.Color,
+                p.Pattern,
+                p.SizeType,
+                p.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+                p.CreatedBy,
+                p.CreatedAt,
+                p.Status,
+                p.ImageURL,
+                p.VectorId,
+                p.SalePrice,
+                p.ImportPrice
+            )).ToList(),
+            result.Value.Total
+        ));
+    }
 }

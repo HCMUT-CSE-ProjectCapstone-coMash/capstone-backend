@@ -599,6 +599,31 @@ public class ProductsService : IProductsService
         ));
     }
 
+    public async Task<Result<(List<ProductDto> Items, int Total)>> FetchAllProducts(int currentPage, int pageSize)
+    {
+        var (products, total) = await _productsRepository.FetchAllProducts(currentPage, pageSize);
+
+        var productDtos = products.Select(product => new ProductDto(
+            product.Id,
+            product.ProductId,
+            product.ProductName,
+            product.Category,
+            product.Color,
+            product.Pattern,
+            product.SizeType,
+            product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+            product.CreatedBy,
+            product.CreatedAt,
+            product.Status,
+            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
+            product.VectorId,
+            product.SalePrice,
+            product.ImportPrice
+        )).ToList();
+
+        return Result<(List<ProductDto> Items, int Total)>.Success((productDtos, total));
+    }
+
     private static string GetCategoryPrefix(string category) => category switch
     {
         "Váy" => "VAY",
