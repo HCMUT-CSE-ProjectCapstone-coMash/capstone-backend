@@ -40,7 +40,14 @@ public class ProductsOrdersRepository : IProductsOrdersRepository
 
     public async Task<ProductsOrder?> GetProductsOrdersByOrderId(Guid orderId)
     {
-        return await _context.ProductsOrders.FirstOrDefaultAsync(po => po.Id == orderId);
+        return await _context.ProductsOrders
+            .Include(po => po.ProductsOrdersDetails)
+                .ThenInclude(detail => detail.Product)
+                    .ThenInclude(p => p.ProductQuantities)
+            .Include(po => po.ProductsOrdersDetails)
+                .ThenInclude(detail => detail.QuantityChanges)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(po => po.Id == orderId);
     }
 
     public async Task PatchProductsOrders(ProductsOrder productsOrder)

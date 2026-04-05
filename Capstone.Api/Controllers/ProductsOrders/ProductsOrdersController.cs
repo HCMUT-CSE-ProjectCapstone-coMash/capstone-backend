@@ -117,4 +117,46 @@ public class ProductsOrdersController : ControllerBase
 
         return Ok(new PatchProductsOrdersResponse(result.Value));
     }
+
+    [HttpGet("{orderId}")]
+    public async Task<IActionResult> GetProductsOrderById([FromRoute] string orderId)
+    {
+        var result = await _productsOrdersService.GetProductsOrderById(orderId);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new ProductsOrdersResponse(
+            result.Value.Id,
+            result.Value.CreatedBy,
+            result.Value.CreatedAt,
+            result.Value.OrderName,
+            result.Value.OrderDescription,
+            result.Value.OrderStatus,
+            result.Value.Products.Select(p => new ProductResponse(
+                p.Product.Id,
+                p.Product.ProductId,
+                p.Product.ProductName,
+                p.Product.Category,
+                p.Product.Color,
+                p.Product.Pattern,
+                p.Product.SizeType,
+                p.Product.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+                p.Product.CreatedBy,
+                p.Product.CreatedAt,
+                p.Product.Status,
+                p.Product.ImageURL,
+                p.Product.VectorId,
+                null,
+                null,
+                p.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
+            )).ToList()
+        ));
+    }
 }

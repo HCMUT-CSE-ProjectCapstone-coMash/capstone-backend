@@ -8,4 +8,5 @@ public interface IProductsOrdersService
     Task<Result<List<ProductsOrdersListDto>>> GetAllProductsOrdersExcludingPending();
     Task<Result<string>> DeleteProductFromProductsOrders(string orderId, string productId);
     Task<Result<string>> PatchProductsOrders(string orderId, string? orderName, string? OrderDescription, string? OrderStatus);
+    Task<Result<ProductsOrdersDto>> GetProductsOrderById(string orderId);
 }
