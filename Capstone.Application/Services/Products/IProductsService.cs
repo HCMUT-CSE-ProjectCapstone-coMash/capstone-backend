@@ -42,4 +42,18 @@ public interface IProductsService
         string productsOrderId,
         List<ProductQuantityDto> productQuantities
     );
+
+    Task<Result<ProductDto>> OwnerCreateProduct(
+        string productId,
+        string productName,
+        string category,
+        string color,
+        string? pattern,
+        string sizeType,
+        List<ProductQuantityDto> productQuantities,
+        string createdBy,
+        IFormFile? image,
+        decimal salePrice,
+        decimal importPrice
+    );
 }

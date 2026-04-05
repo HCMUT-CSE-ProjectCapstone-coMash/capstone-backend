@@ -253,4 +253,49 @@ public class ProductsController : ControllerBase
             result.Value.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
         ));
     }
+
+    [HttpPost("owner-create")]
+    public async Task<IActionResult> OwnerCreateProduct([FromForm] OwnerCreateProductRequest request)
+    {
+        var result = await _productsSerivce.OwnerCreateProduct(
+            request.ProductId,
+            request.ProductName,
+            request.Category,
+            request.Color,
+            request.Pattern,
+            request.SizeType,
+            request.Quantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+            request.CreatedBy,
+            request.Image,
+            request.SalePrice,
+            request.ImportPrice
+        );
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new ProductResponse(
+            result.Value.Id,
+            result.Value.ProductId,
+            result.Value.ProductName,
+            result.Value.Category,
+            result.Value.Color,
+            result.Value.Pattern,
+            result.Value.SizeType,
+            result.Value.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+            result.Value.CreatedBy,
+            result.Value.CreatedAt,
+            result.Value.Status,
+            result.Value.ImageURL,
+            result.Value.VectorId,
+            result.Value.SalePrice,
+            result.Value.ImportPrice
+        ));
+    }
 }

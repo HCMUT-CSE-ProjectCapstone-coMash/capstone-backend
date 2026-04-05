@@ -17,8 +17,6 @@ public class ProductsOrdersService : IProductsOrdersService
     private readonly IProductsRepository _productsRepository;
     private readonly IUsersRepository _usersRepository;
 
-
-
     public ProductsOrdersService(
         IDateTimeProvider dateTimeProvider,
         IFileStorageProvider fileStorageProvider,

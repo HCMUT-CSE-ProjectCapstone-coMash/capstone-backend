@@ -412,6 +412,104 @@ public class ProductsService : IProductsService
         return Result<ProductWithQuantityChangesDto>.Success(new ProductWithQuantityChangesDto(productDto, quantityChanges));
     }
 
+    public async Task<Result<ProductDto>> OwnerCreateProduct(
+        string productId,
+        string productName,
+        string category,
+        string color,
+        string? pattern,
+        string sizeType,
+        List<ProductQuantityDto> quantities,
+        string createdBy,
+        IFormFile? image,
+        decimal salePrice,
+        decimal importPrice
+    )
+    {
+        var newProductID = Guid.NewGuid();
+        string imageKey = "";
+        string imageUrl = "";
+        string vectorId = "";
+
+        if (image != null)
+        {
+            var extension = Path.GetExtension(image.FileName);
+
+            await _fileStorageProvider.UploadImageAsync(
+                newProductID,
+                image.OpenReadStream(),
+                image.ContentType,
+                extension
+            );
+
+            imageKey = $"products/{newProductID}{extension}";
+
+            imageUrl = await _fileStorageProvider.GetImageUrlAsync(imageKey);
+
+            // vectorId = await _vectorStoreProvider.InsertImageAsync(imageUrl, new
+            // {
+            //     Id = newProductID.ToString(),
+            // });
+        }
+
+        var product = new Product
+        {
+            Id = newProductID,
+            ProductId = productId,
+            ProductName = productName,
+            Category = category,
+            Color = color,
+            Pattern = pattern ?? string.Empty,
+            SizeType = sizeType,
+            CreatedBy = Guid.Parse(createdBy),
+            CreatedAt = _dateTimeProvider.UtcNow,
+            Status = ProductStatus.Approved,
+            ImageKey = imageKey,
+            VectorId = vectorId,
+            SalePrice = salePrice,
+            ImportPrice = importPrice
+        };
+
+        await _productsRepository.AddProduct(product);
+
+        var productQuantities = new List<ProductQuantity>();
+
+        for (int i = 0; i < quantities.Count; i++)
+        {
+            var quantity = quantities[i];
+
+            var productQuantity = new ProductQuantity
+            {
+                Id = Guid.NewGuid(),
+                ProductId = product.Id,
+                Size = quantity.Size,
+                Quantities = quantity.Quantities
+            };
+
+            await _productQuantitiesRepository.AddProductQuantities(productQuantity);
+
+            productQuantities.Add(productQuantity);
+        }
+
+        return Result<ProductDto>.Success(new ProductDto(
+            product.Id,
+            product.ProductId,
+            product.ProductName,
+            product.Category,
+            product.Color,
+            product.Pattern,
+            product.SizeType,
+            productQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+            product.CreatedBy,
+            product.CreatedAt,
+            product.Status,
+            imageUrl,
+            product.VectorId,
+            salePrice,
+            importPrice
+        ));
+    }
+
     private static string GetCategoryPrefix(string category) => category switch
     {
         "Váy" => "VAY",
