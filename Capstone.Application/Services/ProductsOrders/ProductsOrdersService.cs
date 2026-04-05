@@ -217,7 +217,9 @@ public class ProductsOrdersService : IProductsOrdersService
                 CreatedAt: detail.Product.CreatedAt,
                 Status: detail.Product.Status,
                 ImageURL: imageUrl,
-                VectorId: detail.Product.VectorId
+                VectorId: detail.Product.VectorId,
+                SalePrice: detail.Product.SalePrice,
+                ImportPrice: detail.Product.ImportPrice
             );
 
             var quantityChanges = detail.QuantityChanges.Select(qc => new ProductQuantityChangeDto(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList();
