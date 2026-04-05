@@ -56,4 +56,17 @@ public interface IProductsService
         decimal salePrice,
         decimal importPrice
     );
+
+    Task<Result<ProductDto>> OwnerPatchProduct(
+        string id,
+        string? productId,
+        string? productName,
+        string? category,
+        string? color,
+        string? pattern,
+        string? sizeType,
+        List<ProductQuantityDto>? quantities,
+        decimal? salePrice,
+        decimal? importPrice
+    );
 }

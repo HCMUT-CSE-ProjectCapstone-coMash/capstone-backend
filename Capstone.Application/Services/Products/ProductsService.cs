@@ -510,6 +510,95 @@ public class ProductsService : IProductsService
         ));
     }
 
+    public async Task<Result<ProductDto>> OwnerPatchProduct(
+        string id,
+        string? productId,
+        string? productName,
+        string? category,
+        string? color,
+        string? pattern,
+        string? sizeType,
+        List<ProductQuantityDto>? quantities,
+        decimal? salePrice,
+        decimal? importPrice
+    )
+    {
+        var product = await _productsRepository.GetProductById(Guid.Parse(id));
+
+        if (product is null)
+        {
+            return Result<ProductDto>.Failure(new Error("NotFound", "Product not found."));
+        }
+
+        if (!string.IsNullOrWhiteSpace(productId))
+            product.ProductId = productId;
+
+        if (!string.IsNullOrWhiteSpace(productName))
+            product.ProductName = productName;
+
+        if (!string.IsNullOrWhiteSpace(category))
+            product.Category = category;
+
+        if (!string.IsNullOrWhiteSpace(color))
+            product.Color = color;
+
+        if (pattern is not null)
+            product.Pattern = pattern;
+
+        if (!string.IsNullOrWhiteSpace(sizeType))
+            product.SizeType = sizeType;
+
+        if (salePrice.HasValue)
+            product.SalePrice = salePrice.Value;
+        
+        if (importPrice.HasValue)
+            product.ImportPrice = importPrice.Value;
+
+        await _productsRepository.UpdateProduct(product);
+
+        var updatedQuantities = product.ProductQuantities.ToList();
+
+        if (quantities is not null)
+        {
+            await _productQuantitiesRepository.DeleteProductQuantitiesByProductId(product.Id);
+
+            updatedQuantities = new List<ProductQuantity>();
+
+            foreach (var quantity in quantities)
+            {
+                var productQuantity = new ProductQuantity
+                {
+                    Id = Guid.NewGuid(),
+                    ProductId = product.Id,
+                    Size = quantity.Size,
+                    Quantities = quantity.Quantities
+                };
+
+                await _productQuantitiesRepository.AddProductQuantities(productQuantity);
+
+                updatedQuantities.Add(productQuantity);
+            }
+        }
+
+        return Result<ProductDto>.Success(new ProductDto(
+            product.Id,
+            product.ProductId,
+            product.ProductName,
+            product.Category,
+            product.Color,
+            product.Pattern,
+            product.SizeType,
+            updatedQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+            product.CreatedBy,
+            product.CreatedAt,
+            product.Status,
+            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
+            product.VectorId,
+            product.SalePrice,
+            product.ImportPrice
+        ));
+    }
+
     private static string GetCategoryPrefix(string category) => category switch
     {
         "Váy" => "VAY",

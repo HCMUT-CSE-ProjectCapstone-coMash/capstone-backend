@@ -298,4 +298,48 @@ public class ProductsController : ControllerBase
             result.Value.ImportPrice
         ));
     }
+
+    [HttpPatch("owner-patch/{productId}")]
+    public async Task<IActionResult> OwnerPatchProduct([FromForm] OwnerPatchProductRequest request, [FromRoute] string productId)
+    {
+        var result = await _productsSerivce.OwnerPatchProduct(
+            productId,
+            request.ProductId,
+            request.ProductName,
+            request.Category,
+            request.Color,
+            request.Pattern,
+            request.SizeType,
+            request.Quantities?.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+            request.SalePrice,
+            request.ImportPrice
+        );
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new ProductResponse(
+            result.Value.Id,
+            result.Value.ProductId,
+            result.Value.ProductName,
+            result.Value.Category,
+            result.Value.Color,
+            result.Value.Pattern,
+            result.Value.SizeType,
+            result.Value.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+            result.Value.CreatedBy,
+            result.Value.CreatedAt,
+            result.Value.Status,
+            result.Value.ImageURL,
+            result.Value.VectorId,
+            result.Value.SalePrice,
+            result.Value.ImportPrice
+        ));
+    }
 }
