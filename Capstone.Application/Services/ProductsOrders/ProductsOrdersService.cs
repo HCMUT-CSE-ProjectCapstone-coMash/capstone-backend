@@ -14,6 +14,8 @@ public class ProductsOrdersService : IProductsOrdersService
     private readonly IVectorStoreProvider _vectorStoreProvider;
     private readonly IProductsOrdersRepository _productsOrdersRepository;
     private readonly IProductsOrdersDetailsRepository _productsOrdersDetailsRepository;
+    private readonly IProductsOrdersDetailsQuantityChangesRepository _productsOrdersDetailsQuantityChangesRepository;
+    private readonly IProductQuantitiesRepository _productQuantitiesRepository;
     private readonly IProductsRepository _productsRepository;
     private readonly IUsersRepository _usersRepository;
 
@@ -23,6 +25,8 @@ public class ProductsOrdersService : IProductsOrdersService
         IVectorStoreProvider vectorStoreProvider,
         IProductsOrdersRepository productsOrdersRepository,
         IProductsOrdersDetailsRepository productsOrdersDetailsRepository,
+        IProductsOrdersDetailsQuantityChangesRepository productsOrdersDetailsQuantityChangesRepository,
+        IProductQuantitiesRepository productQuantitiesRepository,
         IProductsRepository productsRepository,
         IUsersRepository usersRepository
     )
@@ -32,6 +36,8 @@ public class ProductsOrdersService : IProductsOrdersService
         _vectorStoreProvider = vectorStoreProvider;
         _productsOrdersRepository = productsOrdersRepository;
         _productsOrdersDetailsRepository = productsOrdersDetailsRepository;
+        _productsOrdersDetailsQuantityChangesRepository = productsOrdersDetailsQuantityChangesRepository;
+        _productQuantitiesRepository = productQuantitiesRepository;
         _productsRepository = productsRepository;
         _usersRepository = usersRepository;
     }
@@ -236,5 +242,83 @@ public class ProductsOrdersService : IProductsOrdersService
             OrderStatus: productsOrders.OrderStatus,
             Products: products
         ));
+    }
+
+    public async Task<Result<string>> ApproveProductsOrder(string orderId)
+    {
+        var productsOrder = await _productsOrdersRepository.GetProductsOrdersByOrderId(Guid.Parse(orderId));
+
+        if (productsOrder is null)
+        {
+            return Result<string>.Failure(new Error("NotFound", "ProductsOrders not found."));
+        }
+
+        foreach (var detail in productsOrder.ProductsOrdersDetails)
+        {
+            var product = detail.Product;
+
+            if (product.Status == ProductStatus.Pending)
+            {
+                product.Status = ProductStatus.Approved;
+                await _productsRepository.UpdateProduct(product);
+            }
+            else if (product.Status == ProductStatus.Approved)
+            {
+                foreach (var quantityChange in detail.QuantityChanges)
+                { 
+                    var existingQuantity = product.ProductQuantities.FirstOrDefault(q => q.Size == quantityChange.Size);
+                    if (existingQuantity != null)
+                    {
+                        existingQuantity.Quantities = quantityChange.NewQuantity;
+                        await _productQuantitiesRepository.UpdateProductQuantity(existingQuantity);
+                    }
+                }
+                await _productsOrdersDetailsQuantityChangesRepository.DeleteQuantityChangesByProductsOrdersDetailId(detail.Id);
+            }
+        }
+
+        productsOrder.OrderStatus = ProductsOrderStatus.Approved;
+        await _productsOrdersRepository.PatchProductsOrders(productsOrder);
+
+        return Result<string>.Success(productsOrder.Id.ToString());
+    }
+
+    public async Task<Result<string>> DeleteProductsOrder(string orderId)
+    {
+        var productsOrder = await _productsOrdersRepository.GetProductsOrdersByOrderId(Guid.Parse(orderId));
+
+        if (productsOrder is null)
+        {
+            return Result<string>.Failure(new Error("NotFound", "ProductsOrders not found."));
+        }
+
+        var details = productsOrder.ProductsOrdersDetails.ToList();
+        foreach (var detail in details)
+        {
+            var product = detail.Product;
+
+            if (product.Status == ProductStatus.Pending)
+            {
+                if (!string.IsNullOrEmpty(product.ImageKey))
+                {
+                    await _fileStorageProvider.DeleteImageAsync(product.ImageKey);
+                }
+
+                if (!string.IsNullOrEmpty(product.VectorId))
+                {
+                    await _vectorStoreProvider.DeleteImageAsync(product.VectorId);
+                }
+
+                await _productsRepository.DeleteProductAsync(product.Id);
+            }
+            else if (product.Status == ProductStatus.Approved)
+            {
+                await _productsOrdersDetailsRepository.DeleteProductsOrdersDetails(detail.Id);
+            }
+        }
+
+        await _productsOrdersRepository.DeleteProductsOrder(productsOrder);
+
+        return Result<string>.Success(productsOrder.Id.ToString());
     }
 }

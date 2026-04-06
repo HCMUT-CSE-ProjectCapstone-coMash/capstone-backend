@@ -19,6 +19,12 @@ public class ProductQuantitiesRepository : IProductQuantitiesRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task UpdateProductQuantity(ProductQuantity productQuantity)
+    {
+        _context.ProductQuantities.Update(productQuantity);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task DeleteProductQuantitiesByProductId(Guid productId)
     {
         var existing = await _context.ProductQuantities.Where(pq => pq.ProductId == productId).ToListAsync();

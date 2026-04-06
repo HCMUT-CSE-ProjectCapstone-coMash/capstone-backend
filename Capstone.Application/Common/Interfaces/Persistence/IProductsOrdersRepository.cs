@@ -9,5 +9,6 @@ public interface IProductsOrdersRepository
     Task CreateProductsOrders(ProductsOrder productsOrder);
     Task<ProductsOrder?> GetProductsOrdersByOrderId(Guid orderId);
     Task PatchProductsOrders(ProductsOrder productsOrder);
+    Task DeleteProductsOrder(ProductsOrder productsOrder);
     Task<List<Guid>> GetProductIdsInPendingAndSendingOrders();
 }

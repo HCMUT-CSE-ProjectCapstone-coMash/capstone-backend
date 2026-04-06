@@ -56,6 +56,12 @@ public class ProductsOrdersRepository : IProductsOrdersRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task DeleteProductsOrder(ProductsOrder productsOrder)
+    {
+        _context.ProductsOrders.Remove(productsOrder);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<List<Guid>> GetProductIdsInPendingAndSendingOrders()
     {
         return await _context.ProductsOrders
