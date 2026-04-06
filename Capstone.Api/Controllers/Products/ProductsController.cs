@@ -118,48 +118,6 @@ public class ProductsController : ControllerBase
         ));
     }
 
-    [HttpPatch("patch/{productId}")]
-    public async Task<IActionResult> PatchProductInProductsOrders([FromBody] PatchProductRequest request, [FromRoute] string productId)
-    {
-        var result = await _productsSerivce.PatchProductInProductsOrders(
-            productId,
-            request.ProductID,
-            request.ProductName,
-            request.Category,
-            request.Color,
-            request.Pattern,
-            request.SizeType,
-            request.Quantities?.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList()
-        );
-
-        if (result.IsFailure)
-        {
-            return BadRequest(new
-            {
-                error = result.Error.Code,
-                message = result.Error.Description
-            });
-        }
-
-        return Ok(new ProductResponse(
-            result.Value.Id,
-            result.Value.ProductId,
-            result.Value.ProductName,
-            result.Value.Category,
-            result.Value.Color,
-            result.Value.Pattern,
-            result.Value.SizeType,
-            result.Value.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
-            result.Value.CreatedBy,
-            result.Value.CreatedAt,
-            result.Value.Status,
-            result.Value.ImageURL,
-            result.Value.VectorId,
-            result.Value.SalePrice,
-            result.Value.ImportPrice
-        ));
-    }
-
     [HttpGet("fetch-by-name/{productName}")]
     public async Task<IActionResult> FetchApprovedProductByName([FromRoute] string productName)
     {
@@ -209,48 +167,6 @@ public class ProductsController : ControllerBase
 
         return Ok(new CreateProductIdByCategoryResponse(
             result.Value
-        ));
-    }
-
-    [HttpPost("create-detail-for-approved-product/{productId}/{productsOrderId}")]
-    public async Task<IActionResult> CreateDetailForApprovedProduct(
-        [FromForm] CreateDetailForApprovedProductRequest request,
-        [FromRoute] string productId,
-        [FromRoute] string productsOrderId
-    )
-    {
-        var result = await _productsSerivce.CreateDetailForApprovedProduct(
-            productId,
-            productsOrderId,
-            request.Quantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList()
-        );
-
-        if (result.IsFailure)
-        {
-            return BadRequest(new
-            {
-                error = result.Error.Code,
-                message = result.Error.Description
-            });
-        }
-
-        return Ok(new ProductResponse(
-            result.Value.Product.Id,
-            result.Value.Product.ProductId,
-            result.Value.Product.ProductName,
-            result.Value.Product.Category,
-            result.Value.Product.Color,
-            result.Value.Product.Pattern,
-            result.Value.Product.SizeType,
-            result.Value.Product.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
-            result.Value.Product.CreatedBy,
-            result.Value.Product.CreatedAt,
-            result.Value.Product.Status,
-            result.Value.Product.ImageURL,
-            result.Value.Product.VectorId,
-            result.Value.Product.SalePrice,
-            result.Value.Product.ImportPrice,
-            result.Value.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
         ));
     }
 
@@ -419,6 +335,48 @@ public class ProductsController : ControllerBase
             result.Value.Product.VectorId,
             result.Value.Product.SalePrice,
             result.Value.Product.ImportPrice,
+            result.Value.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
+        ));
+    }
+
+    [HttpPatch("employee-patch-in-products-order/{productId}/{productsOrderId}")]
+    public async Task<IActionResult> EmployeeUpdateProductInProductsOrder([FromForm] EmployeePatchInProductsOrderRequest request, [FromRoute] string productId, [FromRoute] string productsOrderId)
+    {
+        var result = await _productsSerivce.EmployeeUpdateProductInProductsOrder(
+            productId,
+            productsOrderId,
+            request.ProductName,
+            request.Color,
+            request.Pattern,
+            request.SizeType,
+            request.Quantities?.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList()
+        );
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new ProductResponse(
+            result.Value.Product.Id,
+            result.Value.Product.ProductId,
+            result.Value.Product.ProductName,
+            result.Value.Product.Category,
+            result.Value.Product.Color,
+            result.Value.Product.Pattern,
+            result.Value.Product.SizeType,
+            result.Value.Product.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+            result.Value.Product.CreatedBy,
+            result.Value.Product.CreatedAt,
+            result.Value.Product.Status,
+            result.Value.Product.ImageURL,
+            result.Value.Product.VectorId,
+            result.Value.Product.SalePrice,
+            0,
             result.Value.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
         ));
     }

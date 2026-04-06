@@ -1,9 +1,7 @@
 namespace Capstone.Contracts.Products;
 
-public record PatchProductRequest(
-    string? ProductID,
+public record EmployeePatchInProductsOrderRequest(
     string? ProductName,
-    string? Category,
     string? Color,
     string? Pattern,
     string? SizeType,

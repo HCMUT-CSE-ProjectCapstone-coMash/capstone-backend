@@ -22,26 +22,9 @@ public interface IProductsService
 
     Task<Result<AnalyzeProductDto>> AnalyzeImage(string ImageBase64);
 
-    Task<Result<ProductDto>> PatchProductInProductsOrders(
-        string id,
-        string? productId,
-        string? productName,
-        string? category,
-        string? color,
-        string? pattern,
-        string? sizeType,
-        List<ProductQuantityDto>? quantities
-    );
-
     Task<Result<List<ProductDto>>> FetchApprovedProductByName(string productName);
 
     Task<Result<string>> CreateProductIdByCategory(string category);
-
-    Task<Result<ProductWithQuantityChangesDto>> CreateDetailForApprovedProduct(
-        string productId,
-        string productsOrderId,
-        List<ProductQuantityDto> productQuantities
-    );
 
     Task<Result<ProductDto>> OwnerCreateProduct(
         string productId,
@@ -82,5 +65,15 @@ public interface IProductsService
         List<ProductQuantityDto>? newQuantities,
         decimal? salePrice,
         decimal? importPrice
+    );
+
+    Task<Result<ProductWithQuantityChangesDto>> EmployeeUpdateProductInProductsOrder(
+        string id,
+        string productsOrderId,
+        string? productName,
+        string? color,
+        string? pattern,
+        string? sizeType,
+        List<ProductQuantityDto>? newQuantities
     );
 }
