@@ -71,4 +71,16 @@ public interface IProductsService
     );
 
     Task<Result<(List<ProductDto> Items, int Total)>> FetchAllProducts(int currentPage, int pageSize);
+
+    Task<Result<ProductWithQuantityChangesDto>> OwnerUpdateProductInProductsOrder(
+        string id,
+        string productsOrderId,
+        string? productName,
+        string? color,
+        string? pattern,
+        string? sizeType,
+        List<ProductQuantityDto>? newQuantities,
+        decimal? salePrice,
+        decimal? importPrice
+    );
 }

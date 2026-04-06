@@ -378,4 +378,48 @@ public class ProductsController : ControllerBase
             result.Value.Total
         ));
     }
+
+    [HttpPatch("owner-patch-in-products-order/{productId}/{productsOrderId}")]
+    public async Task<IActionResult> OwnerUpdateProductInProductsOrder([FromForm] OwnerPatchInProductsOrderRequest request, [FromRoute] string productId, [FromRoute] string productsOrderId)
+    {
+        var result = await _productsSerivce.OwnerUpdateProductInProductsOrder(
+            productId,
+            productsOrderId,
+            request.ProductName,
+            request.Color,
+            request.Pattern,
+            request.SizeType,
+            request.Quantities?.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+            request.SalePrice,
+            request.ImportPrice
+        );
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new ProductResponse(
+            result.Value.Product.Id,
+            result.Value.Product.ProductId,
+            result.Value.Product.ProductName,
+            result.Value.Product.Category,
+            result.Value.Product.Color,
+            result.Value.Product.Pattern,
+            result.Value.Product.SizeType,
+            result.Value.Product.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+            result.Value.Product.CreatedBy,
+            result.Value.Product.CreatedAt,
+            result.Value.Product.Status,
+            result.Value.Product.ImageURL,
+            result.Value.Product.VectorId,
+            result.Value.Product.SalePrice,
+            result.Value.Product.ImportPrice,
+            result.Value.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
+        ));
+    }
 }

@@ -624,6 +624,144 @@ public class ProductsService : IProductsService
         return Result<(List<ProductDto> Items, int Total)>.Success((productDtos, total));
     }
 
+    public async Task<Result<ProductWithQuantityChangesDto>> OwnerUpdateProductInProductsOrder(
+        string id,
+        string productsOrderId,
+        string? productName,
+        string? color,
+        string? pattern,
+        string? sizeType,
+        List<ProductQuantityDto>? newQuantities,
+        decimal? salePrice,
+        decimal? importPrice
+    )
+    {
+        var product = await _productsRepository.GetProductById(Guid.Parse(id));
+
+        if (product is null)
+        {
+            return Result<ProductWithQuantityChangesDto>.Failure(new Error("NotFound", "Product not found."));
+        }
+
+        if (!string.IsNullOrWhiteSpace(productName))
+            product.ProductName = productName;
+
+        if (!string.IsNullOrWhiteSpace(color))
+            product.Color = color;
+
+        if (pattern is not null)
+            product.Pattern = pattern;
+
+        if (!string.IsNullOrWhiteSpace(sizeType))
+            product.SizeType = sizeType;
+
+        if (salePrice.HasValue)
+            product.SalePrice = salePrice.Value;
+
+        if (importPrice.HasValue)
+            product.ImportPrice = importPrice.Value;
+
+        await _productsRepository.UpdateProduct(product);
+
+        List<ProductQuantity> newQuantity = new();
+        List<ProductsOrdersDetailQuantityChange> newQuantityChange = new();
+
+        if (product.Status == ProductStatus.Approved && newQuantities != null)
+        {
+            var existingDetail = await _productsOrdersDetailsRepository.GetProductsOrdersDetailsByOrderIdAndProductId(Guid.Parse(productsOrderId), Guid.Parse(id));
+
+            ProductsOrdersDetail detail;
+
+            if (existingDetail is not null)
+            {
+                detail = existingDetail;
+
+                await _productsOrdersDetailsQuantityChangesRepository.DeleteQuantityChangesByProductsOrdersDetailId(detail.Id);
+            }
+            else
+            {
+                detail = new ProductsOrdersDetail
+                {
+                    Id = Guid.NewGuid(),
+                    ProductId = product.Id,
+                    ProductsOrderId = Guid.Parse(productsOrderId),
+                };
+
+                await _productsOrdersDetailsRepository.CreateProductsOrdersDetails(detail);
+            }
+
+            var allSizes = product.ProductQuantities.Select(q => q.Size).Union(newQuantities.Select(q => q.Size));
+
+            foreach (var size in allSizes)
+            {
+                var currentQuantity = product.ProductQuantities.FirstOrDefault(q => q.Size == size);
+                var requestedQuantity = newQuantities.FirstOrDefault(q => q.Size == size);
+
+                if (requestedQuantity is null) continue;
+
+                var oldQty = currentQuantity?.Quantities ?? 0;
+                var newQty = requestedQuantity.Quantities;
+
+                if (oldQty == newQty) continue;
+
+                var newQuantityChane = new ProductsOrdersDetailQuantityChange
+                {
+                    Id = Guid.NewGuid(),
+                    ProductsOrdersDetailId = detail.Id,
+                    Size = size,
+                    OldQuantity = oldQty,
+                    NewQuantity = newQty,
+                };
+
+                await _productsOrdersDetailsQuantityChangesRepository.AddQuantityChange(newQuantityChane);
+
+                newQuantityChange.Add(newQuantityChane);
+            }
+        }
+
+        if (product.Status == ProductStatus.Pending && newQuantities != null)
+        {
+            await _productQuantitiesRepository.DeleteProductQuantitiesByProductId(product.Id);
+
+            foreach (var quantity in newQuantities)
+            {
+                var productQuantity = new ProductQuantity
+                {
+                    Id = Guid.NewGuid(),
+                    ProductId = product.Id,
+                    Size = quantity.Size,
+                    Quantities = quantity.Quantities
+                };
+
+                await _productQuantitiesRepository.AddProductQuantities(productQuantity);
+
+                newQuantity.Add(productQuantity);
+            }
+        }
+
+        var productDto = new ProductDto(
+            product.Id,
+            product.ProductId,
+            product.ProductName,
+            product.Category,
+            product.Color,
+            product.Pattern,
+            product.SizeType,
+            newQuantity.Count > 0 ? newQuantity.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList() : product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+            product.CreatedBy,
+            product.CreatedAt,
+            product.Status,
+            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
+            product.VectorId,
+            product.SalePrice,
+            product.ImportPrice
+        );
+
+        var quantityChanges = newQuantityChange.Select(c => new ProductQuantityChangeDto(c.Size, c.OldQuantity, c.NewQuantity)).ToList();
+
+        return Result<ProductWithQuantityChangesDto>.Success(new ProductWithQuantityChangesDto(productDto, quantityChanges));
+    }
+
     private static string GetCategoryPrefix(string category) => category switch
     {
         "Váy" => "VAY",
