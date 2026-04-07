@@ -53,7 +53,7 @@ public interface IProductsService
         decimal? importPrice
     );
 
-    Task<Result<(List<ProductDto> Items, int Total)>> FetchAllProducts(int currentPage, int pageSize);
+    Task<Result<(List<ProductDto> Items, int Total)>> FetchAllProducts(int currentPage, int pageSize, string? category = null);
 
     Task<Result<ProductWithQuantityChangesDto>> OwnerUpdateProductInProductsOrder(
         string id,

@@ -68,12 +68,17 @@ public class ProductsRepository : IProductsRepository
             .ToListAsync();
     }
 
-    public async Task<(List<Product> Items, int Total)> FetchAllProducts(int page, int pageSize)
+    public async Task<(List<Product> Items, int Total)> FetchAllProducts(int page, int pageSize, string? category = null)
     {
         var query = _context.Products
             .Include(p => p.ProductQuantities)
             .Where(p => p.Status == ProductStatus.Approved)
             .AsQueryable();
+
+        if (!string.IsNullOrEmpty(category))
+        {
+            query = query.Where(p => p.Category == category);
+        }
 
         var total = await query.CountAsync();
 

@@ -261,9 +261,9 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("fetch-all")]
-    public async Task<IActionResult> FetchAllProducts([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> FetchAllProducts([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? category = null)
     {
-        var result = await _productsSerivce.FetchAllProducts(page, pageSize);
+        var result = await _productsSerivce.FetchAllProducts(page, pageSize, category);
 
         if (result.IsFailure)
         {
