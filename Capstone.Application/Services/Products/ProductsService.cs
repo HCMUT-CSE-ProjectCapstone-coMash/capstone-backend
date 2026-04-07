@@ -434,9 +434,9 @@ public class ProductsService : IProductsService
         ));
     }
 
-    public async Task<Result<(List<ProductDto> Items, int Total)>> FetchAllProducts(int currentPage, int pageSize, string? category = null)
+    public async Task<Result<(List<ProductDto> Items, int Total)>> FetchAllProducts(int currentPage, int pageSize, string? category = null, string? search = null)
     {
-        var (products, total) = await _productsRepository.FetchAllProducts(currentPage, pageSize, category);
+        var (products, total) = await _productsRepository.FetchAllProducts(currentPage, pageSize, category, search);
 
         var productDtos = products.Select(product => new ProductDto(
             product.Id,

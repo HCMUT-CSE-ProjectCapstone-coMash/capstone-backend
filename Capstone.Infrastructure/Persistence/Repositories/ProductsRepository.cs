@@ -68,7 +68,7 @@ public class ProductsRepository : IProductsRepository
             .ToListAsync();
     }
 
-    public async Task<(List<Product> Items, int Total)> FetchAllProducts(int page, int pageSize, string? category = null)
+    public async Task<(List<Product> Items, int Total)> FetchAllProducts(int page, int pageSize, string? category = null, string? search = null)
     {
         var query = _context.Products
             .Include(p => p.ProductQuantities)
@@ -78,6 +78,20 @@ public class ProductsRepository : IProductsRepository
         if (!string.IsNullOrEmpty(category))
         {
             query = query.Where(p => p.Category == category);
+        }
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            var searchPattern = $"%{search}%";
+            query = query.Where(p =>
+                EF.Functions.ILike(
+                    EF.Functions.Unaccent(p.ProductName),
+                    EF.Functions.Unaccent(searchPattern)
+                ) ||
+                EF.Functions.ILike(
+                    EF.Functions.Unaccent(p.ProductId),
+                    EF.Functions.Unaccent(searchPattern)
+                ));
         }
 
         var total = await query.CountAsync();

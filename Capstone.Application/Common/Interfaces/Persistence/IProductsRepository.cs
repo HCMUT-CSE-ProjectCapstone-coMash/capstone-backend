@@ -10,5 +10,5 @@ public interface IProductsRepository
     Task UpdateProduct(Product product);
     Task<int> GetMaxIdNumberByCategoryAsync(string prefix);
     Task<List<Product>> FetchApprovedProductByName(string productName);
-    Task<(List<Product> Items, int Total)> FetchAllProducts(int page, int pageSize, string? category = null);
+    Task<(List<Product> Items, int Total)> FetchAllProducts(int page, int pageSize, string? category = null, string? search = null);
 }
