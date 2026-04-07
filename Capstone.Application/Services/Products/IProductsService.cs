@@ -22,7 +22,7 @@ public interface IProductsService
 
     Task<Result<AnalyzeProductDto>> AnalyzeImage(string ImageBase64);
 
-    Task<Result<List<ProductDto>>> FetchApprovedProductByName(string productName);
+    Task<Result<List<ProductWithOrderStatusDto>>> FetchApprovedProductByName(string productName);
 
     Task<Result<string>> CreateProductIdByCategory(string category);
 

@@ -209,33 +209,32 @@ public class ProductsService : IProductsService
         ));
     }
 
-    public async Task<Result<List<ProductDto>>> FetchApprovedProductByName(string productName)
+    public async Task<Result<List<ProductWithOrderStatusDto>>> FetchApprovedProductByName(string productName)
     {
         var products = await _productsRepository.FetchApprovedProductByName(productName);
 
         var productIdsInPendingOrders = await _productsOrdersRepository.GetProductIdsInPendingAndSendingOrders();
 
-        var productDtos = products
-            .Where(product => !productIdsInPendingOrders.Contains(product.Id))
-            .Select(product => new ProductDto(
-                product.Id,
-                product.ProductId,
-                product.ProductName,
-                product.Category,
-                product.Color,
-                product.Pattern,
-                product.SizeType,
-                product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
-                product.CreatedBy,
-                product.CreatedAt,
-                product.Status,
-                string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
-                product.VectorId,
-                product.SalePrice,
-                product.ImportPrice
-            )).ToList();
+        var productDtos = products.Select(product => new ProductWithOrderStatusDto(
+            product.Id,
+            product.ProductId,
+            product.ProductName,
+            product.Category,
+            product.Color,
+            product.Pattern,
+            product.SizeType,
+            product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+            product.CreatedBy,
+            product.CreatedAt,
+            product.Status,
+            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
+            product.VectorId,
+            product.SalePrice,
+            product.ImportPrice,
+            productIdsInPendingOrders.Contains(product.Id)
+        )).ToList();
 
-        return Result<List<ProductDto>>.Success(productDtos);
+        return Result<List<ProductWithOrderStatusDto>>.Success(productDtos);
     }
 
     public async Task<Result<string>> CreateProductIdByCategory(string category)

@@ -29,3 +29,23 @@ public record ProductQuantityChange(
     int OldQuantity,
     int NewQuantity
 );
+
+public record ProductWithOrderStatusResponse(
+    Guid Id,
+    string ProductId,
+    string ProductName,
+    string Category,
+    string Color,
+    string Pattern,
+    string SizeType,
+    List<ProductQuantity> Quantities,
+    Guid CreatedBy,
+    DateTime CreatedAt,
+    string Status,
+    string ImageURL,
+    string VectorId,
+    decimal SalePrice,
+    decimal ImportPrice,
+    bool IsInPendingOrder,
+    List<ProductQuantityChange>? QuantityChanges = null
+);

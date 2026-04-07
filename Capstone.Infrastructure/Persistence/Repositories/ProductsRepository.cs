@@ -55,10 +55,16 @@ public class ProductsRepository : IProductsRepository
 
     public Task<List<Product>> FetchApprovedProductByName(string productName)
     {
+        var searchPattern = $"%{productName}%";
+
         return _context.Products
             .Include(p => p.ProductQuantities)
-            .Where(p => p.ProductName.Contains(productName) && p.Status == ProductStatus.Approved)
-            .Take(3)
+            .Where(p => p.Status == ProductStatus.Approved &&
+                EF.Functions.ILike(
+                    EF.Functions.Unaccent(p.ProductName),
+                    EF.Functions.Unaccent(searchPattern)
+                ))
+            .Take(8)
             .ToListAsync();
     }
 

@@ -1,5 +1,6 @@
 using Capstone.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 namespace Capstone.Infrastructure.Persistence;
 

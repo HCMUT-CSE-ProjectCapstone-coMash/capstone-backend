@@ -132,7 +132,7 @@ public class ProductsController : ControllerBase
             });
         }
 
-        return Ok(result.Value.Select(p => new ProductResponse(
+        return Ok(result.Value.Select(p => new ProductWithOrderStatusResponse(
             p.Id,
             p.ProductId,
             p.ProductName,
@@ -147,7 +147,8 @@ public class ProductsController : ControllerBase
             p.ImageURL,
             p.VectorId,
             p.SalePrice,
-            p.ImportPrice
+            p.ImportPrice,
+            p.IsInPendingOrder
         )).ToList());
     }
 
