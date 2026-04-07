@@ -273,7 +273,6 @@ public class ProductsOrdersService : IProductsOrdersService
                         await _productQuantitiesRepository.UpdateProductQuantity(existingQuantity);
                     }
                 }
-                await _productsOrdersDetailsQuantityChangesRepository.DeleteQuantityChangesByProductsOrdersDetailId(detail.Id);
             }
         }
 
