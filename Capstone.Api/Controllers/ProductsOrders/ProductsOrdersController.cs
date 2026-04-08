@@ -159,4 +159,38 @@ public class ProductsOrdersController : ControllerBase
             )).ToList()
         ));
     }
+
+    [HttpPatch("approve/{orderId}")]
+    public async Task<IActionResult> ApproveProductsOrder([FromRoute] string orderId)
+    {
+        var result = await _productsOrdersService.ApproveProductsOrder(orderId);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new { message = "Products order approved successfully", orderId = result.Value });
+    }
+
+    [HttpDelete("{orderId}")]
+    public async Task<IActionResult> DeleteProductsOrder([FromRoute] string orderId)
+    {
+        var result = await _productsOrdersService.DeleteProductsOrder(orderId);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new { message = "Products order deleted successfully", orderId = result.Value });
+    }
 }

@@ -9,4 +9,6 @@ public interface IProductsOrdersService
     Task<Result<string>> DeleteProductFromProductsOrders(string orderId, string productId);
     Task<Result<string>> PatchProductsOrders(string orderId, string? orderName, string? OrderDescription, string? OrderStatus);
     Task<Result<ProductsOrdersDto>> GetProductsOrderById(string orderId);
+    Task<Result<string>> ApproveProductsOrder(string orderId);
+    Task<Result<string>> DeleteProductsOrder(string orderId);
 }
