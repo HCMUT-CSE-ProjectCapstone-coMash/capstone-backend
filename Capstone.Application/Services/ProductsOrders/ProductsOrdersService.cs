@@ -113,12 +113,13 @@ public class ProductsOrdersService : IProductsOrdersService
         return Result<ProductsOrdersDto>.Success(newProductsOrdersDto);
     }
 
-    public async Task<Result<List<ProductsOrdersListDto>>> GetAllProductsOrdersExcludingPending()
+    public async Task<Result<PaginatedResult<ProductsOrdersListDto>>> GetAllProductsOrdersExcludingPending(int currentPage, int pageSize, string? search = null)
     {
-        var productsOrders = await _productsOrdersRepository.GetProductsOrdersExcludingPending();
+        var (orders, total) = await _productsOrdersRepository.GetProductsOrdersExcludingPending(currentPage, pageSize, search);
+
         var productsOrdersDtos = new List<ProductsOrdersListDto>();
 
-        foreach (var productsOrder in productsOrders)
+        foreach (var productsOrder in orders)
         {
             var createdByUser = await _usersRepository.GetUserById(productsOrder.CreatedBy);
             var createdByName = createdByUser?.FullName ?? string.Empty;
@@ -134,7 +135,8 @@ public class ProductsOrdersService : IProductsOrdersService
             ));
         }
 
-        return Result<List<ProductsOrdersListDto>>.Success(productsOrdersDtos);
+        return Result<PaginatedResult<ProductsOrdersListDto>>.Success(
+            new PaginatedResult<ProductsOrdersListDto>(productsOrdersDtos, total));
     }
 
     public async Task<Result<string>> DeleteProductFromProductsOrders(string orderId, string productId)

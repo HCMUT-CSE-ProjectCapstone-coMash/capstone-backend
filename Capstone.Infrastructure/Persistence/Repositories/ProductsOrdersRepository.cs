@@ -27,9 +27,29 @@ public class ProductsOrdersRepository : IProductsOrdersRepository
                 && po.OrderStatus == ProductsOrderStatus.Pending);
     }
 
-    public async Task<List<ProductsOrder>> GetProductsOrdersExcludingPending()
+    public async Task<(List<ProductsOrder> Items, int Total)> GetProductsOrdersExcludingPending(int currentPage, int pageSize, string? search = null)
     {
-        return await _context.ProductsOrders.Where(po => po.OrderStatus != "Pending").ToListAsync();
+        var query = _context.ProductsOrders
+            .Where(po => po.OrderStatus != ProductsOrderStatus.Pending);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var searchPattern = $"%{search}%";
+            query = query.Where(po =>
+                EF.Functions.ILike(
+                    EF.Functions.Unaccent(po.OrderName),
+                    EF.Functions.Unaccent(searchPattern)
+                ));
+        }
+
+        var total = await query.CountAsync();
+        var items = await query
+            .OrderByDescending(po => po.CreatedAt)
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, total);
     }
 
     public async Task CreateProductsOrders(ProductsOrder ProductsOrder)

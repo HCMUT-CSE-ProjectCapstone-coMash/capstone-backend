@@ -17,9 +17,12 @@ public class ProductsOrdersController : ControllerBase
     }
 
     [HttpGet("fetch-excluding-pending")]
-    public async Task<IActionResult> GetAllProductsOrdersExcludingPending()
+    public async Task<IActionResult> GetAllProductsOrdersExcludingPending(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? search = null)
     {
-        var result = await _productsOrdersService.GetAllProductsOrdersExcludingPending();
+        var result = await _productsOrdersService.GetAllProductsOrdersExcludingPending(page, pageSize, search);
 
         if (result.IsFailure)
         {
@@ -30,15 +33,7 @@ public class ProductsOrdersController : ControllerBase
             });
         }
 
-        return Ok(result.Value.Select(order => new ProductsOrdersListResponse(
-            order.Id,
-            order.CreatedBy,
-            order.CreatedByName,
-            order.CreatedAt,
-            order.OrderName,
-            order.OrderDescription,
-            order.OrderStatus
-        )));
+        return Ok(result.Value);
     }
 
     [HttpPost("fetch/{createdBy}")]

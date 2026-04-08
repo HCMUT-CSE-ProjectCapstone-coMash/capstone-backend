@@ -434,7 +434,7 @@ public class ProductsService : IProductsService
         ));
     }
 
-    public async Task<Result<(List<ProductDto> Items, int Total)>> FetchAllProducts(int currentPage, int pageSize, string? category = null, string? search = null)
+    public async Task<Result<PaginatedResult<ProductDto>>> FetchAllProducts(int currentPage, int pageSize, string? category = null, string? search = null)
     {
         var (products, total) = await _productsRepository.FetchAllProducts(currentPage, pageSize, category, search);
 
@@ -456,7 +456,8 @@ public class ProductsService : IProductsService
             product.ImportPrice
         )).ToList();
 
-        return Result<(List<ProductDto> Items, int Total)>.Success((productDtos, total));
+        return Result<PaginatedResult<ProductDto>>.Success(
+            new PaginatedResult<ProductDto>(productDtos, total));
     }
 
     public async Task<Result<ProductWithQuantityChangesDto>> OwnerUpdateProductInProductsOrder(
