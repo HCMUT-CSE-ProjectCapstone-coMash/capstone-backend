@@ -55,14 +55,31 @@ public class ProductsRepository : IProductsRepository
 
     public Task<List<Product>> FetchApprovedProductByName(string productName)
     {
+        string? parsedProductId = null;
+        string? parsedSize = null;
+
+        var lastDash = productName.LastIndexOf('-');
+        if (lastDash > 0)
+        {
+            parsedProductId = productName[..lastDash];
+            parsedSize      = productName[(lastDash + 1)..];
+        }
+
         var searchPattern = $"%{productName}%";
 
         return _context.Products
             .Include(p => p.ProductQuantities)
             .Where(p => p.Status == ProductStatus.Approved &&
-                EF.Functions.ILike(
-                    EF.Functions.Unaccent(p.ProductName),
-                    EF.Functions.Unaccent(searchPattern)
+                (
+                    EF.Functions.ILike(
+                        EF.Functions.Unaccent(p.ProductName),
+                        EF.Functions.Unaccent(searchPattern))
+                    ||
+                    EF.Functions.ILike(p.ProductId, searchPattern)
+                    ||
+                    (parsedProductId != null && parsedSize != null &&
+                    EF.Functions.ILike(p.ProductId, $"%{parsedProductId}%") &&
+                    p.ProductQuantities.Any(q => EF.Functions.ILike(q.Size, parsedSize)))
                 ))
             .Take(8)
             .ToListAsync();
@@ -70,6 +87,19 @@ public class ProductsRepository : IProductsRepository
 
     public async Task<(List<Product> Items, int Total)> FetchAllProducts(int page, int pageSize, string? category = null, string? search = null)
     {
+        string? parsedProductId = null;
+        string? parsedSize = null;
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            var lastDash = search.LastIndexOf("-");
+            if (lastDash > 0)
+            {
+                parsedProductId = search[..lastDash];
+                parsedSize      = search[(lastDash + 1)..];
+            }
+        }
+
         var query = _context.Products
             .Include(p => p.ProductQuantities)
             .Where(p => p.Status == ProductStatus.Approved)
@@ -84,14 +114,19 @@ public class ProductsRepository : IProductsRepository
         {
             var searchPattern = $"%{search}%";
             query = query.Where(p =>
+                // match full search term against name
                 EF.Functions.ILike(
                     EF.Functions.Unaccent(p.ProductName),
-                    EF.Functions.Unaccent(searchPattern)
-                ) ||
-                EF.Functions.ILike(
-                    EF.Functions.Unaccent(p.ProductId),
-                    EF.Functions.Unaccent(searchPattern)
-                ));
+                    EF.Functions.Unaccent(searchPattern))
+                ||
+                // match "VAY-6" part against productId
+                EF.Functions.ILike(p.ProductId, searchPattern)
+                ||
+                // match "L" part against a quantity size
+                (parsedProductId != null && parsedSize != null &&
+                EF.Functions.ILike(p.ProductId, $"%{parsedProductId}%") &&
+                p.ProductQuantities.Any(q => EF.Functions.ILike(q.Size, parsedSize)))
+            );
         }
 
         var total = await query.CountAsync();
