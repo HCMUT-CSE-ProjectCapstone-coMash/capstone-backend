@@ -12,4 +12,7 @@ public static class AuthErrors
 
     public static readonly Error UserNotExisted =
         new("Auth.UserNotExisted", "Người dùng không tồn tại");
+
+    public static readonly Error UserDeleted =
+        new("Auth.UserDeleted", "Người dùng đã bị xóa");
 }

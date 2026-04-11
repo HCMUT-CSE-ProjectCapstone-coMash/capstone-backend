@@ -28,4 +28,11 @@ public class UsersRepository : IUsersRepository
     {
         return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
     }
+
+    public async Task<List<User>> GetEmployees()
+    {
+        return await _context.Users
+            .Where(u => u.Role == "employee" && u.Status == "Active")
+            .ToListAsync();
+    }
 }

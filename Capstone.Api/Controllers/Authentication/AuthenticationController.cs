@@ -111,4 +111,22 @@ public class AuthenticationController : ControllerBase
         
         return Ok();
     }
+
+    // [Authorize(Roles = "owner")]
+    [HttpGet("employees")]
+    public async Task<IActionResult> GetEmployees()
+    {
+        var result = await _auth.GetAllEmployees();
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
+    }
 }

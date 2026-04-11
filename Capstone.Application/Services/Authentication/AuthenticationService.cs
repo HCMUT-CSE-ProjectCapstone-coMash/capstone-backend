@@ -38,7 +38,8 @@ public class AuthenticationService : IAuthenticationService
             Email = email,
             Password = _passwordHasher.Hash(password),
             CreatedAt = _dateTimeProvider.UtcNow,
-            Role = Roles.Employee
+            Role = Roles.Employee,
+            Status = UserStatus.Active
         };
 
         await _userRepository.AddUser(user);
@@ -62,6 +63,11 @@ public class AuthenticationService : IAuthenticationService
             return Result<AuthResult>.Failure(new Error(AuthErrors.InvalidCredentials.Code, AuthErrors.InvalidCredentials.Description));
         }
 
+        if (user.Status != UserStatus.Active)
+        {
+            return Result<AuthResult>.Failure(new Error(AuthErrors.UserDeleted.Code, AuthErrors.UserDeleted.Description));
+        }
+
         return Result<AuthResult>.Success(new AuthResult(
             user.Id,
             user.FullName,
@@ -81,6 +87,11 @@ public class AuthenticationService : IAuthenticationService
             return Result<AuthResult>.Failure(new Error(AuthErrors.UserNotExisted.Code, AuthErrors.UserNotExisted.Description));
         }
 
+        if (user.Status != UserStatus.Active)
+        {
+            return Result<AuthResult>.Failure(new Error(AuthErrors.UserDeleted.Code, AuthErrors.UserDeleted.Description));
+        }
+
         return Result<AuthResult>.Success(new AuthResult(
             user.Id,
             user.FullName,
@@ -89,5 +100,21 @@ public class AuthenticationService : IAuthenticationService
             user.CreatedAt,
             ""
         ));
+    }
+    public async Task<Result<List<UserResponse>>> GetAllEmployees()
+    {
+        var users = await _userRepository.GetEmployees();
+
+        var result = users.Select(u => new UserResponse(
+            u.Id,
+            u.FullName,
+            u.Email,
+            u.Role,
+            u.PhoneNumber,
+            u.Gender,
+            u.DateOfBirth
+        )).ToList();
+
+        return Result<List<UserResponse>>.Success(result);
     }
 }
