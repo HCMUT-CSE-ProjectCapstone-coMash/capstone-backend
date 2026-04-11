@@ -8,4 +8,6 @@ public class Customer
     public string CustomerStatus { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public Guid CreatedBy { get; set; }
+
+    public ICollection<SaleOrder> SaleOrders { get; set; } = new List<SaleOrder>();
 }
