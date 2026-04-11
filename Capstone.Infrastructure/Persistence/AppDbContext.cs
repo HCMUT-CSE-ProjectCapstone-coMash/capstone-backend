@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<ProductsOrder> ProductsOrders => Set<ProductsOrder>();
     public DbSet<ProductsOrdersDetail> ProductsOrdersDetails => Set<ProductsOrdersDetail>();
     public DbSet<ProductsOrdersDetailQuantityChange> ProductsOrdersDetailQuantityChanges => Set<ProductsOrdersDetailQuantityChange>();
+    public DbSet<Customer> Customers => Set<Customer>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -66,6 +67,12 @@ public class AppDbContext : DbContext
 
             // ProductsOrdersDetailQuantityChange has one ProductsOrdersDetail and ProductsOrdersDetail has many ProductsOrdersDetailQuantityChanges
             entity.HasOne(podqc => podqc.ProductsOrdersDetail).WithMany(pod => pod.QuantityChanges).HasForeignKey(podqc => podqc.ProductsOrdersDetailId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Customer Table
+        modelBuilder.Entity<Customer>(entity =>
+        {
+            entity.ToTable("customers");
         });
     }
 }
