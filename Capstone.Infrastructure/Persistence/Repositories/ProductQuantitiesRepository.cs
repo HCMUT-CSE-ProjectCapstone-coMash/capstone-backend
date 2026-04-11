@@ -37,4 +37,9 @@ public class ProductQuantitiesRepository : IProductQuantitiesRepository
         _context.ProductQuantities.RemoveRange(existing);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<ProductQuantity?> GetProductQuantitiesByProductId(Guid productId, string size)
+    {
+        return await _context.ProductQuantities.FirstOrDefaultAsync(pq => pq.ProductId == productId && pq.Size == size);
+    }
 }

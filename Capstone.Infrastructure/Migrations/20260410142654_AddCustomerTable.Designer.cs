@@ -78,7 +78,7 @@ namespace Capstone.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("ImportPrice")
+                    b.Property<double>("ImportPrice")
                         .HasColumnType("numeric");
 
                     b.Property<string>("Pattern")
@@ -93,7 +93,7 @@ namespace Capstone.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("SalePrice")
+                    b.Property<double>("SalePrice")
                         .HasColumnType("numeric");
 
                     b.Property<string>("SizeType")

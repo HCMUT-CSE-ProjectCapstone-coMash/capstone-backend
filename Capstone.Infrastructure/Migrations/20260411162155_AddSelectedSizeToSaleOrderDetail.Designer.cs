@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Capstone.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260409141458_AddMoreFieldForUser")]
-    partial class AddMoreFieldForUser
+    [Migration("20260411162155_AddSelectedSizeToSaleOrderDetail")]
+    partial class AddSelectedSizeToSaleOrderDetail
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,35 @@ namespace Capstone.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Capstone.Domain.Entities.Customer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CustomerPhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CustomerStatus")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("customers", (string)null);
+                });
 
             modelBuilder.Entity("Capstone.Domain.Entities.Product", b =>
                 {
@@ -187,6 +216,71 @@ namespace Capstone.Infrastructure.Migrations
                     b.ToTable("products_orders_detail_quantity_changes", (string)null);
                 });
 
+            modelBuilder.Entity("Capstone.Domain.Entities.SaleOrder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("DebitMoney")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Discount")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("sale_orders", (string)null);
+                });
+
+            modelBuilder.Entity("Capstone.Domain.Entities.SaleOrderDetail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("Discount")
+                        .HasColumnType("double precision");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("SaleOrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SelectedSize")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("SaleOrderId");
+
+                    b.ToTable("sale_order_details", (string)null);
+                });
+
             modelBuilder.Entity("Capstone.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -221,6 +315,10 @@ namespace Capstone.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -286,6 +384,45 @@ namespace Capstone.Infrastructure.Migrations
                     b.Navigation("ProductsOrdersDetail");
                 });
 
+            modelBuilder.Entity("Capstone.Domain.Entities.SaleOrder", b =>
+                {
+                    b.HasOne("Capstone.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Capstone.Domain.Entities.Customer", "Customer")
+                        .WithMany("SaleOrders")
+                        .HasForeignKey("CustomerId");
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("Capstone.Domain.Entities.SaleOrderDetail", b =>
+                {
+                    b.HasOne("Capstone.Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Capstone.Domain.Entities.SaleOrder", "SaleOrder")
+                        .WithMany("SaleOrderDetails")
+                        .HasForeignKey("SaleOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("SaleOrder");
+                });
+
+            modelBuilder.Entity("Capstone.Domain.Entities.Customer", b =>
+                {
+                    b.Navigation("SaleOrders");
+                });
+
             modelBuilder.Entity("Capstone.Domain.Entities.Product", b =>
                 {
                     b.Navigation("ProductQuantities");
@@ -299,6 +436,11 @@ namespace Capstone.Infrastructure.Migrations
             modelBuilder.Entity("Capstone.Domain.Entities.ProductsOrdersDetail", b =>
                 {
                     b.Navigation("QuantityChanges");
+                });
+
+            modelBuilder.Entity("Capstone.Domain.Entities.SaleOrder", b =>
+                {
+                    b.Navigation("SaleOrderDetails");
                 });
 #pragma warning restore 612, 618
         }

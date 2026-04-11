@@ -7,4 +7,5 @@ public interface IProductQuantitiesRepository
     Task AddProductQuantities(ProductQuantity productQuantities);
     Task UpdateProductQuantity(ProductQuantity productQuantity);
     Task DeleteProductQuantitiesByProductId(Guid productId);
+    Task<ProductQuantity?> GetProductQuantitiesByProductId(Guid productId, string size);
 }

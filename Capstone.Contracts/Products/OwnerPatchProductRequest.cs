@@ -8,6 +8,6 @@ public record OwnerPatchProductRequest(
     string? Pattern,
     string? SizeType,
     List<ProductQuantity>? Quantities,
-    decimal? SalePrice,
-    decimal? ImportPrice
+    double? SalePrice,
+    double? ImportPrice
 );

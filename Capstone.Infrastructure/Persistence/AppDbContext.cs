@@ -83,7 +83,7 @@ public class AppDbContext : DbContext
             entity.ToTable("sale_orders");
 
             // SaleOrder has one User (CreatedBy) and User has many SaleOrders
-            entity.HasOne<User>().WithMany().HasForeignKey(so => so.CreatedBy);
+            entity.HasOne(so => so.User).WithMany().HasForeignKey(so => so.CreatedBy);
 
             // SaleOrder has one Customer and Customer has many SaleOrders
             entity.HasOne(so => so.Customer).WithMany(c => c.SaleOrders).HasForeignKey(so => so.CustomerId).IsRequired(false);

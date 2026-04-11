@@ -75,8 +75,8 @@ namespace Capstone.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("ImportPrice")
-                        .HasColumnType("numeric");
+                    b.Property<double>("ImportPrice")
+                        .HasColumnType("double precision");
 
                     b.Property<string>("Pattern")
                         .IsRequired()
@@ -90,8 +90,8 @@ namespace Capstone.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("SalePrice")
-                        .HasColumnType("numeric");
+                    b.Property<double>("SalePrice")
+                        .HasColumnType("double precision");
 
                     b.Property<string>("SizeType")
                         .IsRequired()
@@ -265,6 +265,10 @@ namespace Capstone.Infrastructure.Migrations
                     b.Property<Guid>("SaleOrderId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("SelectedSize")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
@@ -379,7 +383,7 @@ namespace Capstone.Infrastructure.Migrations
 
             modelBuilder.Entity("Capstone.Domain.Entities.SaleOrder", b =>
                 {
-                    b.HasOne("Capstone.Domain.Entities.User", null)
+                    b.HasOne("Capstone.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -390,6 +394,8 @@ namespace Capstone.Infrastructure.Migrations
                         .HasForeignKey("CustomerId");
 
                     b.Navigation("Customer");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Capstone.Domain.Entities.SaleOrderDetail", b =>

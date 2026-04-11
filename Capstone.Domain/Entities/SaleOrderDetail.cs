@@ -5,6 +5,7 @@ public class SaleOrderDetail
     public Guid Id { get; set; }
     public Guid SaleOrderId { get; set; }
     public Guid ProductId { get; set; }
+    public string SelectedSize { get; set; } = null!;
     public int Quantity { get; set; }
     public double Discount { get; set; }
 

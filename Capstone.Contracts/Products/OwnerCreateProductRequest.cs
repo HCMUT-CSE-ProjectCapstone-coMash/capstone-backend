@@ -12,6 +12,6 @@ public record OwnerCreateProductRequest(
     List<ProductQuantity> Quantities,
     string CreatedBy,
     IFormFile? Image,
-    decimal SalePrice,
-    decimal ImportPrice
+    double SalePrice,
+    double ImportPrice
 );

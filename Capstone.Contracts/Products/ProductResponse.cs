@@ -14,8 +14,8 @@ public record ProductResponse(
     string Status,
     string ImageURL,
     string VectorId,
-    decimal SalePrice,
-    decimal ImportPrice,
+    double SalePrice,
+    double ImportPrice,
     List<ProductQuantityChange>? QuantityChanges = null
 );
 
@@ -44,8 +44,8 @@ public record ProductWithOrderStatusResponse(
     string Status,
     string ImageURL,
     string VectorId,
-    decimal SalePrice,
-    decimal ImportPrice,
+    double SalePrice,
+    double ImportPrice,
     bool IsInPendingOrder,
     List<ProductQuantityChange>? QuantityChanges = null
 );

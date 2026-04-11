@@ -257,8 +257,8 @@ public class ProductsService : IProductsService
         List<ProductQuantityDto> quantities,
         string createdBy,
         IFormFile? image,
-        decimal salePrice,
-        decimal importPrice
+        double salePrice,
+        double importPrice
     )
     {
         var newProductID = Guid.NewGuid();
@@ -354,8 +354,8 @@ public class ProductsService : IProductsService
         string? pattern,
         string? sizeType,
         List<ProductQuantityDto>? quantities,
-        decimal? salePrice,
-        decimal? importPrice
+        double? salePrice,
+        double? importPrice
     )
     {
         var product = await _productsRepository.GetProductById(Guid.Parse(id));
@@ -468,8 +468,8 @@ public class ProductsService : IProductsService
         string? pattern,
         string? sizeType,
         List<ProductQuantityDto>? newQuantities,
-        decimal? salePrice,
-        decimal? importPrice
+        double? salePrice,
+        double? importPrice
     )
     {
         var product = await _productsRepository.GetProductById(Guid.Parse(id));

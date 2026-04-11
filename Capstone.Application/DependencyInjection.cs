@@ -2,6 +2,7 @@ using Capstone.Application.Services.Authentication;
 using Capstone.Application.Services.Customers;
 using Capstone.Application.Services.Products;
 using Capstone.Application.Services.ProductsOrders;
+using Capstone.Application.Services.SaleOrderDetails;
 using Capstone.Application.Services.SaleOrders;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,6 +17,7 @@ public static class DependencyInjection
         services.AddScoped<IProductsOrdersService, ProductsOrdersService>();
         services.AddScoped<ICustomersService, CustomersService>();
         services.AddScoped<ISaleOrdersService, SaleOrdersService>();
+        services.AddScoped<ISaleOrderDetailsService, SaleOrderDetailsService>();
 
         return services;
     }

@@ -1,5 +1,6 @@
 using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Capstone.Infrastructure.Persistence.Repositories;
 
@@ -16,5 +17,15 @@ public class SaleOrdersRepository : ISaleOrdersRepository
     {
         _context.SaleOrders.Add(saleOrder);
         await _context.SaveChangesAsync();
+    }
+    
+    public async Task<SaleOrder?> GetSaleOrderWithDetails(Guid saleOrderId)
+    {
+        return await _context.SaleOrders
+            .Include(so => so.SaleOrderDetails)
+                .ThenInclude(d => d.Product)
+            .Include(so => so.Customer)
+            .Include(so => so.User)
+            .FirstOrDefaultAsync(so => so.Id == saleOrderId);
     }
 }
