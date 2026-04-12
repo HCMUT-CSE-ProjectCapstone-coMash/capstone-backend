@@ -8,7 +8,7 @@ public class SaleOrder
     public string PaymentMethod { get; set; } = string.Empty;
     public double DebitMoney { get; set; }
     public DateTime CreatedAt { get; set; }
-    public double Discount { get; set; }
+    public double TotalPrice { get; set; }
 
     public Customer? Customer { get; set; }
     public User User { get; set; } = null!;

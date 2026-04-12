@@ -8,9 +8,10 @@ public interface ISaleOrdersService
         string CustomerId,
         string CreatedBy,
         string PaymentMethod,
-        double DebitMoney,
-        double Discount
+        double DebitMoney
     );
+
+    Task<Result> UpdateTotalPrice(string saleOrderId);
 
     Task<Result<SaleOrderDto>> GetSaleOrderById(string saleOrderId);
 }

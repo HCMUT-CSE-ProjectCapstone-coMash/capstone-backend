@@ -8,14 +8,17 @@ public class SaleOrderDetailsService : ISaleOrderDetailsService
 {
     private readonly ISaleOrderDetailsRepository _saleOrderDetailsRepository;
     private readonly IProductQuantitiesRepository _productQuantitiesRepository;
+    private readonly IProductsRepository _productsRepository;
 
     public SaleOrderDetailsService(
         ISaleOrderDetailsRepository saleOrderDetailsRepository,
-        IProductQuantitiesRepository productQuantitiesRepository
+        IProductQuantitiesRepository productQuantitiesRepository,
+        IProductsRepository productsRepository
     )
     {
         _saleOrderDetailsRepository = saleOrderDetailsRepository;
         _productQuantitiesRepository = productQuantitiesRepository;
+        _productsRepository = productsRepository;
     }
 
     public async Task<Result> CreateSaleOrderDetail(
@@ -26,6 +29,15 @@ public class SaleOrderDetailsService : ISaleOrderDetailsService
         double Discount
     )
     {
+        var product = await _productsRepository.GetProductById(Guid.Parse(ProductId));
+        if (product == null)
+        {
+            return Result.Failure(new Error("ProductNotFound", "Product not found"));
+        }
+
+        var UnitPrice = product.SalePrice;
+        var SubTotal = Quantity * UnitPrice * (1 - Discount / 100);
+
         var saleOrderDetail = new SaleOrderDetail
         {
             Id = Guid.NewGuid(),
@@ -33,13 +45,14 @@ public class SaleOrderDetailsService : ISaleOrderDetailsService
             ProductId = Guid.Parse(ProductId),
             SelectedSize = SelectedSize,
             Quantity = Quantity,
-            Discount = Discount
+            Discount = Discount,
+            UnitPrice = UnitPrice,
+            SubTotal = SubTotal
         };
 
         await _saleOrderDetailsRepository.CreateSaleOrderDetail(saleOrderDetail);
 
         var productQuantity = await _productQuantitiesRepository.GetProductQuantitiesByProductId(Guid.Parse(ProductId), SelectedSize);
-
         if (productQuantity == null)
         {
             return Result.Failure(new Error("ProductQuantityNotFound", "Product quantity not found"));

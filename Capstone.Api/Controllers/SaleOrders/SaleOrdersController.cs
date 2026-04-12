@@ -28,8 +28,7 @@ public class SaleOrdersController : ControllerBase
             request.CustomerId,
             request.UserId,
             request.PaymentMethod,
-            request.DebitMoney,
-            request.Discount
+            request.DebitMoney
         );
 
         for (int i = 0; i < request.Products.Count; i++)
@@ -44,6 +43,8 @@ public class SaleOrdersController : ControllerBase
             );
         }
 
+        await _saleOrdersService.UpdateTotalPrice(saleOrderResponse.Value);
+
         var result = await _saleOrdersService.GetSaleOrderById(saleOrderResponse.Value);
 
         if (result.IsFailure)
@@ -55,7 +56,7 @@ public class SaleOrdersController : ControllerBase
             });
         }
 
-        var response = new SaleOrderResponse(
+        return Ok(new SaleOrderResponse(
             result.Value.Id,
             result.Value.CustomerId,
             result.Value.CustomerName,
@@ -64,14 +65,17 @@ public class SaleOrdersController : ControllerBase
             result.Value.PaymentMethod,
             result.Value.DebitMoney,
             result.Value.CreatedAt,
-            result.Value.Discount,
             result.Value.TotalPrice,
             result.Value.Details.Select(d => new SaleOrderDetailResponse(
-                d.Id, d.ProductId, d.ProductName, d.SelectedSize,
-                d.Quantity, d.UnitPrice, d.Discount, d.SubTotal
+                d.Id,
+                d.ProductId,
+                d.ProductName,
+                d.SelectedSize,
+                d.Quantity,
+                d.UnitPrice,
+                d.Discount,
+                d.SubTotal
             )).ToList()
-        );
-
-        return Ok(response);
+        ));
     }
 }

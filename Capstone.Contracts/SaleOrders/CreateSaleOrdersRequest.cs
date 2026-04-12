@@ -12,6 +12,5 @@ public record CreateSaleOrdersRequest(
     string UserId,
     string PaymentMethod,
     double DebitMoney,
-    double Discount,
     List<SaleProductRequest> Products
 );

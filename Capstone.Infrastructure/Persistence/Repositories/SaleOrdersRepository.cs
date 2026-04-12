@@ -18,6 +18,12 @@ public class SaleOrdersRepository : ISaleOrdersRepository
         _context.SaleOrders.Add(saleOrder);
         await _context.SaveChangesAsync();
     }
+
+    public async Task UpdateSaleOrder(SaleOrder saleOrder)
+    {
+        _context.SaleOrders.Update(saleOrder);
+        await _context.SaveChangesAsync();
+    }
     
     public async Task<SaleOrder?> GetSaleOrderWithDetails(Guid saleOrderId)
     {

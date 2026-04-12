@@ -9,7 +9,6 @@ public record SaleOrderResponse(
     string PaymentMethod,
     double DebitMoney,
     DateTime CreatedAt,
-    double Discount,
     double TotalPrice,
     List<SaleOrderDetailResponse> Details
 );

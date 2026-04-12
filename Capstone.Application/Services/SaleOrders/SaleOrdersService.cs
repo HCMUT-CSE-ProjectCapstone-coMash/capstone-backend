@@ -22,8 +22,7 @@ public class SaleOrdersService : ISaleOrdersService
         string CustomerId,
         string CreatedBy,
         string PaymentMethod,
-        double DebitMoney,
-        double Discount
+        double DebitMoney
     )
     {
         var newSaleOrder = new SaleOrder
@@ -33,8 +32,7 @@ public class SaleOrdersService : ISaleOrdersService
             CreatedBy = Guid.Parse(CreatedBy),
             PaymentMethod = PaymentMethod,
             DebitMoney = DebitMoney,
-            CreatedAt = _dateTimeProvider.UtcNow,
-            Discount = Discount
+            CreatedAt = _dateTimeProvider.UtcNow
         };
 
         await _saleOrdersRepository.CreateSaleOrder(newSaleOrder);
@@ -42,6 +40,21 @@ public class SaleOrdersService : ISaleOrdersService
         return Result<string>.Success(newSaleOrder.Id.ToString());
     }
 
+    public async Task<Result> UpdateTotalPrice(string saleOrderId)
+    {
+        var saleOrder = await _saleOrdersRepository.GetSaleOrderWithDetails(Guid.Parse(saleOrderId));
+
+        if (saleOrder == null)
+            return Result.Failure(new Error("SaleOrderNotFound", "Sale order not found"));
+
+        var totalPrice = saleOrder.SaleOrderDetails.Sum(d => d.SubTotal);
+
+        saleOrder.TotalPrice = totalPrice;
+        await _saleOrdersRepository.UpdateSaleOrder(saleOrder);
+
+        return Result.Success();
+    }
+ 
     public async Task<Result<SaleOrderDto>> GetSaleOrderById(string saleOrderId)
     {
         var saleOrder = await _saleOrdersRepository.GetSaleOrderWithDetails(Guid.Parse(saleOrderId));
@@ -56,12 +69,10 @@ public class SaleOrdersService : ISaleOrdersService
             ProductName = d.Product.ProductName,
             SelectedSize = d.SelectedSize,
             Quantity = d.Quantity,
-            UnitPrice = d.Product.SalePrice,
+            UnitPrice = d.UnitPrice,
             Discount = d.Discount,
-            SubTotal = d.Quantity * d.Product.SalePrice * (1 - d.Discount / 100)
+            SubTotal = d.SubTotal
         }).ToList();
-
-        var totalBeforeDiscount = details.Sum(d => d.SubTotal);
 
         var dto = new SaleOrderDto
         {
@@ -73,9 +84,8 @@ public class SaleOrdersService : ISaleOrdersService
             PaymentMethod = saleOrder.PaymentMethod,
             DebitMoney = saleOrder.DebitMoney,
             CreatedAt = saleOrder.CreatedAt,
-            Discount = saleOrder.Discount,
             Details = details,
-            TotalPrice = totalBeforeDiscount * (1 - saleOrder.Discount / 100)
+            TotalPrice = saleOrder.TotalPrice
         };
 
         return Result<SaleOrderDto>.Success(dto);
