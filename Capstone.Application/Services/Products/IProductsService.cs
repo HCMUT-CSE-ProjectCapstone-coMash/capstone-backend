@@ -5,18 +5,19 @@ namespace Capstone.Application.Services.Products;
 
 public interface IProductsService
 {
-    Task<Result<ProductDto>> CreateProduct(
+    Task<Result<string>> CreateProduct(
         string productId,
         string ProductName,
         string category,
         string color,
-        string? pattern,
+        string pattern,
         string sizeType,
-        List<ProductQuantityDto> productQuantities,
-        string createdBy,
-        IFormFile? image,
-        string orderID
+        string createdBy
     );
+
+    Task<Result> UpdateProductImageKey(string productId, string imageKey);
+
+    Task<Result<ProductDto>> FetchProductById(string id);
 
     Task<Result<ProductDto>> SearchProductSimilar(string ImageBase64);
 
@@ -26,16 +27,14 @@ public interface IProductsService
 
     Task<Result<string>> CreateProductIdByCategory(string category);
 
-    Task<Result<ProductDto>> OwnerCreateProduct(
+    Task<Result<string>> OwnerCreateProduct(
         string productId,
         string productName,
         string category,
         string color,
-        string? pattern,
+        string pattern,
         string sizeType,
-        List<ProductQuantityDto> productQuantities,
         string createdBy,
-        IFormFile? image,
         double salePrice,
         double importPrice
     );

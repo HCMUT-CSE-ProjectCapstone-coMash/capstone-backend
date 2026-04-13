@@ -1,6 +1,7 @@
 using Capstone.Application.Common;
 using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Application.Common.Interfaces.Services;
+using Capstone.Application.Services.FileStorageService;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
 using Microsoft.AspNetCore.Http;
@@ -14,8 +15,10 @@ public class ProductsService : IProductsService
     private readonly IProductsOrdersRepository _productsOrdersRepository;
     private readonly IProductsOrdersDetailsRepository _productsOrdersDetailsRepository;
     private readonly IProductsOrdersDetailsQuantityChangesRepository _productsOrdersDetailsQuantityChangesRepository;
+
+    private readonly IFileStorageService _fileStorageService;
+
     private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly IFileStorageProvider _fileStorageProvider;
     private readonly IVectorStoreProvider _vectorStoreProvider;
     private readonly IPromptProvider _promptProvider;
 
@@ -26,7 +29,7 @@ public class ProductsService : IProductsService
         IProductsOrdersDetailsRepository productsOrdersDetailsRepository,
         IProductsOrdersDetailsQuantityChangesRepository productsOrdersDetailsQuantityChangesRepository,
         IDateTimeProvider dateTimeProvider,
-        IFileStorageProvider fileStorageProvider,
+        IFileStorageService fileStorageService,
         IVectorStoreProvider vectorStoreProvider,
         IPromptProvider promptProvider
     )
@@ -37,98 +40,68 @@ public class ProductsService : IProductsService
         _productsOrdersDetailsRepository = productsOrdersDetailsRepository;
         _productsOrdersDetailsQuantityChangesRepository = productsOrdersDetailsQuantityChangesRepository;
         _dateTimeProvider = dateTimeProvider;
-        _fileStorageProvider = fileStorageProvider;
+        _fileStorageService = fileStorageService;
         _vectorStoreProvider = vectorStoreProvider;
         _promptProvider = promptProvider;
     }
 
     // Tạo sản phẩm mới
-    public async Task<Result<ProductDto>> CreateProduct(
+    public async Task<Result<string>> CreateProduct(
         string productId,
         string productName,
         string category,
         string color,
-        string? pattern,
+        string pattern,
         string sizeType,
-        List<ProductQuantityDto> quantities,
-        string createdBy,
-        IFormFile? image,
-        string orderID
+        string createdBy
     )
     {
-        var newProductID = Guid.NewGuid();
-        string imageKey = "";
-        string imageUrl = "";
-        string vectorId = "";
-
-        if (image != null)
+        var newProduct = new Product
         {
-            var extension = Path.GetExtension(image.FileName);
-
-            await _fileStorageProvider.UploadImageAsync(
-                newProductID,
-                image.OpenReadStream(),
-                image.ContentType,
-                extension
-            );
-
-            imageKey = $"products/{newProductID}{extension}";
-
-            imageUrl = await _fileStorageProvider.GetImageUrlAsync(imageKey);
-
-            // vectorId = await _vectorStoreProvider.InsertImageAsync(imageUrl, new
-            // {
-            //     Id = newProductID.ToString(),
-            // });
-        }
-
-        var product = new Product
-        {
-            Id = newProductID,
+            Id = Guid.NewGuid(),
             ProductId = productId,
             ProductName = productName,
             Category = category,
             Color = color,
-            Pattern = pattern ?? string.Empty,
+            Pattern = pattern,
             SizeType = sizeType,
-            CreatedBy = Guid.Parse(createdBy),
             CreatedAt = _dateTimeProvider.UtcNow,
-            Status = ProductStatus.Pending,
-            ImageKey = imageKey,
-            VectorId = vectorId,
-            SalePrice = 0,
-            ImportPrice = 0
+            CreatedBy = Guid.Parse(createdBy),
+            Status = ProductStatus.Pending
         };
 
-        await _productsRepository.AddProduct(product);
+        await _productsRepository.AddProduct(newProduct);
 
-        var productQuantities = new List<ProductQuantity>();
+        return Result<string>.Success(newProduct.Id.ToString());
+    }
 
-        for (int i = 0; i < quantities.Count; i++)
+    public async Task<Result> UpdateProductImageKey(string productId, string imageKey)
+    {
+        var product = await _productsRepository.GetProductById(Guid.Parse(productId));
+
+        if (product == null)
+            return Result.Failure(new Error("ProductNotFound", "Product not found."));
+
+        product.ImageKey = imageKey;
+
+        await _productsRepository.UpdateProduct(product);
+
+        return Result.Success();
+    }
+
+    public async Task<Result<ProductDto>> FetchProductById(string id)
+    {
+        var product = await _productsRepository.GetProductById(Guid.Parse(id));
+
+        if (product == null)
+            return Result<ProductDto>.Failure(new Error("ProductNotFound", "Product not found."));
+
+        var imageUrl = "";
+        if (!string.IsNullOrEmpty(product.ImageKey))
         {
-            var quantity = quantities[i];
-
-            var productQuantity = new ProductQuantity
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product.Id,
-                Size = quantity.Size,
-                Quantities = quantity.Quantities
-            };
-
-            await _productQuantitiesRepository.AddProductQuantities(productQuantity);
-
-            productQuantities.Add(productQuantity);
+            var imageResult = await _fileStorageService.GetImageUrlAsync(product.ImageKey);
+            imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
         }
-
-        var newProductsOrdersDetail = new ProductsOrdersDetail
-        {
-            Id = Guid.NewGuid(),
-            ProductId = product.Id,
-            ProductsOrderId = Guid.Parse(orderID),
-        };
-
-        await _productsOrdersDetailsRepository.CreateProductsOrdersDetails(newProductsOrdersDetail);
 
         return Result<ProductDto>.Success(new ProductDto(
             product.Id,
@@ -138,7 +111,7 @@ public class ProductsService : IProductsService
             product.Color,
             product.Pattern,
             product.SizeType,
-            productQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+            product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
             product.CreatedBy,
             product.CreatedAt,
             product.Status,
@@ -167,6 +140,13 @@ public class ProductsService : IProductsService
         if (product == null)
             return Result<ProductDto>.Failure(new Error("ProductNotFound", "The similar product was not found."));
 
+        var imageUrl = "";
+        if (!string.IsNullOrEmpty(product.ImageKey))
+        {
+            var imageResult = await _fileStorageService.GetImageUrlAsync(product.ImageKey);
+            imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
+        }
+
         return Result<ProductDto>.Success(new ProductDto(
             product.Id,
             product.ProductId,
@@ -179,7 +159,7 @@ public class ProductsService : IProductsService
             product.CreatedBy,
             product.CreatedAt,
             product.Status,
-            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
+            imageUrl,
             product.VectorId,
             product.SalePrice,
             product.ImportPrice
@@ -215,24 +195,36 @@ public class ProductsService : IProductsService
 
         var productIdsInPendingOrders = await _productsOrdersRepository.GetProductIdsInPendingAndSendingOrders();
 
-        var productDtos = products.Select(product => new ProductWithOrderStatusDto(
-            product.Id,
-            product.ProductId,
-            product.ProductName,
-            product.Category,
-            product.Color,
-            product.Pattern,
-            product.SizeType,
-            product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
-            product.CreatedBy,
-            product.CreatedAt,
-            product.Status,
-            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
-            product.VectorId,
-            product.SalePrice,
-            product.ImportPrice,
-            productIdsInPendingOrders.Contains(product.Id)
-        )).ToList();
+        var productDtos = new List<ProductWithOrderStatusDto>();
+
+        foreach (var product in products)
+        {
+            var imageUrl = "";
+            if (!string.IsNullOrEmpty(product.ImageKey))
+            {
+                var imageResult = await _fileStorageService.GetImageUrlAsync(product.ImageKey);
+                imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
+            }
+
+            productDtos.Add(new ProductWithOrderStatusDto(
+                product.Id,
+                product.ProductId,
+                product.ProductName,
+                product.Category,
+                product.Color,
+                product.Pattern,
+                product.SizeType,
+                product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+                product.CreatedBy,
+                product.CreatedAt,
+                product.Status,
+                imageUrl,
+                product.VectorId,
+                product.SalePrice,
+                product.ImportPrice,
+                productIdsInPendingOrders.Contains(product.Id)
+            ));
+        }
 
         return Result<List<ProductWithOrderStatusDto>>.Success(productDtos);
     }
@@ -247,102 +239,37 @@ public class ProductsService : IProductsService
         return Result<string>.Success(newProductId);
     }
 
-    public async Task<Result<ProductDto>> OwnerCreateProduct(
+    public async Task<Result<string>> OwnerCreateProduct(
         string productId,
         string productName,
         string category,
         string color,
-        string? pattern,
+        string pattern,
         string sizeType,
-        List<ProductQuantityDto> quantities,
         string createdBy,
-        IFormFile? image,
         double salePrice,
         double importPrice
     )
     {
-        var newProductID = Guid.NewGuid();
-        string imageKey = "";
-        string imageUrl = "";
-        string vectorId = "";
-
-        if (image != null)
-        {
-            var extension = Path.GetExtension(image.FileName);
-
-            await _fileStorageProvider.UploadImageAsync(
-                newProductID,
-                image.OpenReadStream(),
-                image.ContentType,
-                extension
-            );
-
-            imageKey = $"products/{newProductID}{extension}";
-
-            imageUrl = await _fileStorageProvider.GetImageUrlAsync(imageKey);
-
-            // vectorId = await _vectorStoreProvider.InsertImageAsync(imageUrl, new
-            // {
-            //     Id = newProductID.ToString(),
-            // });
-        }
-
         var product = new Product
         {
-            Id = newProductID,
+            Id = Guid.NewGuid(),
             ProductId = productId,
             ProductName = productName,
             Category = category,
             Color = color,
-            Pattern = pattern ?? string.Empty,
+            Pattern = pattern,
             SizeType = sizeType,
             CreatedBy = Guid.Parse(createdBy),
             CreatedAt = _dateTimeProvider.UtcNow,
             Status = ProductStatus.Approved,
-            ImageKey = imageKey,
-            VectorId = vectorId,
             SalePrice = salePrice,
             ImportPrice = importPrice
         };
 
         await _productsRepository.AddProduct(product);
 
-        var productQuantities = new List<ProductQuantity>();
-
-        for (int i = 0; i < quantities.Count; i++)
-        {
-            var quantity = quantities[i];
-
-            var productQuantity = new ProductQuantity
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product.Id,
-                Size = quantity.Size,
-                Quantities = quantity.Quantities
-            };
-
-            await _productQuantitiesRepository.AddProductQuantities(productQuantity);
-
-            productQuantities.Add(productQuantity);
-        }
-
-        return Result<ProductDto>.Success(new ProductDto(
-            product.Id,
-            product.ProductId,
-            product.ProductName,
-            product.Category,
-            product.Color,
-            product.Pattern,
-            product.SizeType,
-            productQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
-            product.CreatedBy,
-            product.CreatedAt,
-            product.Status,
-            imageUrl,
-            product.VectorId,
-            salePrice,
-            importPrice
-        ));
+        return Result<string>.Success(product.Id.ToString());
     }
 
     public async Task<Result<ProductDto>> OwnerPatchProduct(
@@ -415,6 +342,13 @@ public class ProductsService : IProductsService
             }
         }
 
+        var imageUrl = "";
+        if (!string.IsNullOrEmpty(product.ImageKey))
+        {
+            var imageResult = await _fileStorageService.GetImageUrlAsync(product.ImageKey);
+            imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
+        }
+
         return Result<ProductDto>.Success(new ProductDto(
             product.Id,
             product.ProductId,
@@ -427,7 +361,7 @@ public class ProductsService : IProductsService
             product.CreatedBy,
             product.CreatedAt,
             product.Status,
-            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
+            imageUrl,
             product.VectorId,
             product.SalePrice,
             product.ImportPrice
@@ -438,23 +372,35 @@ public class ProductsService : IProductsService
     {
         var (products, total) = await _productsRepository.FetchAllProducts(currentPage, pageSize, category, search);
 
-        var productDtos = products.Select(product => new ProductDto(
-            product.Id,
-            product.ProductId,
-            product.ProductName,
-            product.Category,
-            product.Color,
-            product.Pattern,
-            product.SizeType,
-            product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
-            product.CreatedBy,
-            product.CreatedAt,
-            product.Status,
-            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
-            product.VectorId,
-            product.SalePrice,
-            product.ImportPrice
-        )).ToList();
+        var productDtos = new List<ProductDto>();
+
+        foreach (var product in products)
+        {
+            var imageUrl = "";
+            if (!string.IsNullOrEmpty(product.ImageKey))
+            {
+                var imageResult = await _fileStorageService.GetImageUrlAsync(product.ImageKey);
+                imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
+            }
+
+            productDtos.Add(new ProductDto(
+                product.Id,
+                product.ProductId,
+                product.ProductName,
+                product.Category,
+                product.Color,
+                product.Pattern,
+                product.SizeType,
+                product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+                product.CreatedBy,
+                product.CreatedAt,
+                product.Status,
+                imageUrl,
+                product.VectorId,
+                product.SalePrice,
+                product.ImportPrice
+            ));
+        }
 
         return Result<PaginatedResult<ProductDto>>.Success(
             new PaginatedResult<ProductDto>(productDtos, total));
@@ -575,6 +521,13 @@ public class ProductsService : IProductsService
             }
         }
 
+        var imageUrl = "";
+        if (!string.IsNullOrEmpty(product.ImageKey))
+        {
+            var imageResult = await _fileStorageService.GetImageUrlAsync(product.ImageKey);
+            imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
+        }
+
         var productDto = new ProductDto(
             product.Id,
             product.ProductId,
@@ -587,7 +540,7 @@ public class ProductsService : IProductsService
             product.CreatedBy,
             product.CreatedAt,
             product.Status,
-            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
+            imageUrl,
             product.VectorId,
             product.SalePrice,
             product.ImportPrice
@@ -705,6 +658,13 @@ public class ProductsService : IProductsService
             }
         }
 
+        var imageUrl = "";
+        if (!string.IsNullOrEmpty(product.ImageKey))
+        {
+            var imageResult = await _fileStorageService.GetImageUrlAsync(product.ImageKey);
+            imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
+        }
+
         var productDto = new ProductDto(
             product.Id,
             product.ProductId,
@@ -717,7 +677,7 @@ public class ProductsService : IProductsService
             product.CreatedBy,
             product.CreatedAt,
             product.Status,
-            string.IsNullOrEmpty(product.ImageKey) ? "" : _fileStorageProvider.GetImageUrlAsync(product.ImageKey).Result,
+            imageUrl,
             product.VectorId,
             product.SalePrice,
             product.ImportPrice
