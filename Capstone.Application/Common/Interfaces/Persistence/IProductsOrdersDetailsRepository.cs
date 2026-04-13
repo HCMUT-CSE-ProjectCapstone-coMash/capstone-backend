@@ -7,4 +7,5 @@ public interface IProductsOrdersDetailsRepository
     Task CreateProductsOrdersDetails(ProductsOrdersDetail productsOrdersDetail);
     Task<ProductsOrdersDetail?> GetProductsOrdersDetailsByOrderIdAndProductId(Guid orderId, Guid productId);
     Task DeleteProductsOrdersDetails(Guid productsOrdersDetailId);
+    Task<bool> ExistsByProductId(Guid productId);
 }

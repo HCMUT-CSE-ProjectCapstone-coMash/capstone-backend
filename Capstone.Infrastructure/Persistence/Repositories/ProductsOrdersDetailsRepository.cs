@@ -34,4 +34,9 @@ public class ProductsOrdersDetailsRepository : IProductsOrdersDetailsRepository
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task<bool> ExistsByProductId(Guid productId)
+    {
+        return await _context.ProductsOrdersDetails.AnyAsync(detail => detail.ProductId == productId);
+    }
 }

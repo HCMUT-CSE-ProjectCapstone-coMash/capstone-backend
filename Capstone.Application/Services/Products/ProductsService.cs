@@ -14,6 +14,7 @@ public class ProductsService : IProductsService
     private readonly IProductsOrdersRepository _productsOrdersRepository;
     private readonly IProductsOrdersDetailsRepository _productsOrdersDetailsRepository;
     private readonly IProductsOrdersDetailsQuantityChangesRepository _productsOrdersDetailsQuantityChangesRepository;
+    private readonly ISaleOrderDetailsRepository _saleOrderDetailsRepository;
 
     private readonly IFileStorageService _fileStorageService;
 
@@ -27,6 +28,7 @@ public class ProductsService : IProductsService
         IProductsOrdersRepository productsOrdersRepository,
         IProductsOrdersDetailsRepository productsOrdersDetailsRepository,
         IProductsOrdersDetailsQuantityChangesRepository productsOrdersDetailsQuantityChangesRepository,
+        ISaleOrderDetailsRepository saleOrderDetailsRepository,
         IDateTimeProvider dateTimeProvider,
         IFileStorageService fileStorageService,
         IVectorStoreProvider vectorStoreProvider,
@@ -38,6 +40,7 @@ public class ProductsService : IProductsService
         _productsOrdersRepository = productsOrdersRepository;
         _productsOrdersDetailsRepository = productsOrdersDetailsRepository;
         _productsOrdersDetailsQuantityChangesRepository = productsOrdersDetailsQuantityChangesRepository;
+        _saleOrderDetailsRepository = saleOrderDetailsRepository;
         _dateTimeProvider = dateTimeProvider;
         _fileStorageService = fileStorageService;
         _vectorStoreProvider = vectorStoreProvider;
@@ -691,6 +694,30 @@ public class ProductsService : IProductsService
         var quantityChanges = newQuantityChange.Select(c => new ProductQuantityChangeDto(c.Size, c.OldQuantity, c.NewQuantity)).ToList();
 
         return Result<ProductWithQuantityChangesDto>.Success(new ProductWithQuantityChangesDto(productDto, quantityChanges));
+    }
+
+    public async Task<Result<string>> DeleteProduct(string id)
+    {
+        var product = await _productsRepository.GetProductById(Guid.Parse(id));
+        if (product == null)
+        {
+            return Result<string>.Failure(new Error("NotFound", "Product not found."));
+        }
+
+        var isInSaleOrder = await _saleOrderDetailsRepository.ExistsByProductId(product.Id);
+        var isInProductsOrder = await _productsOrdersDetailsRepository.ExistsByProductId(product.Id);
+
+        if (isInSaleOrder || isInProductsOrder)
+        {
+            product.Status = ProductStatus.Deleted;
+            await _productsRepository.UpdateProduct(product);
+        }
+        else
+        {
+            await _productsRepository.DeleteProductAsync(product.Id);
+        }
+
+        return Result<string>.Success(product.ProductName);
     }
 
     private static string GetCategoryPrefix(string category) => category switch

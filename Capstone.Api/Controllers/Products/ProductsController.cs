@@ -437,4 +437,21 @@ public class ProductsController : ControllerBase
             result.Value.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
         ));
     }
+
+    [HttpDelete("owner-delete/{productId}")]
+    public async Task<IActionResult> OwnerDeleteProduct([FromRoute] string productId)
+    {
+        var result = await _productsSerivce.DeleteProduct(productId);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new { message = "Product deleted successfully", productName = result.Value });
+    }
 }

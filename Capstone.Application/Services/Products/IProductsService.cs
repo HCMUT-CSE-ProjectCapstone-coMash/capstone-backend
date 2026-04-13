@@ -73,4 +73,6 @@ public interface IProductsService
         string? sizeType,
         List<ProductQuantityDto>? newQuantities
     );
+
+    Task<Result<string>> DeleteProduct(string id);
 }
