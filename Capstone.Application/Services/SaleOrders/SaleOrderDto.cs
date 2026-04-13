@@ -5,6 +5,7 @@ namespace Capstone.Application.Services.SaleOrders;
 public class SaleOrderDto
 {
     public Guid Id { get; set; }
+    public string SaleOrderId { get; set; } = string.Empty;
     public Guid? CustomerId { get; set; }
     public string? CustomerName { get; set; }
     public Guid CreatedBy { get; set; }

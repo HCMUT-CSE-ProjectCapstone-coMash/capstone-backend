@@ -7,4 +7,5 @@ public interface ISaleOrdersRepository
     Task CreateSaleOrder(SaleOrder saleOrder);
     Task UpdateSaleOrder(SaleOrder saleOrder);
     Task<SaleOrder?> GetSaleOrderWithDetails(Guid saleOrderId);
+    Task<int> GetMaxIdNumber();
 }

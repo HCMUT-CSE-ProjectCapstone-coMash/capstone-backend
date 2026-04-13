@@ -3,6 +3,7 @@ namespace Capstone.Domain.Entities;
 public class SaleOrder
 {
     public Guid Id { get; set; }
+    public string SaleOrderId { get; set; } = string.Empty;
     public Guid? CustomerId { get; set; }
     public Guid CreatedBy { get; set; }
     public string PaymentMethod { get; set; } = string.Empty;

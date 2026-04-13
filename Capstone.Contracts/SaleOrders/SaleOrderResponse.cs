@@ -2,6 +2,7 @@ namespace Capstone.Contracts.SaleOrders;
 
 public record SaleOrderResponse(
     Guid Id,
+    string SaleOrderId,
     Guid? CustomerId,
     string? CustomerName,
     Guid CreatedBy,

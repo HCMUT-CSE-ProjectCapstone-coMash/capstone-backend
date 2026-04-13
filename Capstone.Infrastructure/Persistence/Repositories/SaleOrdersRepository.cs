@@ -24,7 +24,7 @@ public class SaleOrdersRepository : ISaleOrdersRepository
         _context.SaleOrders.Update(saleOrder);
         await _context.SaveChangesAsync();
     }
-    
+
     public async Task<SaleOrder?> GetSaleOrderWithDetails(Guid saleOrderId)
     {
         return await _context.SaleOrders
@@ -33,5 +33,18 @@ public class SaleOrdersRepository : ISaleOrdersRepository
             .Include(so => so.Customer)
             .Include(so => so.User)
             .FirstOrDefaultAsync(so => so.Id == saleOrderId);
+    }
+
+    public async Task<int> GetMaxIdNumber()
+    {
+        var lastId = await _context.SaleOrders
+            .OrderByDescending(so => so.CreatedAt)
+            .Select(so => so.SaleOrderId)
+            .FirstOrDefaultAsync();
+
+        if (lastId is null || !int.TryParse(lastId.Substring(3), out var number))
+            return 0;
+
+        return number;
     }
 }

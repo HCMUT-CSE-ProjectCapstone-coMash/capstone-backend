@@ -25,9 +25,13 @@ public class SaleOrdersService : ISaleOrdersService
         double DebitMoney
     )
     {
+        var maxNumber = await _saleOrdersRepository.GetMaxIdNumber();
+        var saleOrderId = $"HD-{maxNumber + 1}";
+
         var newSaleOrder = new SaleOrder
         {
             Id = Guid.NewGuid(),
+            SaleOrderId = saleOrderId,
             CustomerId = string.IsNullOrEmpty(CustomerId) ? null : Guid.Parse(CustomerId),
             CreatedBy = Guid.Parse(CreatedBy),
             PaymentMethod = PaymentMethod,
@@ -77,6 +81,7 @@ public class SaleOrdersService : ISaleOrdersService
         var dto = new SaleOrderDto
         {
             Id = saleOrder.Id,
+            SaleOrderId = saleOrder.SaleOrderId,
             CustomerId = saleOrder.CustomerId,
             CustomerName = saleOrder.Customer?.CustomerName,
             CreatedBy = saleOrder.CreatedBy,

@@ -58,6 +58,7 @@ public class SaleOrdersController : ControllerBase
 
         return Ok(new SaleOrderResponse(
             result.Value.Id,
+            result.Value.SaleOrderId,
             result.Value.CustomerId,
             result.Value.CustomerName,
             result.Value.CreatedBy,
