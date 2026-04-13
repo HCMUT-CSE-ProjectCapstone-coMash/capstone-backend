@@ -36,7 +36,6 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> CreateProduct([FromForm] CreateProductRequest request, [FromRoute] string orderId)
     {
         var productResult = await _productsSerivce.CreateProduct(
-            request.ProductId,
             request.ProductName,
             request.Category,
             request.Color,
@@ -212,7 +211,6 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> OwnerCreateProduct([FromForm] OwnerCreateProductRequest request)
     {
         var productResult = await _productsSerivce.OwnerCreateProduct(
-            request.ProductId,
             request.ProductName,
             request.Category,
             request.Color,

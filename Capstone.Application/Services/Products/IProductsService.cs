@@ -6,7 +6,6 @@ namespace Capstone.Application.Services.Products;
 public interface IProductsService
 {
     Task<Result<string>> CreateProduct(
-        string productId,
         string ProductName,
         string category,
         string color,
@@ -28,7 +27,6 @@ public interface IProductsService
     Task<Result<string>> CreateProductIdByCategory(string category);
 
     Task<Result<string>> OwnerCreateProduct(
-        string productId,
         string productName,
         string category,
         string color,

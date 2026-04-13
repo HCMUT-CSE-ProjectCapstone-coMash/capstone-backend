@@ -4,7 +4,6 @@ using Capstone.Application.Common.Interfaces.Services;
 using Capstone.Application.Services.FileStorageService;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
-using Microsoft.AspNetCore.Http;
 
 namespace Capstone.Application.Services.Products;
 
@@ -47,7 +46,6 @@ public class ProductsService : IProductsService
 
     // Tạo sản phẩm mới
     public async Task<Result<string>> CreateProduct(
-        string productId,
         string productName,
         string category,
         string color,
@@ -56,6 +54,10 @@ public class ProductsService : IProductsService
         string createdBy
     )
     {
+        var prefix = GetCategoryPrefix(category);
+        var maxNumber = await _productsRepository.GetMaxIdNumberByCategoryAsync(prefix);
+        var productId = $"{prefix}-{maxNumber + 1}";
+
         var newProduct = new Product
         {
             Id = Guid.NewGuid(),
@@ -240,7 +242,6 @@ public class ProductsService : IProductsService
     }
 
     public async Task<Result<string>> OwnerCreateProduct(
-        string productId,
         string productName,
         string category,
         string color,
@@ -251,6 +252,10 @@ public class ProductsService : IProductsService
         double importPrice
     )
     {
+        var prefix = GetCategoryPrefix(category);
+        var maxNumber = await _productsRepository.GetMaxIdNumberByCategoryAsync(prefix);
+        var productId = $"{prefix}-{maxNumber + 1}";
+        
         var product = new Product
         {
             Id = Guid.NewGuid(),
