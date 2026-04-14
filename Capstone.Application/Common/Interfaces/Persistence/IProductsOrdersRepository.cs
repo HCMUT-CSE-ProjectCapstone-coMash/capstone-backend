@@ -11,4 +11,5 @@ public interface IProductsOrdersRepository
     Task PatchProductsOrders(ProductsOrder productsOrder);
     Task DeleteProductsOrder(ProductsOrder productsOrder);
     Task<List<Guid>> GetProductIdsInPendingAndSendingOrders();
+    Task<bool> ExistsByEmployeeId(Guid employeeId);
 }

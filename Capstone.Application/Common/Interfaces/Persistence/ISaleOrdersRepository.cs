@@ -8,4 +8,5 @@ public interface ISaleOrdersRepository
     Task UpdateSaleOrder(SaleOrder saleOrder);
     Task<SaleOrder?> GetSaleOrderWithDetails(Guid saleOrderId);
     Task<int> GetMaxIdNumber();
+    Task<bool> ExistsByEmployeeId(Guid employeeId);
 }

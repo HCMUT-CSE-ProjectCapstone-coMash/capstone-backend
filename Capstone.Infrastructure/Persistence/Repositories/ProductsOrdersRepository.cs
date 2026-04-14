@@ -90,4 +90,14 @@ public class ProductsOrdersRepository : IProductsOrdersRepository
             .Distinct()
             .ToListAsync();
     }
+
+    public async Task<bool> ExistsByEmployeeId(Guid employeeId)
+    {
+        return await _context.ProductsOrders
+            .Join(_context.Users,
+                productsOrder => productsOrder.CreatedBy,
+                user => user.Id,
+                (productsOrder, user) => user)
+            .AnyAsync(user => user.Id == employeeId && user.Role == Roles.Employee);
+    }
 }

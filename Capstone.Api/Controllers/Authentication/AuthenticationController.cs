@@ -181,10 +181,60 @@ public class AuthenticationController : ControllerBase
         return Ok(result.Value);
     }
 
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchEmployees([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
+    {
+        var result = await _auth.SearchEmployees(page, pageSize, search);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
+    }
+
     [HttpGet("get-employee-by-id/{userId}")]
     public async Task<IActionResult> GetEmployeeById([FromRoute] string userId)
     {
         var result = await _auth.GetUserById(userId);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new GetEmployeeByIdResponse(
+            result.Value.EmployeeId,
+            result.Value.FullName,
+            result.Value.Email,
+            result.Value.Role,
+            result.Value.PhoneNumber,
+            result.Value.Gender,
+            result.Value.DateOfBirth,
+            result.Value.ImageURL
+        ));
+    }
+
+    [HttpPatch("edit-employee/{id}")]
+    public async Task<IActionResult> EditEmployee([FromRoute] string id, [FromForm] EditEmployeeRequest request)
+    {
+        var result = await _auth.EditEmployee(
+            id,
+            request.FullName,
+            request.Gender,
+            request.DateOfBirth,
+            request.PhoneNumber,
+            request.Email
+        );
 
         if (result.IsFailure)
         {

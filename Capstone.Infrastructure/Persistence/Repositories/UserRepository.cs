@@ -51,11 +51,40 @@ public class UsersRepository : IUsersRepository
             .ToListAsync();
     }
 
+    public async Task<(List<User> Items, int Total)> SearchEmployees(int page, int pageSize, string? search = null)
+    {
+        var query = _context.Users
+            .Where(u => u.Role == "employee" && u.Status == "Active")
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var searchPattern = $"%{search}%";
+            query = query.Where(u =>
+                EF.Functions.ILike(
+                    EF.Functions.Unaccent(u.FullName),
+                    EF.Functions.Unaccent(searchPattern))
+                || EF.Functions.ILike(u.EmployeeId ?? string.Empty, searchPattern)
+                || EF.Functions.ILike(u.Email, searchPattern)
+            );
+        }
+
+        var total = await query.CountAsync();
+
+        var items = await query
+            .OrderByDescending(u => u.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, total);
+    }
+
     public async Task<int> GetMaxEmployeeNumberAsync(string prefix)
     {
         var numberStrings = await _context.Users
-            .Where(u => u.EmployeeId.StartsWith(prefix + "-"))
-            .Select(u => u.EmployeeId.Substring(prefix.Length + 1))
+            .Where(u => u.EmployeeId != null && u.EmployeeId.StartsWith(prefix + "-"))
+            .Select(u => u.EmployeeId!.Substring(prefix.Length + 1))
             .ToListAsync();
 
         if (!numberStrings.Any()) return 0;

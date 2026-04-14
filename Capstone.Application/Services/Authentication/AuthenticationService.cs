@@ -16,8 +16,8 @@ public class AuthenticationService : IAuthenticationService
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
     private readonly IFileStorageService _fileStorageService;
-    private readonly ISaleOrderDetailsRepository _saleOrderDetailsRepository;
-    private readonly IProductsOrdersDetailsRepository _productsOrdersDetailsRepository;
+    private readonly ISaleOrdersRepository _saleOrderRepository;
+    private readonly IProductsOrdersRepository _productsOrdersRepository;
 
     public AuthenticationService(
         IUsersRepository userRepository, 
@@ -25,16 +25,16 @@ public class AuthenticationService : IAuthenticationService
         IDateTimeProvider dateTimeProvider, 
         IJwtTokenGenerator jwtTokenGenerator, 
         IFileStorageService fileStorageService,
-        ISaleOrderDetailsRepository saleOrderDetailsRepository,
-        IProductsOrdersDetailsRepository productsOrdersDetailsRepository)
+        ISaleOrdersRepository saleOrdersRepository,
+        IProductsOrdersRepository productsOrdersRepository)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _dateTimeProvider = dateTimeProvider;
         _jwtTokenGenerator = jwtTokenGenerator;
         _fileStorageService = fileStorageService;
-        _saleOrderDetailsRepository = saleOrderDetailsRepository;
-        _productsOrdersDetailsRepository = productsOrdersDetailsRepository;
+        _saleOrderRepository = saleOrdersRepository;
+        _productsOrdersRepository = productsOrdersRepository;
 
     }
 
@@ -173,6 +173,88 @@ public class AuthenticationService : IAuthenticationService
 
         return Result<List<UserDto>>.Success(result);
     }
+
+    public async Task<Result<PaginatedResult<UserDto>>> SearchEmployees(int currentPage, int pageSize, string? search = null)
+    {
+        if (currentPage <= 0) currentPage = 1;
+        if (pageSize <= 0) pageSize = 10;
+
+        var (users, total) = await _userRepository.SearchEmployees(currentPage, pageSize, search);
+
+        var items = users.Select(u => new UserDto(
+            u.EmployeeId ?? string.Empty,
+            u.FullName,
+            u.Email,
+            u.Role,
+            u.PhoneNumber,
+            u.Gender,
+            u.DateOfBirth
+        )).ToList();
+
+        return Result<PaginatedResult<UserDto>>.Success(new PaginatedResult<UserDto>(items, total));
+    }
+    public async Task<Result<EmployeeDto>> EditEmployee(
+        string id,
+        string? fullName,
+        string? gender,
+        string? dateOfBirth,
+        string? phoneNumber,
+        string? email
+    )
+    {
+        var user = await _userRepository.GetUserById(Guid.Parse(id));
+
+        if (user is null)
+        {
+            return Result<EmployeeDto>.Failure(new Error("NotFound", "User not found."));
+        }
+
+        if (user.Status != UserStatus.Active)
+        {
+            return Result<EmployeeDto>.Failure(new Error(AuthErrors.UserDeleted.Code, AuthErrors.UserDeleted.Description));
+        }
+
+        if (!string.IsNullOrWhiteSpace(email))
+        {
+            user.Email = email;
+        }
+
+        if (!string.IsNullOrWhiteSpace(fullName))
+            user.FullName = fullName;
+
+        if (!string.IsNullOrWhiteSpace(phoneNumber))
+            user.PhoneNumber = phoneNumber;
+
+        if (!string.IsNullOrWhiteSpace(gender))
+            user.Gender = gender;
+
+        if (!string.IsNullOrWhiteSpace(dateOfBirth))
+            user.DateOfBirth = dateOfBirth;
+
+        await _userRepository.UpdateUser(user);
+
+        var imageUrl = string.Empty;
+        if (!string.IsNullOrEmpty(user.ImageKey))
+        {
+            var imageResult = await _fileStorageService.GetImageUrlAsync(user.ImageKey);
+            imageUrl = imageResult.IsSuccess ? imageResult.Value : string.Empty;
+        }
+
+        return Result<EmployeeDto>.Success(new EmployeeDto(
+            user.Id,
+            user.EmployeeId ?? string.Empty,
+            user.FullName,
+            user.Email,
+            user.Role,
+            user.CreatedAt,
+            user.PhoneNumber,
+            user.Gender,
+            user.DateOfBirth,
+            imageUrl
+        ));
+    }
+
+
     public async Task<Result<string>> DeleteEmployee(string id)
     {
         var user = await _userRepository.GetUserById(Guid.Parse(id));
@@ -180,9 +262,13 @@ public class AuthenticationService : IAuthenticationService
         {
             return Result<string>.Failure(new Error("NotFound", "User not found."));
         }
+        else if (user.Role == Roles.ShopOwner)
+        {
+            return Result<string>.Failure(new Error("InvalidOperation", "Cannot delete a shop owner."));
+        }
 
-        var isInSaleOrder = await _saleOrderDetailsRepository.ExistsByProductId(user.Id);
-        var isInProductsOrder = await _productsOrdersDetailsRepository.ExistsByProductId(user.Id);
+        var isInSaleOrder = await _saleOrderRepository.ExistsByEmployeeId(user.Id);
+        var isInProductsOrder = await _productsOrdersRepository.ExistsByEmployeeId(user.Id);
         Console.WriteLine($"isInSaleOrder: {isInSaleOrder}, isInProductsOrder: {isInProductsOrder}");
 
         if (isInSaleOrder || isInProductsOrder)

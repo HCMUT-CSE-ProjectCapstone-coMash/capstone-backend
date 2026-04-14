@@ -6,5 +6,5 @@ public interface ISaleOrderDetailsRepository
 {
     Task CreateSaleOrderDetail(SaleOrderDetail saleOrderDetail);
     Task<bool> ExistsByProductId(Guid productId);
-    Task<bool> ExistsByEmployeeId(Guid employeeId);
+    
 }
