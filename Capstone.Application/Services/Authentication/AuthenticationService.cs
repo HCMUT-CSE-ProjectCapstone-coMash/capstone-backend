@@ -2,6 +2,7 @@ using Capstone.Application.Common;
 using Capstone.Application.Common.Interfaces.Authentication;
 using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Application.Common.Interfaces.Services;
+using Capstone.Application.Services.FileStorageService;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
 using Microsoft.AspNetCore.Http;
@@ -14,58 +15,42 @@ public class AuthenticationService : IAuthenticationService
     private readonly IPasswordHasher _passwordHasher;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
-    private readonly IFileStorageProvider _fileStorageProvider;
+    private readonly IFileStorageService _fileStorageService;
 
     public AuthenticationService(
         IUsersRepository userRepository, 
         IPasswordHasher passwordHasher, 
         IDateTimeProvider dateTimeProvider, 
         IJwtTokenGenerator jwtTokenGenerator, 
-        IFileStorageProvider fileStorageProvider)
+        IFileStorageService fileStorageService)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _dateTimeProvider = dateTimeProvider;
         _jwtTokenGenerator = jwtTokenGenerator;
-        _fileStorageProvider = fileStorageProvider;
+        _fileStorageService = fileStorageService;
     }
 
-    public async Task<Result<RegisterDto>> Register(
+    public async Task<Result<string>> Register(
         string employeeId,
         string fullName, 
         string email, 
         string phoneNumber, 
         string gender, 
-        string dateOfBirth,
-        IFormFile? image)
+        string dateOfBirth)
     {
         var existing = await _userRepository.GetUserByEmail(email);
 
         if (existing != null)
         {
-            return Result<RegisterDto>.Failure(new Error(AuthErrors.UserAlreadyExists.Code, AuthErrors.UserAlreadyExists.Description));
+            return Result<string>.Failure(new Error(AuthErrors.UserAlreadyExists.Code, AuthErrors.UserAlreadyExists.Description));
         }
+
         var password = "123456";
-        var newUserID = Guid.NewGuid();
-        string imageKey = "";
-        string imageUrl = "";
-        if (image != null)
-        {
-            var extension = Path.GetExtension(image.FileName);
 
-            await _fileStorageProvider.UploadUserImageAsync(
-                newUserID,
-                image.OpenReadStream(),
-                image.ContentType,
-                extension
-            );
-
-            imageKey = $"users/{newUserID}{extension}";
-            imageUrl = await _fileStorageProvider.GetImageUrlAsync(imageKey);
-        }
         var user = new User
         {
-            Id = newUserID,
+            Id =  Guid.NewGuid(),
             EmployeeId = employeeId,
             FullName = fullName,
             Email = email,
@@ -76,24 +61,11 @@ public class AuthenticationService : IAuthenticationService
             PhoneNumber = phoneNumber,
             Gender = gender,
             DateOfBirth = dateOfBirth,
-            ImageKey = imageKey
         }; 
 
         await _userRepository.AddUser(user);
 
-        return Result<RegisterDto>.Success(new RegisterDto(
-            user.Id,
-            user.EmployeeId,
-            user.FullName,
-            user.Email,
-            user.Role,
-            user.CreatedAt,
-            _jwtTokenGenerator.GenerateToken(user.Id, user.FullName, user.Role),
-            user.PhoneNumber,
-            user.Gender,
-            user.DateOfBirth,
-            imageUrl
-        ));
+        return Result<string>.Success(user.Id.ToString());
     }
 
     public async Task<Result<string>> CreateEmployeeId()

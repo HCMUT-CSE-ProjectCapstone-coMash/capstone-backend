@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Capstone.Application.Services.Authentication;
+using Capstone.Application.Services.FileStorageService;
 using Capstone.Contracts.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,27 +13,46 @@ namespace Capstone.Api.Controllers.Authentication;
 public class AuthenticationController : ControllerBase
 {
     private readonly IAuthenticationService _auth;
+    private readonly IFileStorageService _fileStorageService;
 
-    public AuthenticationController(IAuthenticationService auth)
+    public AuthenticationController(IAuthenticationService auth, IFileStorageService fileStorageService)
     {
         _auth = auth;
+        _fileStorageService = fileStorageService;
     }
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromForm] RegisterRequest request)
     {
-        var result = await _auth.Register(request.EmployeeId, request.FullName, request.Email,  request.PhoneNumber, request.Gender, request.DateOfBirth, request.Image);
+        var userResult = await _auth.Register(request.EmployeeId, request.FullName, request.Email,  request.PhoneNumber, request.Gender, request.DateOfBirth);
 
-        if (result.IsFailure)
+        if (request.Image != null)
+        {
+            var extension = Path.GetExtension(request.Image.FileName);
+
+            var ImageResult = await _fileStorageService.UploadImageAsync(
+                "users",
+                userResult.Value,
+                request.Image.OpenReadStream(),
+                request.Image.ContentType,
+                extension
+            );
+
+            // Gọi hàm update user
+        }
+
+        var user = await _auth.GetUserById(userResult.Value);
+
+        if (user.IsFailure)
         {
             return BadRequest(new
             {
-                error = result.Error.Code,
-                message = result.Error.Description
+                error = user.Error.Code,
+                message = user.Error.Description
             });
         }
-
-        Response.Cookies.Append("accessToken", result.Value.Token, new CookieOptions
+        
+        Response.Cookies.Append("accessToken", user.Value.Id.ToString(), new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
