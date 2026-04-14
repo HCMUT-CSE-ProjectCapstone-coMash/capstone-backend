@@ -12,4 +12,6 @@ public class User
     public string Gender { get; set; } = string.Empty;
     public string DateOfBirth { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
+    public string? ImageKey { get; set; } = string.Empty;
+    public string? EmployeeId { get; set; } = string.Empty;
 }

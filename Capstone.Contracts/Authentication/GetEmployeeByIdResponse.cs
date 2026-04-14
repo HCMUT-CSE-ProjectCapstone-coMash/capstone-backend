@@ -1,12 +1,12 @@
-using Microsoft.AspNetCore.Http;
 namespace Capstone.Contracts.Authentication;
 
-public record RegisterRequest (
+public record GetEmployeeByIdResponse(
     string EmployeeId,
     string FullName,
     string Email,
+    string Role,
     string PhoneNumber,
     string Gender,
     string DateOfBirth,
-    IFormFile? Image
+    string ImageURL
 );

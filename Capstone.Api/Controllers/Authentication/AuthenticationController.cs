@@ -19,9 +19,9 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterRequest request)
+    public async Task<IActionResult> Register([FromForm] RegisterRequest request)
     {
-        var result = await _auth.Register(request.FullName, request.Email, request.Password);
+        var result = await _auth.Register(request.EmployeeId, request.FullName, request.Email,  request.PhoneNumber, request.Gender, request.DateOfBirth, request.Image);
 
         if (result.IsFailure)
         {
@@ -47,6 +47,23 @@ public class AuthenticationController : ControllerBase
             result.Value.Role,
             result.Value.CreatedAt
         ));
+    }
+
+    [HttpGet("create-employee-id")]
+    public async Task<IActionResult> CreateEmployeeId()
+    {
+        var result = await _auth.CreateEmployeeId();
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new CreateEmployeeIdResponse(result.Value));
     }
 
     [HttpPost("login")]
@@ -112,9 +129,8 @@ public class AuthenticationController : ControllerBase
         return Ok();
     }
 
-    // [Authorize(Roles = "owner")]
     [HttpGet("employees")]
-    public async Task<IActionResult> GetEmployees()
+    public async Task<IActionResult> GetAllEmployees()
     {
         var result = await _auth.GetAllEmployees();
 
@@ -128,5 +144,31 @@ public class AuthenticationController : ControllerBase
         }
 
         return Ok(result.Value);
+    }
+
+    [HttpGet("get-employee-by-id/{userId}")]
+    public async Task<IActionResult> GetEmployeeById([FromRoute] string userId)
+    {
+        var result = await _auth.GetUserById(userId);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new GetEmployeeByIdResponse(
+            result.Value.EmployeeId,
+            result.Value.FullName,
+            result.Value.Email,
+            result.Value.Role,
+            result.Value.PhoneNumber,
+            result.Value.Gender,
+            result.Value.DateOfBirth,
+            result.Value.ImageURL
+        ));
     }
 }

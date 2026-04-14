@@ -35,4 +35,17 @@ public class UsersRepository : IUsersRepository
             .Where(u => u.Role == "employee" && u.Status == "Active")
             .ToListAsync();
     }
+
+    public async Task<int> GetMaxEmployeeNumberAsync(string prefix)
+    {
+        var numberStrings = await _context.Users
+            .Where(u => u.EmployeeId.StartsWith(prefix + "-"))
+            .Select(u => u.EmployeeId.Substring(prefix.Length + 1))
+            .ToListAsync();
+
+        if (!numberStrings.Any()) return 0;
+
+        return numberStrings
+            .Max(n => int.TryParse(n, out var num) ? num : 0);
+    }
 }

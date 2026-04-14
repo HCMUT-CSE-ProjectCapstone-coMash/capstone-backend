@@ -32,6 +32,23 @@ public class FileStorageProvider : IFileStorageProvider
         await transferUtility.UploadAsync(uploadRequest);
     }
 
+    public async Task UploadUserImageAsync(Guid userId, Stream fileStream, string contentType, string extension)
+    {
+        var key = $"users/{userId}{extension}";
+
+        var uploadRequest = new TransferUtilityUploadRequest
+        {
+            InputStream = fileStream,
+            Key = key,
+            BucketName = _bucketSettings.BucketName,
+            ContentType = contentType
+        };
+
+        var transferUtility = new TransferUtility(_s3Client);
+
+        await transferUtility.UploadAsync(uploadRequest);
+    }
+
     public Task<string> GetImageUrlAsync(string imageKey, int expirationInMinutes = 60)
     {
         var request = new Amazon.S3.Model.GetPreSignedUrlRequest {

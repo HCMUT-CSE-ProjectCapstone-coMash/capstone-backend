@@ -9,8 +9,34 @@ public record AuthResult(
     string Token
 );
 
-public record UserResponse(
+public record RegisterDto(
     Guid Id,
+    string EmployeeId,
+    string FullName,
+    string Email,
+    string Role,
+    DateTime CreatedAt,
+    string Token,
+    string PhoneNumber,
+    string Gender,
+    string DateOfBirth,
+    string ImageURL
+);
+
+public record EmployeeDto(
+    Guid Id,
+    string EmployeeId,
+    string FullName,
+    string Email,
+    string Role,
+    DateTime CreatedAt,
+    string PhoneNumber,
+    string Gender,
+    string DateOfBirth,
+    string ImageURL
+);
+public record UserDto(
+    string Id,
     string FullName,
     string Email,
     string Role,

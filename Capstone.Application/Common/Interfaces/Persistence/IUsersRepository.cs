@@ -8,4 +8,5 @@ public interface IUsersRepository
     Task AddUser(User user);
     Task<User?> GetUserById(Guid userId);
     Task<List<User>> GetEmployees();
+    Task<int> GetMaxEmployeeNumberAsync(string prefix);
 }
