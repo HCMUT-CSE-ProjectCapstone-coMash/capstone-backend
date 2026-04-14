@@ -24,7 +24,22 @@ public class AuthenticationController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromForm] RegisterRequest request)
     {
-        var userResult = await _auth.Register(request.EmployeeId, request.FullName, request.Email,  request.PhoneNumber, request.Gender, request.DateOfBirth);
+        var userResult = await _auth.Register(
+            request.EmployeeId, 
+            request.FullName, 
+            request.Email,  
+            request.PhoneNumber, 
+            request.Gender, 
+            request.DateOfBirth);
+
+        if (userResult.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = userResult.Error.Code,
+                message = userResult.Error.Description
+            });
+        }
 
         if (request.Image != null)
         {
@@ -38,7 +53,7 @@ public class AuthenticationController : ControllerBase
                 extension
             );
 
-            // Gọi hàm update user
+            await _auth.UpdateUserImageKey(userResult.Value, ImageResult.Value);
         }
 
         var user = await _auth.GetUserById(userResult.Value);
@@ -61,11 +76,11 @@ public class AuthenticationController : ControllerBase
         });
 
         return Ok(new AuthenticationResponse(
-            result.Value.Id,
-            result.Value.FullName,
-            result.Value.Email,
-            result.Value.Role,
-            result.Value.CreatedAt
+            user.Value.Id,
+            user.Value.FullName,
+            user.Value.Email,
+            user.Value.Role,
+            user.Value.CreatedAt
         ));
     }
 
@@ -190,5 +205,21 @@ public class AuthenticationController : ControllerBase
             result.Value.DateOfBirth,
             result.Value.ImageURL
         ));
+    }
+    [HttpDelete("delete/{employeeId}")]
+    public async Task<IActionResult> DeleteEmployee([FromRoute] string employeeId)
+    {
+        var result = await _auth.DeleteEmployee(employeeId);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new { message = "Employee deleted successfully", employeeName = result.Value });
     }
 }

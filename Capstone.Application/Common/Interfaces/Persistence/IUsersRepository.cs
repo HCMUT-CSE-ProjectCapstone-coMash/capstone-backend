@@ -6,6 +6,8 @@ public interface IUsersRepository
 {
     Task<User?> GetUserByEmail(string email);
     Task AddUser(User user);
+    Task UpdateUser(User user);
+    Task DeleteUserAsync(Guid userId);
     Task<User?> GetUserById(Guid userId);
     Task<List<User>> GetEmployees();
     Task<int> GetMaxEmployeeNumberAsync(string prefix);

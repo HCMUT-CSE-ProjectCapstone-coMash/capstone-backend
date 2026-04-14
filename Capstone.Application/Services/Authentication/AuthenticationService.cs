@@ -16,19 +16,26 @@ public class AuthenticationService : IAuthenticationService
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
     private readonly IFileStorageService _fileStorageService;
+    private readonly ISaleOrderDetailsRepository _saleOrderDetailsRepository;
+    private readonly IProductsOrdersDetailsRepository _productsOrdersDetailsRepository;
 
     public AuthenticationService(
         IUsersRepository userRepository, 
         IPasswordHasher passwordHasher, 
         IDateTimeProvider dateTimeProvider, 
         IJwtTokenGenerator jwtTokenGenerator, 
-        IFileStorageService fileStorageService)
+        IFileStorageService fileStorageService,
+        ISaleOrderDetailsRepository saleOrderDetailsRepository,
+        IProductsOrdersDetailsRepository productsOrdersDetailsRepository)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _dateTimeProvider = dateTimeProvider;
         _jwtTokenGenerator = jwtTokenGenerator;
         _fileStorageService = fileStorageService;
+        _saleOrderDetailsRepository = saleOrderDetailsRepository;
+        _productsOrdersDetailsRepository = productsOrdersDetailsRepository;
+
     }
 
     public async Task<Result<string>> Register(
@@ -68,6 +75,20 @@ public class AuthenticationService : IAuthenticationService
         return Result<string>.Success(user.Id.ToString());
     }
 
+    public async Task<Result> UpdateUserImageKey(string userId, string imageKey)
+    {
+        var user = await _userRepository.GetUserById(Guid.Parse(userId));
+
+        if (user == null)
+            return Result.Failure(new Error("UserNotFound", "User not found."));
+
+        user.ImageKey = imageKey;
+
+        await _userRepository.UpdateUser(user);
+
+        return Result.Success();
+    }
+    
     public async Task<Result<string>> CreateEmployeeId()
     {
         const string prefix = "NV";
@@ -102,9 +123,9 @@ public class AuthenticationService : IAuthenticationService
         ));
     }
 
-    public async Task<Result<EmployeeDto>> GetUserById(string userId)
+    public async Task<Result<EmployeeDto>> GetUserById(string id)
     {
-        var user = await _userRepository.GetUserById(Guid.Parse(userId));
+        var user = await _userRepository.GetUserById(Guid.Parse(id));
 
         if (user is null)
         {
@@ -114,6 +135,13 @@ public class AuthenticationService : IAuthenticationService
         if (user.Status != UserStatus.Active)
         {
             return Result<EmployeeDto>.Failure(new Error(AuthErrors.UserDeleted.Code, AuthErrors.UserDeleted.Description));
+        }
+
+        var imageUrl = "";
+        if (!string.IsNullOrEmpty(user.ImageKey))
+        {
+            var imageResult = await _fileStorageService.GetImageUrlAsync(user.ImageKey);
+            imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
         }
 
         return Result<EmployeeDto>.Success(new EmployeeDto(
@@ -126,9 +154,7 @@ public class AuthenticationService : IAuthenticationService
             user.PhoneNumber,
             user.Gender,
             user.DateOfBirth,
-            !string.IsNullOrWhiteSpace(user.ImageKey)
-                ? await _fileStorageProvider.GetImageUrlAsync(user.ImageKey)
-                : string.Empty
+            imageUrl
         ));
     }
     public async Task<Result<List<UserDto>>> GetAllEmployees()
@@ -146,5 +172,29 @@ public class AuthenticationService : IAuthenticationService
         )).ToList();
 
         return Result<List<UserDto>>.Success(result);
+    }
+    public async Task<Result<string>> DeleteEmployee(string id)
+    {
+        var user = await _userRepository.GetUserById(Guid.Parse(id));
+        if (user == null)
+        {
+            return Result<string>.Failure(new Error("NotFound", "User not found."));
+        }
+
+        var isInSaleOrder = await _saleOrderDetailsRepository.ExistsByProductId(user.Id);
+        var isInProductsOrder = await _productsOrdersDetailsRepository.ExistsByProductId(user.Id);
+        Console.WriteLine($"isInSaleOrder: {isInSaleOrder}, isInProductsOrder: {isInProductsOrder}");
+
+        if (isInSaleOrder || isInProductsOrder)
+        {
+            user.Status = UserStatus.Deleted;
+            await _userRepository.UpdateUser(user);
+        }
+        else
+        {
+            await _userRepository.DeleteUserAsync(user.Id);
+        }
+
+        return Result<string>.Success(user.FullName);
     }
 }

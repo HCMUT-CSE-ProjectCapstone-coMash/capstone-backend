@@ -1,4 +1,5 @@
 using Capstone.Application.Common.Interfaces.Persistence;
+using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,5 +23,19 @@ public class SaleOrderDetailsRepository : ISaleOrderDetailsRepository
     public async Task<bool> ExistsByProductId(Guid productId)
     {
         return await _context.SaleOrderDetails.AnyAsync(sod => sod.ProductId == productId);
+    }
+
+    public async Task<bool> ExistsByEmployeeId(Guid employeeId)
+    {
+        return await _context.SaleOrderDetails
+            .Join(_context.SaleOrders,
+                detail => detail.SaleOrderId,
+                order => order.Id,
+                (detail, order) => order.CreatedBy)
+            .Join(_context.Users,
+                createdBy => createdBy,
+                user => user.Id,
+                (createdBy, user) => user)
+            .AnyAsync(user => user.Id == employeeId && user.Role == Roles.Employee);
     }
 }
