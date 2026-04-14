@@ -2,6 +2,7 @@ using Capstone.Application.Common;
 using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Application.Common.Interfaces.Services;
 using Capstone.Application.Services.SaleOrderDetails;
+using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
 
 namespace Capstone.Application.Services.SaleOrders;
@@ -28,6 +29,10 @@ public class SaleOrdersService : ISaleOrdersService
         var maxNumber = await _saleOrdersRepository.GetMaxIdNumber();
         var saleOrderId = $"HD-{maxNumber + 1}";
 
+        var newDebitMoney= PaymentMethodStatus.Debit == PaymentMethod
+            ? DebitMoney
+            : 0;
+
         var newSaleOrder = new SaleOrder
         {
             Id = Guid.NewGuid(),
@@ -35,7 +40,7 @@ public class SaleOrdersService : ISaleOrdersService
             CustomerId = string.IsNullOrEmpty(CustomerId) ? null : Guid.Parse(CustomerId),
             CreatedBy = Guid.Parse(CreatedBy),
             PaymentMethod = PaymentMethod,
-            DebitMoney = DebitMoney,
+            DebitMoney = newDebitMoney,
             CreatedAt = _dateTimeProvider.UtcNow
         };
 
