@@ -16,11 +16,12 @@ public class FileStorageProvider : IFileStorageProvider
         _bucketSettings = bucketSettings.Value;
     }
 
-    public async Task UploadImageAsync(Guid productID, Stream fileStream, string contentType, string extension)
+    public async Task<string> UploadImageAsync(string folder, string id, Stream fileStream, string contentType, string extension)
     {
-        var key = $"products/{productID}{extension}";
+        var key = $"{folder}/{id}{extension}";
 
-        var uploadRequest = new TransferUtilityUploadRequest {
+        var uploadRequest = new TransferUtilityUploadRequest
+        {
             InputStream = fileStream,
             Key = key,
             BucketName = _bucketSettings.BucketName,
@@ -28,8 +29,9 @@ public class FileStorageProvider : IFileStorageProvider
         };
 
         var transferUtility = new TransferUtility(_s3Client);
-
         await transferUtility.UploadAsync(uploadRequest);
+
+        return key;
     }
 
     public async Task UploadUserImageAsync(Guid userId, Stream fileStream, string contentType, string extension)

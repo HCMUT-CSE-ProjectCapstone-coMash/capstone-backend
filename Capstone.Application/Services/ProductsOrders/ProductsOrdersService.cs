@@ -1,6 +1,7 @@
 using Capstone.Application.Common;
 using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Application.Common.Interfaces.Services;
+using Capstone.Application.Services.FileStorageService;
 using Capstone.Application.Services.Products;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
@@ -10,33 +11,30 @@ namespace Capstone.Application.Services.ProductsOrders;
 public class ProductsOrdersService : IProductsOrdersService
 {
     private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly IFileStorageProvider _fileStorageProvider;
+    private readonly IFileStorageService _fileStorageService;
     private readonly IVectorStoreProvider _vectorStoreProvider;
     private readonly IProductsOrdersRepository _productsOrdersRepository;
     private readonly IProductsOrdersDetailsRepository _productsOrdersDetailsRepository;
-    private readonly IProductsOrdersDetailsQuantityChangesRepository _productsOrdersDetailsQuantityChangesRepository;
     private readonly IProductQuantitiesRepository _productQuantitiesRepository;
     private readonly IProductsRepository _productsRepository;
     private readonly IUsersRepository _usersRepository;
 
     public ProductsOrdersService(
         IDateTimeProvider dateTimeProvider,
-        IFileStorageProvider fileStorageProvider,
+        IFileStorageService fileStorageService,
         IVectorStoreProvider vectorStoreProvider,
         IProductsOrdersRepository productsOrdersRepository,
         IProductsOrdersDetailsRepository productsOrdersDetailsRepository,
-        IProductsOrdersDetailsQuantityChangesRepository productsOrdersDetailsQuantityChangesRepository,
         IProductQuantitiesRepository productQuantitiesRepository,
         IProductsRepository productsRepository,
         IUsersRepository usersRepository
     )
     {
         _dateTimeProvider = dateTimeProvider;
-        _fileStorageProvider = fileStorageProvider;
+        _fileStorageService = fileStorageService;
         _vectorStoreProvider = vectorStoreProvider;
         _productsOrdersRepository = productsOrdersRepository;
         _productsOrdersDetailsRepository = productsOrdersDetailsRepository;
-        _productsOrdersDetailsQuantityChangesRepository = productsOrdersDetailsQuantityChangesRepository;
         _productQuantitiesRepository = productQuantitiesRepository;
         _productsRepository = productsRepository;
         _usersRepository = usersRepository;
@@ -52,7 +50,12 @@ public class ProductsOrdersService : IProductsOrdersService
 
             foreach (var detail in productsOrders.ProductsOrdersDetails)
             {
-                var imageUrl = detail.Product.ImageKey != null ? await _fileStorageProvider.GetImageUrlAsync(detail.Product.ImageKey) : "";
+                var imageUrl = "";
+                if (!string.IsNullOrEmpty(detail.Product.ImageKey))
+                {
+                    var imageResult = await _fileStorageService.GetImageUrlAsync(detail.Product.ImageKey);
+                    imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
+                }
 
                 var productDto = new ProductDto(
                     Id: detail.Product.Id,
@@ -158,7 +161,7 @@ public class ProductsOrdersService : IProductsOrdersService
         {
             if (!string.IsNullOrEmpty(product.ImageKey))
             {
-                await _fileStorageProvider.DeleteImageAsync(product.ImageKey);
+                await _fileStorageService.DeleteImageAsync(product.ImageKey);
             }
 
             if (!string.IsNullOrEmpty(product.VectorId))
@@ -210,7 +213,12 @@ public class ProductsOrdersService : IProductsOrdersService
 
         foreach (var detail in productsOrders.ProductsOrdersDetails)
         {
-            var imageUrl = detail.Product.ImageKey != null ? await _fileStorageProvider.GetImageUrlAsync(detail.Product.ImageKey) : "";
+            var imageUrl = "";
+            if (!string.IsNullOrEmpty(detail.Product.ImageKey))
+            {
+                var imageResult = await _fileStorageService.GetImageUrlAsync(detail.Product.ImageKey);
+                imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
+            }
 
             var productDto = new ProductDto(
                 Id: detail.Product.Id,
@@ -302,7 +310,7 @@ public class ProductsOrdersService : IProductsOrdersService
             {
                 if (!string.IsNullOrEmpty(product.ImageKey))
                 {
-                    await _fileStorageProvider.DeleteImageAsync(product.ImageKey);
+                    await _fileStorageService.DeleteImageAsync(product.ImageKey);
                 }
 
                 if (!string.IsNullOrEmpty(product.VectorId))

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 namespace Capstone.Contracts.Products;
 
 public record OwnerCreateProductRequest(
-    string ProductId,
     string ProductName,
     string Category,
     string Color,
@@ -12,6 +11,6 @@ public record OwnerCreateProductRequest(
     List<ProductQuantity> Quantities,
     string CreatedBy,
     IFormFile? Image,
-    decimal SalePrice,
-    decimal ImportPrice
+    double SalePrice,
+    double ImportPrice
 );

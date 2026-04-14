@@ -1,4 +1,7 @@
+using Capstone.Application.Services.FileStorageService;
+using Capstone.Application.Services.ProductQuantitesService;
 using Capstone.Application.Services.Products;
+using Capstone.Application.Services.ProductsOrdersDetailService;
 using Capstone.Contracts.Products;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,28 +13,61 @@ namespace Capstone.Api.Controllers.Products;
 public class ProductsController : ControllerBase
 {
     private readonly IProductsService _productsSerivce;
+    private readonly IProductQuantitiesService _productQuantitiesService;
+    private readonly IProductsOrdersDetailService _productsOrdersDetailService;
 
-    public ProductsController(IProductsService productsSerivce)
+    private readonly IFileStorageService _fileStorageService;
+
+    public ProductsController(
+        IProductsService productsSerivce,
+        IProductQuantitiesService productQuantitiesService,
+        IProductsOrdersDetailService productsOrdersDetailService,
+        IFileStorageService fileStorageService
+    )
     {
         _productsSerivce = productsSerivce;
+        _productQuantitiesService = productQuantitiesService;
+        _productsOrdersDetailService = productsOrdersDetailService;
+        _fileStorageService = fileStorageService;
     }
 
     [Authorize]
     [HttpPost("create/{orderId}")]
     public async Task<IActionResult> CreateProduct([FromForm] CreateProductRequest request, [FromRoute] string orderId)
     {
-        var result = await _productsSerivce.CreateProduct(
-            request.ProductId,
+        var productResult = await _productsSerivce.CreateProduct(
             request.ProductName,
             request.Category,
             request.Color,
-            request.Pattern,
+            request.Pattern ?? string.Empty,
             request.SizeType,
-            request.Quantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
-            request.CreatedBy,
-            request.Image,
-            orderId
+            request.CreatedBy
         );
+
+        for (int i = 0; i < request.Quantities.Count; i++)
+        {
+            var quantity = request.Quantities[i];
+            await _productQuantitiesService.CreateProductQuantities(productResult.Value, quantity.Size, quantity.Quantities);
+        }
+
+        await _productsOrdersDetailService.CreateProductsOrdersDetail(orderId, productResult.Value);
+
+        if (request.Image != null)
+        {
+            var extension = Path.GetExtension(request.Image.FileName);
+
+            var ImageResult = await _fileStorageService.UploadImageAsync(
+                "products",
+                productResult.Value,
+                request.Image.OpenReadStream(),
+                request.Image.ContentType,
+                extension
+            );
+
+            await _productsSerivce.UpdateProductImageKey(productResult.Value, ImageResult.Value);
+        }
+
+        var result = await _productsSerivce.FetchProductById(productResult.Value);
 
         if (result.IsFailure)
         {
@@ -174,19 +210,39 @@ public class ProductsController : ControllerBase
     [HttpPost("owner-create")]
     public async Task<IActionResult> OwnerCreateProduct([FromForm] OwnerCreateProductRequest request)
     {
-        var result = await _productsSerivce.OwnerCreateProduct(
-            request.ProductId,
+        var productResult = await _productsSerivce.OwnerCreateProduct(
             request.ProductName,
             request.Category,
             request.Color,
-            request.Pattern,
+            request.Pattern ?? string.Empty,
             request.SizeType,
-            request.Quantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
             request.CreatedBy,
-            request.Image,
             request.SalePrice,
             request.ImportPrice
         );
+
+        for (int i = 0; i < request.Quantities.Count; i++)
+        {
+            var quantity = request.Quantities[i];
+            await _productQuantitiesService.CreateProductQuantities(productResult.Value, quantity.Size, quantity.Quantities);
+        }
+
+        if (request.Image != null)
+        {
+            var extension = Path.GetExtension(request.Image.FileName);
+
+            var ImageResult = await _fileStorageService.UploadImageAsync(
+                "products",
+                productResult.Value,
+                request.Image.OpenReadStream(),
+                request.Image.ContentType,
+                extension
+            );
+
+            await _productsSerivce.UpdateProductImageKey(productResult.Value, ImageResult.Value);
+        }
+
+        var result = await _productsSerivce.FetchProductById(productResult.Value);
 
         if (result.IsFailure)
         {
@@ -380,5 +436,22 @@ public class ProductsController : ControllerBase
             0,
             result.Value.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
         ));
+    }
+
+    [HttpDelete("owner-delete/{productId}")]
+    public async Task<IActionResult> OwnerDeleteProduct([FromRoute] string productId)
+    {
+        var result = await _productsSerivce.DeleteProduct(productId);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new { message = "Product deleted successfully", productName = result.Value });
     }
 }

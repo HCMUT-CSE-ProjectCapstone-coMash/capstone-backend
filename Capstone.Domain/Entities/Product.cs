@@ -14,8 +14,8 @@ public class Product
     public string Status { get; set; } = string.Empty;
     public string ImageKey { get; set; } = string.Empty;
     public string VectorId { get; set; } = string.Empty;
-    public decimal SalePrice { get; set; }
-    public decimal ImportPrice { get; set; }
+    public double SalePrice { get; set; }
+    public double ImportPrice { get; set; }
 
     public ICollection<ProductQuantity> ProductQuantities { get; set; } = new List<ProductQuantity>();
 }

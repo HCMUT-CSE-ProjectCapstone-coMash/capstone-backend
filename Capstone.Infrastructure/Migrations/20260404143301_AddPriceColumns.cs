@@ -10,14 +10,14 @@ namespace Capstone.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<decimal>(
+            migrationBuilder.AddColumn<double>(
                 name: "ImportPrice",
                 table: "products",
                 type: "numeric",
                 nullable: false,
                 defaultValue: 0m);
 
-            migrationBuilder.AddColumn<decimal>(
+            migrationBuilder.AddColumn<double>(
                 name: "SalePrice",
                 table: "products",
                 type: "numeric",

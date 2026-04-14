@@ -5,18 +5,18 @@ namespace Capstone.Application.Services.Products;
 
 public interface IProductsService
 {
-    Task<Result<ProductDto>> CreateProduct(
-        string productId,
+    Task<Result<string>> CreateProduct(
         string ProductName,
         string category,
         string color,
-        string? pattern,
+        string pattern,
         string sizeType,
-        List<ProductQuantityDto> productQuantities,
-        string createdBy,
-        IFormFile? image,
-        string orderID
+        string createdBy
     );
+
+    Task<Result> UpdateProductImageKey(string productId, string imageKey);
+
+    Task<Result<ProductDto>> FetchProductById(string id);
 
     Task<Result<ProductDto>> SearchProductSimilar(string ImageBase64);
 
@@ -26,18 +26,15 @@ public interface IProductsService
 
     Task<Result<string>> CreateProductIdByCategory(string category);
 
-    Task<Result<ProductDto>> OwnerCreateProduct(
-        string productId,
+    Task<Result<string>> OwnerCreateProduct(
         string productName,
         string category,
         string color,
-        string? pattern,
+        string pattern,
         string sizeType,
-        List<ProductQuantityDto> productQuantities,
         string createdBy,
-        IFormFile? image,
-        decimal salePrice,
-        decimal importPrice
+        double salePrice,
+        double importPrice
     );
 
     Task<Result<ProductDto>> OwnerPatchProduct(
@@ -49,8 +46,8 @@ public interface IProductsService
         string? pattern,
         string? sizeType,
         List<ProductQuantityDto>? quantities,
-        decimal? salePrice,
-        decimal? importPrice
+        double? salePrice,
+        double? importPrice
     );
 
     Task<Result<PaginatedResult<ProductDto>>> FetchAllProducts(int currentPage, int pageSize, string? category = null, string? search = null);
@@ -63,8 +60,8 @@ public interface IProductsService
         string? pattern,
         string? sizeType,
         List<ProductQuantityDto>? newQuantities,
-        decimal? salePrice,
-        decimal? importPrice
+        double? salePrice,
+        double? importPrice
     );
 
     Task<Result<ProductWithQuantityChangesDto>> EmployeeUpdateProductInProductsOrder(
@@ -76,4 +73,6 @@ public interface IProductsService
         string? sizeType,
         List<ProductQuantityDto>? newQuantities
     );
+
+    Task<Result<string>> DeleteProduct(string id);
 }
