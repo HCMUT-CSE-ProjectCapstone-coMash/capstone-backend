@@ -51,11 +51,6 @@ public class SaleOrdersRepository : ISaleOrdersRepository
 
     public async Task<bool> ExistsByEmployeeId(Guid employeeId)
     {
-        return await _context.SaleOrders
-            .Join(_context.Users,
-                saleOrder => saleOrder.CreatedBy,
-                user => user.Id,
-                (saleOrder, user) => user)
-            .AnyAsync(user => user.Id == employeeId && user.Role == Roles.Employee);
+        return await _context.SaleOrders.AnyAsync(saleOrder => saleOrder.CreatedBy == employeeId);
     }
 }

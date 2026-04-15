@@ -112,6 +112,12 @@ public class AuthenticationService : IAuthenticationService
         {
             return Result<AuthResult>.Failure(new Error(AuthErrors.UserDeleted.Code, AuthErrors.UserDeleted.Description));
         }
+        var imageUrl = "";
+        if (!string.IsNullOrEmpty(user.ImageKey))
+        {
+            var imageResult = await _fileStorageService.GetImageUrlAsync(user.ImageKey);
+            imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
+        }
 
         return Result<AuthResult>.Success(new AuthResult(
             user.Id,
@@ -119,22 +125,26 @@ public class AuthenticationService : IAuthenticationService
             user.Email,
             user.Role,
             user.CreatedAt,
-            _jwtTokenGenerator.GenerateToken(user.Id, user.FullName, user.Role)
+            _jwtTokenGenerator.GenerateToken(user.Id, user.FullName, user.Role),
+            user.PhoneNumber,
+            user.Gender,
+            user.DateOfBirth,
+            imageUrl
         ));
     }
 
-    public async Task<Result<EmployeeDto>> GetUserById(string id)
+    public async Task<Result<UserDto>> GetUserById(string id)
     {
         var user = await _userRepository.GetUserById(Guid.Parse(id));
 
         if (user is null)
         {
-            return Result<EmployeeDto>.Failure(new Error(AuthErrors.UserNotExisted.Code, AuthErrors.UserNotExisted.Description));
+            return Result<UserDto>.Failure(new Error(AuthErrors.UserNotExisted.Code, AuthErrors.UserNotExisted.Description));
         }
 
         if (user.Status != UserStatus.Active)
         {
-            return Result<EmployeeDto>.Failure(new Error(AuthErrors.UserDeleted.Code, AuthErrors.UserDeleted.Description));
+            return Result<UserDto>.Failure(new Error(AuthErrors.UserDeleted.Code, AuthErrors.UserDeleted.Description));
         }
 
         var imageUrl = "";
@@ -144,7 +154,7 @@ public class AuthenticationService : IAuthenticationService
             imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
         }
 
-        return Result<EmployeeDto>.Success(new EmployeeDto(
+        return Result<UserDto>.Success(new UserDto(
             user.Id,
             user.EmployeeId ?? string.Empty,
             user.FullName,
@@ -161,15 +171,29 @@ public class AuthenticationService : IAuthenticationService
     {
         var users = await _userRepository.GetEmployees();
 
-        var result = users.Select(u => new UserDto(
-            u.EmployeeId ?? string.Empty,
-            u.FullName,
-            u.Email,
-            u.Role,
-            u.PhoneNumber,
-            u.Gender,
-            u.DateOfBirth
-        )).ToList();
+        var result = new List<UserDto>();
+        foreach (var u in users)
+        {
+            var imageUrl = string.Empty;
+            if (!string.IsNullOrEmpty(u.ImageKey))
+            {
+                var imageResult = await _fileStorageService.GetImageUrlAsync(u.ImageKey);
+                imageUrl = imageResult.IsSuccess ? imageResult.Value : string.Empty;
+            }
+
+            result.Add(new UserDto(
+                u.Id,
+                u.EmployeeId ?? string.Empty,
+                u.FullName,
+                u.Email,
+                u.Role,
+                u.CreatedAt,
+                u.PhoneNumber,
+                u.Gender,
+                u.DateOfBirth,
+                imageUrl
+            ));
+        }
 
         return Result<List<UserDto>>.Success(result);
     }
@@ -182,18 +206,21 @@ public class AuthenticationService : IAuthenticationService
         var (users, total) = await _userRepository.SearchEmployees(currentPage, pageSize, search);
 
         var items = users.Select(u => new UserDto(
+            u.Id,
             u.EmployeeId ?? string.Empty,
             u.FullName,
             u.Email,
             u.Role,
+            u.CreatedAt,
             u.PhoneNumber,
             u.Gender,
-            u.DateOfBirth
+            u.DateOfBirth,
+            !string.IsNullOrEmpty(u.ImageKey) ? _fileStorageService.GetImageUrlAsync(u.ImageKey).Result.Value : string.Empty
         )).ToList();
 
         return Result<PaginatedResult<UserDto>>.Success(new PaginatedResult<UserDto>(items, total));
     }
-    public async Task<Result<EmployeeDto>> EditEmployee(
+    public async Task<Result<UserDto>> EditEmployee(
         string id,
         string? fullName,
         string? gender,
@@ -206,12 +233,12 @@ public class AuthenticationService : IAuthenticationService
 
         if (user is null)
         {
-            return Result<EmployeeDto>.Failure(new Error("NotFound", "User not found."));
+            return Result<UserDto>.Failure(new Error("NotFound", "User not found."));
         }
 
         if (user.Status != UserStatus.Active)
         {
-            return Result<EmployeeDto>.Failure(new Error(AuthErrors.UserDeleted.Code, AuthErrors.UserDeleted.Description));
+            return Result<UserDto>.Failure(new Error(AuthErrors.UserDeleted.Code, AuthErrors.UserDeleted.Description));
         }
 
         if (!string.IsNullOrWhiteSpace(email))
@@ -240,7 +267,7 @@ public class AuthenticationService : IAuthenticationService
             imageUrl = imageResult.IsSuccess ? imageResult.Value : string.Empty;
         }
 
-        return Result<EmployeeDto>.Success(new EmployeeDto(
+        return Result<UserDto>.Success(new UserDto(
             user.Id,
             user.EmployeeId ?? string.Empty,
             user.FullName,
@@ -262,14 +289,10 @@ public class AuthenticationService : IAuthenticationService
         {
             return Result<string>.Failure(new Error("NotFound", "User not found."));
         }
-        else if (user.Role == Roles.ShopOwner)
-        {
-            return Result<string>.Failure(new Error("InvalidOperation", "Cannot delete a shop owner."));
-        }
 
         var isInSaleOrder = await _saleOrderRepository.ExistsByEmployeeId(user.Id);
         var isInProductsOrder = await _productsOrdersRepository.ExistsByEmployeeId(user.Id);
-        Console.WriteLine($"isInSaleOrder: {isInSaleOrder}, isInProductsOrder: {isInProductsOrder}");
+        // Console.WriteLine($"isInSaleOrder: {isInSaleOrder}, isInProductsOrder: {isInProductsOrder}");
 
         if (isInSaleOrder || isInProductsOrder)
         {

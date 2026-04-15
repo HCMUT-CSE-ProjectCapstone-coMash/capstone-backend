@@ -6,16 +6,6 @@ public record AuthResult(
     string Email,
     string Role,
     DateTime CreatedAt,
-    string Token
-);
-
-public record RegisterDto(
-    Guid Id,
-    string EmployeeId,
-    string FullName,
-    string Email,
-    string Role,
-    DateTime CreatedAt,
     string Token,
     string PhoneNumber,
     string Gender,
@@ -23,7 +13,7 @@ public record RegisterDto(
     string ImageURL
 );
 
-public record EmployeeDto(
+public record UserDto(
     Guid Id,
     string EmployeeId,
     string FullName,
@@ -34,13 +24,4 @@ public record EmployeeDto(
     string Gender,
     string DateOfBirth,
     string ImageURL
-);
-public record UserDto(
-    string Id,
-    string FullName,
-    string Email,
-    string Role,
-    string PhoneNumber,
-    string Gender,
-    string DateOfBirth
 );

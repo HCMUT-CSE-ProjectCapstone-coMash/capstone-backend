@@ -198,31 +198,6 @@ public class AuthenticationController : ControllerBase
         return Ok(result.Value);
     }
 
-    [HttpGet("get-employee-by-id/{userId}")]
-    public async Task<IActionResult> GetEmployeeById([FromRoute] string userId)
-    {
-        var result = await _auth.GetUserById(userId);
-
-        if (result.IsFailure)
-        {
-            return BadRequest(new
-            {
-                error = result.Error.Code,
-                message = result.Error.Description
-            });
-        }
-
-        return Ok(new GetEmployeeByIdResponse(
-            result.Value.EmployeeId,
-            result.Value.FullName,
-            result.Value.Email,
-            result.Value.Role,
-            result.Value.PhoneNumber,
-            result.Value.Gender,
-            result.Value.DateOfBirth,
-            result.Value.ImageURL
-        ));
-    }
 
     [HttpPatch("edit-employee/{id}")]
     public async Task<IActionResult> EditEmployee([FromRoute] string id, [FromForm] EditEmployeeRequest request)
