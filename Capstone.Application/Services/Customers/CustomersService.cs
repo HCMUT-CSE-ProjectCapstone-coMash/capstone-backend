@@ -27,7 +27,8 @@ public class CustomersService : ICustomersService
             c.CustomerPhoneNumber,
             c.CustomerStatus,
             c.CreatedAt,
-            c.CreatedBy
+            0,
+            0
         )).ToList();
 
         return Result<List<CustomerDto>>.Success(customerDtos);
@@ -43,8 +44,42 @@ public class CustomersService : ICustomersService
             c.CustomerPhoneNumber,
             c.CustomerStatus,
             c.CreatedAt,
-            c.CreatedBy
+            0,
+            0
         )).ToList();
+
+        return Result<List<CustomerDto>>.Success(customerDtos);
+    }
+
+    public async Task<Result<List<CustomerDto>>> FetchAllCustomers()
+    {
+        var customers = await _customers.FetchAllCustomers();
+
+        var customerDtos = customers.Select(c =>
+        {
+            var debitOrders = c.SaleOrders
+                .Where(so => so.PaymentMethod == PaymentMethodStatus.Debit)
+                .ToList();
+
+            var totalDebit = debitOrders.Sum(so => so.DebitMoney);
+            var debitDays = 0;
+
+            if (debitOrders.Any())
+            {
+                var earliestDebitAt = debitOrders.Min(so => so.CreatedAt);
+                debitDays = (int)(_dateTimeProvider.UtcNow - earliestDebitAt).TotalDays;
+            }
+
+            return new CustomerDto(
+                c.Id,
+                c.CustomerName,
+                c.CustomerPhoneNumber,
+                c.CustomerStatus,
+                c.CreatedAt,
+                totalDebit,
+                debitDays
+            );
+        }).ToList();
 
         return Result<List<CustomerDto>>.Success(customerDtos);
     }
@@ -76,7 +111,8 @@ public class CustomersService : ICustomersService
             newCustomer.CustomerPhoneNumber,
             newCustomer.CustomerStatus,
             newCustomer.CreatedAt,
-            newCustomer.CreatedBy
+            0,
+            0
         ));
     }
 }

@@ -36,7 +36,8 @@ public class CustomersController : ControllerBase
             c.CustomerPhone,
             c.CustomerStatus,
             c.CreatedAt,
-            c.CreatedBy
+            c.DebitMoney,
+            c.DebitDays
         )).ToList();
 
         return Ok(customersResponse);
@@ -62,7 +63,35 @@ public class CustomersController : ControllerBase
             c.CustomerPhone,
             c.CustomerStatus,
             c.CreatedAt,
-            c.CreatedBy
+            c.DebitMoney,
+            c.DebitDays
+        )).ToList();
+
+        return Ok(customersResponse);
+    }
+
+    [HttpGet("fetch-all")]
+    public async Task<IActionResult> FetchAllCustomers()
+    {
+        var result = await _customersService.FetchAllCustomers();
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        var customersResponse = result.Value.Select(c => new CustomersResponse(
+            c.Id,
+            c.CustomerName,
+            c.CustomerPhone,
+            c.CustomerStatus,
+            c.CreatedAt,
+            c.DebitMoney,
+            c.DebitDays
         )).ToList();
 
         return Ok(customersResponse);
@@ -88,7 +117,8 @@ public class CustomersController : ControllerBase
             result.Value.CustomerPhone,
             result.Value.CustomerStatus,
             result.Value.CreatedAt,
-            result.Value.CreatedBy
+            result.Value.DebitMoney,
+            result.Value.DebitDays
         ));
     }
 }

@@ -43,4 +43,11 @@ public class CustomersRepository : ICustomersRepository
             .Take(8)
             .ToListAsync();
     }
+
+    public async Task<List<Customer>> FetchAllCustomers()
+    {
+        return await _context.Customers
+            .Include(c => c.SaleOrders)
+            .ToListAsync();
+    }
 }

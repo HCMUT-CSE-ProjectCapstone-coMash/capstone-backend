@@ -6,5 +6,6 @@ public record CustomersResponse(
     string CustomerPhone,
     string CustomerStatus,
     DateTime CreatedAt,
-    Guid CreatedBy
+    double DebitMoney,
+    int DebitDays
 );
