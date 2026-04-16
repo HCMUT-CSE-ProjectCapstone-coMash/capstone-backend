@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Capstone.Application.Services.Authentication;
 using Capstone.Application.Services.FileStorageService;
 using Capstone.Contracts.Authentication;
@@ -25,11 +24,11 @@ public class AuthenticationController : ControllerBase
     public async Task<IActionResult> Register([FromForm] RegisterRequest request)
     {
         var userResult = await _auth.Register(
-            request.EmployeeId, 
-            request.FullName, 
-            request.Email,  
-            request.PhoneNumber, 
-            request.Gender, 
+            request.EmployeeId,
+            request.FullName,
+            request.Email,
+            request.PhoneNumber,
+            request.Gender,
             request.DateOfBirth);
 
         if (userResult.IsFailure)
@@ -47,27 +46,16 @@ public class AuthenticationController : ControllerBase
 
             var ImageResult = await _fileStorageService.UploadImageAsync(
                 "users",
-                userResult.Value,
+                userResult.Value.Id.ToString(),
                 request.Image.OpenReadStream(),
                 request.Image.ContentType,
                 extension
             );
 
-            await _auth.UpdateUserImageKey(userResult.Value, ImageResult.Value);
-        }
-
-        var user = await _auth.GetUserById(userResult.Value);
-
-        if (user.IsFailure)
-        {
-            return BadRequest(new
-            {
-                error = user.Error.Code,
-                message = user.Error.Description
-            });
+            await _auth.UpdateUserImageKey(userResult.Value.Id.ToString(), ImageResult.Value);
         }
         
-        Response.Cookies.Append("accessToken", user.Value.Id.ToString(), new CookieOptions
+        Response.Cookies.Append("accessToken", userResult.Value.Token, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
@@ -75,12 +63,19 @@ public class AuthenticationController : ControllerBase
             Expires = DateTime.UtcNow.AddMinutes(60)
         });
 
+        var user = _auth.GetUserById(userResult.Value.Id.ToString()).Result.Value;
+
         return Ok(new AuthenticationResponse(
-            user.Value.Id,
-            user.Value.FullName,
-            user.Value.Email,
-            user.Value.Role,
-            user.Value.CreatedAt
+            user.Id,
+            user.EmployeeId,
+            user.FullName,
+            user.Email,
+            user.Role,
+            user.PhoneNumber,
+            user.Gender,
+            user.DateOfBirth,
+            user.ImageURL,
+            user.CreatedAt
         ));
     }
 
@@ -125,9 +120,14 @@ public class AuthenticationController : ControllerBase
 
         return Ok(new AuthenticationResponse(
             result.Value.Id,
+            result.Value.EmployeeId,
             result.Value.FullName,
             result.Value.Email,
             result.Value.Role,
+            result.Value.PhoneNumber,
+            result.Value.Gender,
+            result.Value.DateOfBirth,
+            result.Value.ImageURL,
             result.Value.CreatedAt
         ));
     }
@@ -144,9 +144,14 @@ public class AuthenticationController : ControllerBase
 
         return Ok(new AuthenticationResponse(
             result.Value.Id,
+            result.Value.EmployeeId,
             result.Value.FullName,
             result.Value.Email,
             result.Value.Role,
+            result.Value.PhoneNumber,
+            result.Value.Gender,
+            result.Value.DateOfBirth,
+            result.Value.ImageURL,
             result.Value.CreatedAt
         ));
     }
@@ -165,9 +170,9 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpGet("employees")]
-    public async Task<IActionResult> GetAllEmployees()
+    public async Task<IActionResult> GetAllEmployees([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
     {
-        var result = await _auth.GetAllEmployees();
+        var result = await _auth.GetAllEmployees(page, pageSize, search);
 
         if (result.IsFailure)
         {
@@ -178,59 +183,55 @@ public class AuthenticationController : ControllerBase
             });
         }
 
-        return Ok(result.Value);
-    }
-
-    [HttpGet("search")]
-    public async Task<IActionResult> SearchEmployees([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
-    {
-        var result = await _auth.SearchEmployees(page, pageSize, search);
-
-        if (result.IsFailure)
-        {
-            return BadRequest(new
-            {
-                error = result.Error.Code,
-                message = result.Error.Description
-            });
-        }
-
-        return Ok(result.Value);
-    }
-
-
-    [HttpPatch("edit-employee/{id}")]
-    public async Task<IActionResult> EditEmployee([FromRoute] string id, [FromForm] EditEmployeeRequest request)
-    {
-        var result = await _auth.EditEmployee(
-            id,
-            request.FullName,
-            request.Gender,
-            request.DateOfBirth,
-            request.PhoneNumber,
-            request.Email
-        );
-
-        if (result.IsFailure)
-        {
-            return BadRequest(new
-            {
-                error = result.Error.Code,
-                message = result.Error.Description
-            });
-        }
-
-        return Ok(new GetEmployeeByIdResponse(
-            result.Value.EmployeeId,
-            result.Value.FullName,
-            result.Value.Email,
-            result.Value.Role,
-            result.Value.PhoneNumber,
-            result.Value.Gender,
-            result.Value.DateOfBirth,
-            result.Value.ImageURL
+        return Ok(new GetEmployeeResponse(
+            result.Value.Items.Select(u => new EmployeeResponse(
+                u.Id,
+                u.EmployeeId,
+                u.FullName,
+                u.Email,
+                u.Role,
+                u.PhoneNumber,
+                u.Gender,
+                u.DateOfBirth,
+                u.ImageURL
+            )).ToList(),
+            result.Value.Total
         ));
     }
+
+    // [HttpPatch("edit-employee/{id}")]
+    // public async Task<IActionResult> EditEmployee([FromRoute] string id, [FromForm] EditEmployeeRequest request)
+    // {
+    //     var result = await _auth.EditEmployee(
+    //         id,
+    //         request.FullName,
+    //         request.Gender,
+    //         request.DateOfBirth,
+    //         request.PhoneNumber,
+    //         request.Email
+    //     );
+
+    //     if (result.IsFailure)
+    //     {
+    //         return BadRequest(new
+    //         {
+    //             error = result.Error.Code,
+    //             message = result.Error.Description
+    //         });
+    //     }
+
+    //     return Ok(new GetEmployeeByIdResponse(
+    //         result.Value.EmployeeId,
+    //         result.Value.FullName,
+    //         result.Value.Email,
+    //         result.Value.Role,
+    //         result.Value.PhoneNumber,
+    //         result.Value.Gender,
+    //         result.Value.DateOfBirth,
+    //         result.Value.ImageURL
+    //     ));
+    // }
+
     [HttpDelete("delete/{employeeId}")]
     public async Task<IActionResult> DeleteEmployee([FromRoute] string employeeId)
     {

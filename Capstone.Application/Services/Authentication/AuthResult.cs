@@ -2,6 +2,7 @@ namespace Capstone.Application.Services.Authentication;
 
 public record AuthResult(
     Guid Id,
+    string EmployeeId,
     string FullName,
     string Email,
     string Role,

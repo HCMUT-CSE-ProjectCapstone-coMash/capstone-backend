@@ -9,7 +9,6 @@ public interface IUsersRepository
     Task UpdateUser(User user);
     Task DeleteUserAsync(Guid userId);
     Task<User?> GetUserById(Guid userId);
-    Task<List<User>> GetEmployees();
-    Task<(List<User> Items, int Total)> SearchEmployees(int page, int pageSize, string? search = null);
+    Task<(List<User> Items, int Total)> GetEmployees(int page, int pageSize, string? search = null);
     Task<int> GetMaxEmployeeNumberAsync(string prefix);
 }
