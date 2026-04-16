@@ -44,10 +44,32 @@ public class CustomersRepository : ICustomersRepository
             .ToListAsync();
     }
 
-    public async Task<List<Customer>> FetchAllCustomers()
+    public async Task<(List<Customer> Items, int Total)> FetchCustomers(int page, int pageSize, string? search = null)
     {
-        return await _context.Customers
+        if (page <= 0)
+            page = 1;
+
+        if (pageSize <= 0)
+            pageSize = 10;
+
+        var query = _context.Customers.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var searchPattern = $"%{search}%";
+            query = query.Where(c => EF.Functions.ILike(c.CustomerName, searchPattern)
+                || EF.Functions.ILike(c.CustomerPhoneNumber, searchPattern));
+        }
+
+        var total = await query.CountAsync();
+
+        var items = await query
             .Include(c => c.SaleOrders)
+            .OrderByDescending(c => c.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
+
+        return (items, total);
     }
 }

@@ -51,9 +51,9 @@ public class CustomersService : ICustomersService
         return Result<List<CustomerDto>>.Success(customerDtos);
     }
 
-    public async Task<Result<List<CustomerDto>>> FetchAllCustomers()
+    public async Task<Result<PaginatedResult<CustomerDto>>> FetchAllCustomers(int page, int pageSize, string? search = null)
     {
-        var customers = await _customers.FetchAllCustomers();
+        var (customers, total) = await _customers.FetchCustomers(page, pageSize, search);
 
         var customerDtos = customers.Select(c =>
         {
@@ -67,7 +67,7 @@ public class CustomersService : ICustomersService
             if (debitOrders.Any())
             {
                 var earliestDebitAt = debitOrders.Min(so => so.CreatedAt);
-                debitDays = (int)(_dateTimeProvider.UtcNow - earliestDebitAt).TotalDays;
+                debitDays = (int)Math.Max(0, (_dateTimeProvider.UtcNow - earliestDebitAt).TotalDays);
             }
 
             return new CustomerDto(
@@ -81,7 +81,8 @@ public class CustomersService : ICustomersService
             );
         }).ToList();
 
-        return Result<List<CustomerDto>>.Success(customerDtos);
+        return Result<PaginatedResult<CustomerDto>>.Success(
+            new PaginatedResult<CustomerDto>(customerDtos, total));
     }
 
     public async Task<Result<CustomerDto>> CreateCustomer(string customerName, string customerPhone, string userId)

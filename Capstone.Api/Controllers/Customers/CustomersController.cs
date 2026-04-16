@@ -71,9 +71,9 @@ public class CustomersController : ControllerBase
     }
 
     [HttpGet("fetch-all")]
-    public async Task<IActionResult> FetchAllCustomers()
+    public async Task<IActionResult> FetchAllCustomers([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
     {
-        var result = await _customersService.FetchAllCustomers();
+        var result = await _customersService.FetchAllCustomers(page, pageSize, search);
 
         if (result.IsFailure)
         {
@@ -84,17 +84,18 @@ public class CustomersController : ControllerBase
             });
         }
 
-        var customersResponse = result.Value.Select(c => new CustomersResponse(
-            c.Id,
-            c.CustomerName,
-            c.CustomerPhone,
-            c.CustomerStatus,
-            c.CreatedAt,
-            c.DebitMoney,
-            c.DebitDays
-        )).ToList();
-
-        return Ok(customersResponse);
+        return Ok(new GetCustomersResponse(
+            result.Value.Items.Select(c => new CustomersResponse(
+                c.Id,
+                c.CustomerName,
+                c.CustomerPhone,
+                c.CustomerStatus,
+                c.CreatedAt,
+                c.DebitMoney,
+                c.DebitDays
+            )).ToList(),
+            result.Value.Total
+        ));
     }
 
     [HttpPost("create/{userId}")]

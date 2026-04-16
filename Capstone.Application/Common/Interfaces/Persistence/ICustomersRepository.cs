@@ -8,6 +8,6 @@ public interface ICustomersRepository
     Task<Customer?> GetCustomerByPhone(string customerPhone);
     Task<List<Customer>> FetchCustomerByName(string customerName);
     Task<List<Customer>> FetchCustomerByPhone(string customerPhone);
-    Task<List<Customer>> FetchAllCustomers();
+    Task<(List<Customer> Items, int Total)> FetchCustomers(int page, int pageSize, string? search = null);
 }
 
