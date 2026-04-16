@@ -5,7 +5,6 @@ using Capstone.Application.Common.Interfaces.Services;
 using Capstone.Application.Services.FileStorageService;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
-using Microsoft.AspNetCore.Http;
 
 namespace Capstone.Application.Services.Authentication;
 
@@ -38,7 +37,7 @@ public class AuthenticationService : IAuthenticationService
 
     }
 
-    public async Task<Result<string>> Register(
+    public async Task<Result<AuthResult>> Register(
         string employeeId,
         string fullName, 
         string email, 
@@ -50,7 +49,7 @@ public class AuthenticationService : IAuthenticationService
 
         if (existing != null)
         {
-            return Result<string>.Failure(new Error(AuthErrors.UserAlreadyExists.Code, AuthErrors.UserAlreadyExists.Description));
+            return Result<AuthResult>.Failure(new Error(AuthErrors.UserAlreadyExists.Code, AuthErrors.UserAlreadyExists.Description));
         }
 
         var password = "123456";
@@ -72,7 +71,19 @@ public class AuthenticationService : IAuthenticationService
 
         await _userRepository.AddUser(user);
 
-        return Result<string>.Success(user.Id.ToString());
+        return Result<AuthResult>.Success(new AuthResult(
+            user.Id,
+            user.EmployeeId,
+            user.FullName,
+            user.Email,
+            user.Role,
+            user.CreatedAt,
+            _jwtTokenGenerator.GenerateToken(user.Id, user.FullName, user.Role),
+            user.PhoneNumber,
+            user.Gender,
+            user.DateOfBirth,
+            string.Empty
+        ));
     }
 
     public async Task<Result> UpdateUserImageKey(string userId, string imageKey)
@@ -121,6 +132,7 @@ public class AuthenticationService : IAuthenticationService
 
         return Result<AuthResult>.Success(new AuthResult(
             user.Id,
+            user.EmployeeId ?? string.Empty,
             user.FullName,
             user.Email,
             user.Role,
@@ -167,59 +179,39 @@ public class AuthenticationService : IAuthenticationService
             imageUrl
         ));
     }
-    public async Task<Result<List<UserDto>>> GetAllEmployees()
+    public async Task<Result<PaginatedResult<UserDto>>> GetAllEmployees(int page, int pageSize, string? search = null)
     {
-        var users = await _userRepository.GetEmployees();
+        var (employees, total) = await _userRepository.GetEmployees(page, pageSize, search);
 
-        var result = new List<UserDto>();
-        foreach (var u in users)
+        var userDtos = new List<UserDto>();
+
+        foreach (var employee in employees)
         {
-            var imageUrl = string.Empty;
-            if (!string.IsNullOrEmpty(u.ImageKey))
+            var imageUrl = "";
+            if (!string.IsNullOrEmpty(employee.ImageKey))
             {
-                var imageResult = await _fileStorageService.GetImageUrlAsync(u.ImageKey);
-                imageUrl = imageResult.IsSuccess ? imageResult.Value : string.Empty;
+                var imageResult = await _fileStorageService.GetImageUrlAsync(employee.ImageKey);
+                imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
             }
 
-            result.Add(new UserDto(
-                u.Id,
-                u.EmployeeId ?? string.Empty,
-                u.FullName,
-                u.Email,
-                u.Role,
-                u.CreatedAt,
-                u.PhoneNumber,
-                u.Gender,
-                u.DateOfBirth,
+            userDtos.Add(new UserDto(
+                employee.Id,
+                employee.EmployeeId ?? string.Empty,
+                employee.FullName,
+                employee.Email,
+                employee.Role,
+                employee.CreatedAt,
+                employee.PhoneNumber,
+                employee.Gender,
+                employee.DateOfBirth,
                 imageUrl
             ));
         }
-
-        return Result<List<UserDto>>.Success(result);
+        
+        return Result<PaginatedResult<UserDto>>.Success(
+            new PaginatedResult<UserDto>(userDtos, total));
     }
 
-    public async Task<Result<PaginatedResult<UserDto>>> SearchEmployees(int currentPage, int pageSize, string? search = null)
-    {
-        if (currentPage <= 0) currentPage = 1;
-        if (pageSize <= 0) pageSize = 10;
-
-        var (users, total) = await _userRepository.SearchEmployees(currentPage, pageSize, search);
-
-        var items = users.Select(u => new UserDto(
-            u.Id,
-            u.EmployeeId ?? string.Empty,
-            u.FullName,
-            u.Email,
-            u.Role,
-            u.CreatedAt,
-            u.PhoneNumber,
-            u.Gender,
-            u.DateOfBirth,
-            !string.IsNullOrEmpty(u.ImageKey) ? _fileStorageService.GetImageUrlAsync(u.ImageKey).Result.Value : string.Empty
-        )).ToList();
-
-        return Result<PaginatedResult<UserDto>>.Success(new PaginatedResult<UserDto>(items, total));
-    }
     public async Task<Result<UserDto>> EditEmployee(
         string id,
         string? fullName,
@@ -292,7 +284,6 @@ public class AuthenticationService : IAuthenticationService
 
         var isInSaleOrder = await _saleOrderRepository.ExistsByEmployeeId(user.Id);
         var isInProductsOrder = await _productsOrdersRepository.ExistsByEmployeeId(user.Id);
-        // Console.WriteLine($"isInSaleOrder: {isInSaleOrder}, isInProductsOrder: {isInProductsOrder}");
 
         if (isInSaleOrder || isInProductsOrder)
         {

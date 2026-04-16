@@ -1,6 +1,7 @@
 namespace Capstone.Contracts.Authentication;
 
-public record GetEmployeeByIdResponse(
+public record EmployeeResponse(
+    Guid Id,
     string EmployeeId,
     string FullName,
     string Email,

@@ -1,4 +1,5 @@
 using Capstone.Application.Common.Interfaces.Persistence;
+using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,6 +30,7 @@ public class UsersRepository : IUsersRepository
         _context.Users.Update(user);
         await _context.SaveChangesAsync();
     }
+    
     public async Task DeleteUserAsync(Guid userId)
     {
         var user = await _context.Users.FindAsync(userId);
@@ -44,18 +46,9 @@ public class UsersRepository : IUsersRepository
         return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
     }
 
-    public async Task<List<User>> GetEmployees()
+    public async Task<(List<User> Items, int Total)> GetEmployees(int page, int pageSize, string? search = null)
     {
-        return await _context.Users
-            .Where(u => u.Role == "employee" && u.Status == "Active")
-            .ToListAsync();
-    }
-
-    public async Task<(List<User> Items, int Total)> SearchEmployees(int page, int pageSize, string? search = null)
-    {
-        var query = _context.Users
-            .Where(u => u.Role == "employee" && u.Status == "Active")
-            .AsQueryable();
+        var query = _context.Users.Where(u => u.Role == Roles.Employee && u.Status == UserStatus.Active).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -64,8 +57,6 @@ public class UsersRepository : IUsersRepository
                 EF.Functions.ILike(
                     EF.Functions.Unaccent(u.FullName),
                     EF.Functions.Unaccent(searchPattern))
-                || EF.Functions.ILike(u.EmployeeId ?? string.Empty, searchPattern)
-                || EF.Functions.ILike(u.Email, searchPattern)
             );
         }
 
@@ -89,7 +80,6 @@ public class UsersRepository : IUsersRepository
 
         if (!numberStrings.Any()) return 0;
 
-        return numberStrings
-            .Max(n => int.TryParse(n, out var num) ? num : 0);
+        return numberStrings.Max(n => int.TryParse(n, out var num) ? num : 0);
     }
 }

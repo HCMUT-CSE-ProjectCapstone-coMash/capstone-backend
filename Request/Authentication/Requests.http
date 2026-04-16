@@ -22,3 +22,7 @@ Content-Type: application/json
 GET {{host}}/auth/profile
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhYTU3NDJkNy1hM2E0LTQ2MzgtYTI0ZC03NmJlMDJiODUyOTMiLCJnaXZlbl9uYW1lIjoiSHV5bmggTmdvYyBOaG9uIiwianRpIjoiNTNlZDI4MWYtMmFlNS00YTBjLWE4YjUtN2U0OTY2YmJlZTk0IiwiZXhwIjoxNzcxMDEyNDU4LCJpc3MiOiJDYXBzdG9uZSIsImF1ZCI6IkNhcHN0b25lVXNlcnMifQ.iyKmvEVLgVwZnP1ngyof9T_F1qu90GUjFoI0_dRuGQo
+
+###
+GET {{host}}/auth/employees?page=1&pageSize=10
+Content-Type: application/json
