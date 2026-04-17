@@ -55,13 +55,13 @@ public class AuthenticationController : ControllerBase
             await _auth.UpdateUserImageKey(userResult.Value.Id.ToString(), ImageResult.Value);
         }
         
-        Response.Cookies.Append("accessToken", userResult.Value.Token, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddMinutes(60)
-        });
+        // Response.Cookies.Append("accessToken", userResult.Value.Token, new CookieOptions
+        // {
+        //     HttpOnly = true,
+        //     Secure = true,
+        //     SameSite = SameSiteMode.Strict,
+        //     Expires = DateTime.UtcNow.AddMinutes(60)
+        // });
 
         var user = _auth.GetUserById(userResult.Value.Id.ToString()).Result.Value;
 
