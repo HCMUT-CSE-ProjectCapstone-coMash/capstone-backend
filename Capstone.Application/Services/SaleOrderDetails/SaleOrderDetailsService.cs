@@ -38,6 +38,8 @@ public class SaleOrderDetailsService : ISaleOrderDetailsService
         var UnitPrice = product.SalePrice;
         var SubTotal = Quantity * UnitPrice * (1 - Discount / 100);
 
+        // Tính lợi nhuận: TODO
+
         var saleOrderDetail = new SaleOrderDetail
         {
             Id = Guid.NewGuid(),

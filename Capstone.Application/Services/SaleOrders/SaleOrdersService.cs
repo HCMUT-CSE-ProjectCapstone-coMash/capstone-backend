@@ -58,7 +58,11 @@ public class SaleOrdersService : ISaleOrdersService
 
         var totalPrice = saleOrder.SaleOrderDetails.Sum(d => d.SubTotal);
 
+        // Tính total profit
+        //var totalProfit = saleOrder.SaleOrderDetails.Sum(d => d.Profit);
+
         saleOrder.TotalPrice = totalPrice;
+        // saleOrder.TotalProfit = totalProfit;
         await _saleOrdersRepository.UpdateSaleOrder(saleOrder);
 
         return Result.Success();

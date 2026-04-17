@@ -10,4 +10,5 @@ public class SaleOrderDetailDto
     public double UnitPrice { get; set; }
     public double Discount { get; set; }
     public double SubTotal { get; set; }
+    public double Profit { get; set; }
 }

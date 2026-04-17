@@ -11,6 +11,7 @@ public record SaleOrderResponse(
     double DebitMoney,
     DateTime CreatedAt,
     double TotalPrice,
+    double TotalProfit,
     List<SaleOrderDetailResponse> Details
 );
 
@@ -22,5 +23,6 @@ public record SaleOrderDetailResponse(
     int Quantity,
     double UnitPrice,
     double Discount,
-    double SubTotal
+    double SubTotal,
+    double Profit
 );

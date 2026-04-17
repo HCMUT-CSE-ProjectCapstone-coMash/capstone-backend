@@ -14,4 +14,6 @@ public interface ISaleOrdersService
     Task<Result> UpdateTotalPrice(string saleOrderId);
 
     Task<Result<SaleOrderDto>> GetSaleOrderById(string saleOrderId);
+
+    // Task<Result<PaginatedResult<SaleOrderDto>>> GetSaleOrders(...);
 }

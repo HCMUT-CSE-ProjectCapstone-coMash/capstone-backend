@@ -67,6 +67,7 @@ public class SaleOrdersController : ControllerBase
             result.Value.DebitMoney,
             result.Value.CreatedAt,
             result.Value.TotalPrice,
+            result.Value.TotalProfit,
             result.Value.Details.Select(d => new SaleOrderDetailResponse(
                 d.Id,
                 d.ProductId,
@@ -75,7 +76,8 @@ public class SaleOrdersController : ControllerBase
                 d.Quantity,
                 d.UnitPrice,
                 d.Discount,
-                d.SubTotal
+                d.SubTotal,
+                d.Profit
             )).ToList()
         ));
     }
