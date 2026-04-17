@@ -21,15 +21,31 @@ public class CustomersService : ICustomersService
     {
         var customer = await _customers.FetchCustomerByName(customerName);
 
-        var customerDtos = customer.Select(c => new CustomerDto(
-            c.Id,
-            c.CustomerName,
-            c.CustomerPhoneNumber,
-            c.CustomerStatus,
-            c.CreatedAt,
-            0,
-            0
-        )).ToList();
+        var customerDtos = customer.Select(c =>
+        {
+            var debitOrders = c.SaleOrders
+                .Where(so => so.PaymentMethod == PaymentMethodStatus.Debit)
+                .ToList();
+
+            var totalDebit = debitOrders.Sum(so => so.DebitMoney);
+            var debitDays = 0;
+
+            if (debitOrders.Any())
+            {
+                var earliestDebitAt = debitOrders.Min(so => so.CreatedAt);
+                debitDays = (int)Math.Max(0, (_dateTimeProvider.UtcNow - earliestDebitAt).TotalDays);
+            }
+
+            return new CustomerDto(
+                c.Id,
+                c.CustomerName,
+                c.CustomerPhoneNumber,
+                c.CustomerStatus,
+                c.CreatedAt,
+                totalDebit,
+                debitDays
+            );
+        }).ToList();
 
         return Result<List<CustomerDto>>.Success(customerDtos);
     }
@@ -38,15 +54,31 @@ public class CustomersService : ICustomersService
     {
         var customer = await _customers.FetchCustomerByPhone(customerPhone);
 
-        var customerDtos = customer.Select(c => new CustomerDto(
-            c.Id,
-            c.CustomerName,
-            c.CustomerPhoneNumber,
-            c.CustomerStatus,
-            c.CreatedAt,
-            0,
-            0
-        )).ToList();
+        var customerDtos = customer.Select(c =>
+        {
+            var debitOrders = c.SaleOrders
+                .Where(so => so.PaymentMethod == PaymentMethodStatus.Debit)
+                .ToList();
+
+            var totalDebit = debitOrders.Sum(so => so.DebitMoney);
+            var debitDays = 0;
+
+            if (debitOrders.Any())
+            {
+                var earliestDebitAt = debitOrders.Min(so => so.CreatedAt);
+                debitDays = (int)Math.Max(0, (_dateTimeProvider.UtcNow - earliestDebitAt).TotalDays);
+            }
+
+            return new CustomerDto(
+                c.Id,
+                c.CustomerName,
+                c.CustomerPhoneNumber,
+                c.CustomerStatus,
+                c.CreatedAt,
+                totalDebit,
+                debitDays
+            );
+        }).ToList();
 
         return Result<List<CustomerDto>>.Success(customerDtos);
     }

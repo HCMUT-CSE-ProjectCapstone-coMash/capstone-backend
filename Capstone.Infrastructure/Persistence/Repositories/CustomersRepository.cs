@@ -28,6 +28,7 @@ public class CustomersRepository : ICustomersRepository
     {
         var namePattern = $"%{customerName}%";
         return await _context.Customers
+            .Include(c => c.SaleOrders)
             .Where(c => EF.Functions.ILike(
                 EF.Functions.Unaccent(c.CustomerName),
                 EF.Functions.Unaccent(namePattern)))
@@ -39,6 +40,7 @@ public class CustomersRepository : ICustomersRepository
     {
         var phonePattern = $"%{customerPhone}%";
         return await _context.Customers
+            .Include(c => c.SaleOrders)
             .Where(c => EF.Functions.ILike(c.CustomerPhoneNumber, phonePattern))
             .Take(8)
             .ToListAsync();
