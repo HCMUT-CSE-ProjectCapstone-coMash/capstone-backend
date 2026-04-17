@@ -1,0 +1,4 @@
+@host = http://localhost:5194
+
+GET {{host}}/customers/fetch-all
+Content-Type: application/json

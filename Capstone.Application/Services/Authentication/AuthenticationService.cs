@@ -212,7 +212,7 @@ public class AuthenticationService : IAuthenticationService
             new PaginatedResult<UserDto>(userDtos, total));
     }
 
-    public async Task<Result<UserDto>> EditEmployee(
+    public async Task<Result<string>> EditEmployee(
         string id,
         string? fullName,
         string? gender,
@@ -225,12 +225,12 @@ public class AuthenticationService : IAuthenticationService
 
         if (user is null)
         {
-            return Result<UserDto>.Failure(new Error("NotFound", "User not found."));
+            return Result<string>.Failure(new Error("NotFound", "User not found."));
         }
 
         if (user.Status != UserStatus.Active)
         {
-            return Result<UserDto>.Failure(new Error(AuthErrors.UserDeleted.Code, AuthErrors.UserDeleted.Description));
+            return Result<string>.Failure(new Error(AuthErrors.UserDeleted.Code, AuthErrors.UserDeleted.Description));
         }
 
         if (!string.IsNullOrWhiteSpace(email))
@@ -252,27 +252,8 @@ public class AuthenticationService : IAuthenticationService
 
         await _userRepository.UpdateUser(user);
 
-        var imageUrl = string.Empty;
-        if (!string.IsNullOrEmpty(user.ImageKey))
-        {
-            var imageResult = await _fileStorageService.GetImageUrlAsync(user.ImageKey);
-            imageUrl = imageResult.IsSuccess ? imageResult.Value : string.Empty;
-        }
-
-        return Result<UserDto>.Success(new UserDto(
-            user.Id,
-            user.EmployeeId ?? string.Empty,
-            user.FullName,
-            user.Email,
-            user.Role,
-            user.CreatedAt,
-            user.PhoneNumber,
-            user.Gender,
-            user.DateOfBirth,
-            imageUrl
-        ));
+        return Result<string>.Success(user.FullName);
     }
-
 
     public async Task<Result<string>> DeleteEmployee(string id)
     {
