@@ -8,7 +8,7 @@ public interface IAuthenticationService
 
     Task<Result> UpdateUserImageKey(string userId, string imageKey);
 
-    Task<Result<UserDto>> EditEmployee(string id, string? fullName, string? gender, string? dateOfBirth, string? phoneNumber, string? email);
+    Task<Result<string>> EditEmployee(string id, string? fullName, string? gender, string? dateOfBirth, string? phoneNumber, string? email);
 
     Task<Result<string>> DeleteEmployee(string id);
 
