@@ -64,7 +64,9 @@ public class SaleOrdersRepository : ISaleOrdersRepository
 
         if (!string.IsNullOrEmpty(search))
         {
-            query = query.Where(so => so.SaleOrderId.Contains(search) || so.Customer!.CustomerName.Contains(search));
+            query = query.Where(
+                so => so.SaleOrderId.Contains(search) 
+                || EF.Functions.Unaccent(so.Customer!.CustomerName).Contains(EF.Functions.Unaccent(search)));
         }
 
         var total = await query.CountAsync();
