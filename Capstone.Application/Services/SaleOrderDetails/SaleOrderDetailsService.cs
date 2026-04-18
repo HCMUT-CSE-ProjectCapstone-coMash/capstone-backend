@@ -38,7 +38,8 @@ public class SaleOrderDetailsService : ISaleOrderDetailsService
         var UnitPrice = product.SalePrice;
         var SubTotal = Quantity * UnitPrice * (1 - Discount / 100);
 
-        // Tính lợi nhuận: TODO
+        var importPrice = Quantity * product.ImportPrice;
+        var profit = SubTotal - importPrice;
 
         var saleOrderDetail = new SaleOrderDetail
         {
@@ -49,7 +50,8 @@ public class SaleOrderDetailsService : ISaleOrderDetailsService
             Quantity = Quantity,
             Discount = Discount,
             UnitPrice = UnitPrice,
-            SubTotal = SubTotal
+            SubTotal = SubTotal,
+            Profit = profit
         };
 
         await _saleOrderDetailsRepository.CreateSaleOrderDetail(saleOrderDetail);

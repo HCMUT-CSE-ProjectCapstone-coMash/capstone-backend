@@ -43,7 +43,7 @@ public class SaleOrdersController : ControllerBase
             );
         }
 
-        await _saleOrdersService.UpdateTotalPrice(saleOrderResponse.Value);
+        await _saleOrdersService.UpdateTotalPriceAndTotalProfit(saleOrderResponse.Value);
 
         var result = await _saleOrdersService.GetSaleOrderById(saleOrderResponse.Value);
 
@@ -80,5 +80,45 @@ public class SaleOrdersController : ControllerBase
                 d.Profit
             )).ToList()
         ));
+    }
+
+    [HttpGet("fetch-all")]
+    public async Task<IActionResult> FetchAllSaleOrders([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
+    {
+        var result = await _saleOrdersService.FetchAllSaleOrders(page, pageSize, search);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new { items = result.Value.Items.Select(s => new SaleOrderResponse(
+            s.Id,
+            s.SaleOrderId,
+            s.CustomerId,
+            s.CustomerName,
+            s.CreatedBy,
+            s.CreatedByName,
+            s.PaymentMethod,
+            s.DebitMoney,
+            s.CreatedAt,
+            s.TotalPrice,
+            s.TotalProfit,
+            s.Details.Select(d => new SaleOrderDetailResponse(
+                d.Id,
+                d.ProductId,
+                d.ProductName,
+                d.SelectedSize,
+                d.Quantity,
+                d.UnitPrice,
+                d.Discount,
+                d.SubTotal,
+                d.Profit
+            )).ToList()
+        )).ToList(), total = result.Value.Total });
     }
 }

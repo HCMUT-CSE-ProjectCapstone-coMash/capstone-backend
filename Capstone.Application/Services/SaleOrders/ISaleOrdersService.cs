@@ -11,9 +11,9 @@ public interface ISaleOrdersService
         double DebitMoney
     );
 
-    Task<Result> UpdateTotalPrice(string saleOrderId);
+    Task<Result> UpdateTotalPriceAndTotalProfit(string saleOrderId);
 
     Task<Result<SaleOrderDto>> GetSaleOrderById(string saleOrderId);
 
-    // Task<Result<PaginatedResult<SaleOrderDto>>> GetSaleOrders(...);
+    Task<Result<PaginatedResult<SaleOrderDto>>> FetchAllSaleOrders(int page, int pageSize, string? search = null);
 }

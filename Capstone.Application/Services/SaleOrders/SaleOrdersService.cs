@@ -49,7 +49,7 @@ public class SaleOrdersService : ISaleOrdersService
         return Result<string>.Success(newSaleOrder.Id.ToString());
     }
 
-    public async Task<Result> UpdateTotalPrice(string saleOrderId)
+    public async Task<Result> UpdateTotalPriceAndTotalProfit(string saleOrderId)
     {
         var saleOrder = await _saleOrdersRepository.GetSaleOrderWithDetails(Guid.Parse(saleOrderId));
 
@@ -57,15 +57,36 @@ public class SaleOrdersService : ISaleOrdersService
             return Result.Failure(new Error("SaleOrderNotFound", "Sale order not found"));
 
         var totalPrice = saleOrder.SaleOrderDetails.Sum(d => d.SubTotal);
-
-        // Tính total profit
-        //var totalProfit = saleOrder.SaleOrderDetails.Sum(d => d.Profit);
+        var totalProfit = saleOrder.SaleOrderDetails.Sum(d => d.Profit);
 
         saleOrder.TotalPrice = totalPrice;
-        // saleOrder.TotalProfit = totalProfit;
+        saleOrder.TotalProfit = totalProfit;
         await _saleOrdersRepository.UpdateSaleOrder(saleOrder);
 
         return Result.Success();
+    }
+
+    public async Task<Result<PaginatedResult<SaleOrderDto>>> FetchAllSaleOrders(int page, int pageSize, string? search = null)
+    {
+        var saleOrders = await _saleOrdersRepository.FetchAllSaleOrders(page, pageSize, search);
+
+        var saleOrderDtos = saleOrders.Items.Select(so => new SaleOrderDto
+        {
+            Id = so.Id,
+            SaleOrderId = so.SaleOrderId,
+            CustomerId = so.CustomerId,
+            CustomerName = so.Customer?.CustomerName,
+            CreatedBy = so.CreatedBy,
+            CreatedByName = so.User.FullName,
+            PaymentMethod = so.PaymentMethod,
+            DebitMoney = so.DebitMoney,
+            CreatedAt = so.CreatedAt,
+            TotalPrice = so.TotalPrice,
+            TotalProfit = so.TotalProfit,
+            Details = new List<SaleOrderDetailDto>()
+        }).ToList();
+
+        return Result<PaginatedResult<SaleOrderDto>>.Success(new PaginatedResult<SaleOrderDto>(saleOrderDtos, saleOrders.Total));
     }
  
     public async Task<Result<SaleOrderDto>> GetSaleOrderById(string saleOrderId)

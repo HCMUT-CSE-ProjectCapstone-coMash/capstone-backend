@@ -1,3 +1,4 @@
+using Capstone.Application.Common;
 using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
@@ -52,5 +53,27 @@ public class SaleOrdersRepository : ISaleOrdersRepository
     public async Task<bool> ExistsByEmployeeId(Guid employeeId)
     {
         return await _context.SaleOrders.AnyAsync(saleOrder => saleOrder.CreatedBy == employeeId);
+    }
+
+    public async Task<(List<SaleOrder> Items, int Total)> FetchAllSaleOrders(int page, int pageSize, string? search = null)
+    {
+        var query = _context.SaleOrders
+            .Include(so => so.Customer)
+            .Include(so => so.User)
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            query = query.Where(so => so.SaleOrderId.Contains(search) || so.Customer!.CustomerName.Contains(search));
+        }
+
+        var total = await query.CountAsync();
+        var orders = await query
+            .OrderByDescending(so => so.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (orders, total);
     }
 }
