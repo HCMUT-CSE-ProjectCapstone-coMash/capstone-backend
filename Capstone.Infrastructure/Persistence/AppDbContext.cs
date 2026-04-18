@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<SaleOrder> SaleOrders => Set<SaleOrder>();
     public DbSet<SaleOrderDetail> SaleOrderDetails => Set<SaleOrderDetail>();
+    public DbSet<Promotion> Promotions => Set<Promotion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -29,7 +30,7 @@ public class AppDbContext : DbContext
             enity.ToTable("products");
 
             // Product has one User (CreatedBy) and User has many Products
-            enity.HasOne<User>().WithMany().HasForeignKey(p => p.CreatedBy).OnDelete(DeleteBehavior.Restrict);;
+            enity.HasOne<User>().WithMany().HasForeignKey(p => p.CreatedBy).OnDelete(DeleteBehavior.Restrict); ;
         });
 
         // ProductQuantities Table
@@ -47,7 +48,7 @@ public class AppDbContext : DbContext
             entity.ToTable("products_orders");
 
             // ProductsOrder has one User (CreatedBy) and User has many ProductsOrders
-            entity.HasOne<User>().WithMany().HasForeignKey(po => po.CreatedBy).OnDelete(DeleteBehavior.Restrict);;
+            entity.HasOne<User>().WithMany().HasForeignKey(po => po.CreatedBy).OnDelete(DeleteBehavior.Restrict); ;
         });
 
         // ProductsOrdersDetail Table
@@ -83,7 +84,7 @@ public class AppDbContext : DbContext
             entity.ToTable("sale_orders");
 
             // SaleOrder has one User (CreatedBy) and User has many SaleOrders
-            entity.HasOne(so => so.User).WithMany().HasForeignKey(so => so.CreatedBy).OnDelete(DeleteBehavior.Restrict);;
+            entity.HasOne(so => so.User).WithMany().HasForeignKey(so => so.CreatedBy).OnDelete(DeleteBehavior.Restrict); ;
 
             // SaleOrder has one Customer and Customer has many SaleOrders
             entity.HasOne(so => so.Customer).WithMany(c => c.SaleOrders).HasForeignKey(so => so.CustomerId).IsRequired(false);
@@ -99,6 +100,12 @@ public class AppDbContext : DbContext
 
             // SaleOrderDetail has one Product and Product has many SaleOrderDetails
             entity.HasOne(sod => sod.Product).WithMany().HasForeignKey(sod => sod.ProductId);
+        });
+
+        // Promotion Table
+        modelBuilder.Entity<Promotion>(entity =>
+        {
+            entity.ToTable("promotions");
         });
     }
 }
