@@ -19,7 +19,7 @@ public class PromotionsController : ControllerBase
     public async Task<IActionResult> CreatePromotionId()
     {
         var result = await _promotionsService.CreatePromotionId();
-        
+
         if (result.IsFailure)
         {
             return BadRequest(new
@@ -33,5 +33,11 @@ public class PromotionsController : ControllerBase
         {
             PromotionId = result.Value
         });
+    }
+
+    [HttpPost("create")]
+    public async Task<IActionResult> CreatePromotion([FromBody] CreatePromotionRequest request)
+    {
+        return Ok(request);
     }
 }
