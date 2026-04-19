@@ -112,6 +112,34 @@ namespace Capstone.Infrastructure.Migrations
                     b.ToTable("products", (string)null);
                 });
 
+            modelBuilder.Entity("Capstone.Domain.Entities.ProductPromotion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DiscountType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("DiscountValue")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("PromotionId");
+
+                    b.ToTable("product_promotions", (string)null);
+                });
+
             modelBuilder.Entity("Capstone.Domain.Entities.ProductQuantity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -219,12 +247,18 @@ namespace Capstone.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("PromotionId")
                         .IsRequired()
@@ -242,10 +276,12 @@ namespace Capstone.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
 
                     b.ToTable("promotions", (string)null);
                 });
@@ -392,6 +428,25 @@ namespace Capstone.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Capstone.Domain.Entities.ProductPromotion", b =>
+                {
+                    b.HasOne("Capstone.Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Capstone.Domain.Entities.Promotion", "Promotion")
+                        .WithMany("ProductPromotions")
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Promotion");
+                });
+
             modelBuilder.Entity("Capstone.Domain.Entities.ProductQuantity", b =>
                 {
                     b.HasOne("Capstone.Domain.Entities.Product", "Product")
@@ -438,6 +493,17 @@ namespace Capstone.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("ProductsOrdersDetail");
+                });
+
+            modelBuilder.Entity("Capstone.Domain.Entities.Promotion", b =>
+                {
+                    b.HasOne("Capstone.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Capstone.Domain.Entities.SaleOrder", b =>
@@ -494,6 +560,11 @@ namespace Capstone.Infrastructure.Migrations
             modelBuilder.Entity("Capstone.Domain.Entities.ProductsOrdersDetail", b =>
                 {
                     b.Navigation("QuantityChanges");
+                });
+
+            modelBuilder.Entity("Capstone.Domain.Entities.Promotion", b =>
+                {
+                    b.Navigation("ProductPromotions");
                 });
 
             modelBuilder.Entity("Capstone.Domain.Entities.SaleOrder", b =>

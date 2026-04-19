@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
     public DbSet<SaleOrder> SaleOrders => Set<SaleOrder>();
     public DbSet<SaleOrderDetail> SaleOrderDetails => Set<SaleOrderDetail>();
     public DbSet<Promotion> Promotions => Set<Promotion>();
+    public DbSet<ProductPromotion> ProductPromotions => Set<ProductPromotion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -106,6 +107,21 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Promotion>(entity =>
         {
             entity.ToTable("promotions");
+
+            // Promotion has one User (CreatedBy) and User has many Promotions
+            entity.HasOne(p => p.User).WithMany().HasForeignKey(p => p.CreatedBy).OnDelete(DeleteBehavior.Restrict);
+
+            // Promotion has many ProductPromotions and ProductPromotion has one Promotion
+            entity.HasMany(p => p.ProductPromotions).WithOne(pp => pp.Promotion).HasForeignKey(pp => pp.PromotionId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ProductPromotion Table
+        modelBuilder.Entity<ProductPromotion>(entity =>
+        {
+            entity.ToTable("product_promotions");
+
+            // ProductPromotion has one Product and Product has many ProductPromotions
+            entity.HasOne(pp => pp.Product).WithMany().HasForeignKey(pp => pp.ProductId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

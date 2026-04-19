@@ -12,5 +12,6 @@ public class SaleOrderDetail
     public double SubTotal { get; set; }
     public double Profit { get; set; }
     public Product Product { get; set; } = null!;
+    
     public SaleOrder SaleOrder { get; set; } = null!;
 }
