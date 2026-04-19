@@ -200,7 +200,7 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPatch("edit-employee/{id}")]
-    public async Task<IActionResult> EditEmployee([FromRoute] string id, [FromBody] EditEmployeeRequest request)
+    public async Task<IActionResult> EditEmployee([FromRoute] string id, [FromForm] EditEmployeeRequest request)
     {
         var result = await _auth.EditEmployee(
             id,
