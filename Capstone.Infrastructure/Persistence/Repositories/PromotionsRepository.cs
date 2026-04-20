@@ -1,4 +1,5 @@
 using Capstone.Application.Common.Interfaces.Persistence;
+using Capstone.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Capstone.Infrastructure.Persistence.Repositories;
@@ -22,5 +23,11 @@ public class PromotionsRepository : IPromotionsRepository
         if (!numberStrings.Any()) return 0;
 
         return numberStrings.Max(n => int.TryParse(n, out var num) ? num : 0);
+    }
+
+    public async Task CreatePromotion(Promotion promotion)
+    {
+        _context.Promotions.Add(promotion);
+        await _context.SaveChangesAsync();
     }
 }

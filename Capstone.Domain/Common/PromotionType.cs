@@ -2,7 +2,7 @@ namespace Capstone.Domain.Common;
 
 public static class PromotionType
 {
-    public const string ProductPromotion = "ProductPromotion";
-    public const string ComboPromotion = "ComboPromotion";
-    public const string OrderPromotion = "OrderPromotion";
+    public const string ProductPromotion = "Product";
+    public const string ComboPromotion = "Combo";
+    public const string OrderPromotion = "Order";
 }

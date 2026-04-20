@@ -12,6 +12,7 @@ public class SaleOrder
     public double TotalPrice { get; set; }
     public double TotalProfit { get; set; }
     public Customer? Customer { get; set; }
+    
     public User User { get; set; } = null!;
     public ICollection<SaleOrderDetail> SaleOrderDetails { get; set; } = new List<SaleOrderDetail>();
 }

@@ -1,6 +1,9 @@
 using Capstone.Application.Services.Authentication;
+using Capstone.Application.Services.ComboPromotionsService;
 using Capstone.Application.Services.Customers;
 using Capstone.Application.Services.FileStorageService;
+using Capstone.Application.Services.OrderPromotionsService;
+using Capstone.Application.Services.ProductPromotionsService;
 using Capstone.Application.Services.ProductQuantitesService;
 using Capstone.Application.Services.Products;
 using Capstone.Application.Services.ProductsOrders;
@@ -26,6 +29,9 @@ public static class DependencyInjection
         services.AddScoped<ISaleOrdersService, SaleOrdersService>();
         services.AddScoped<ISaleOrderDetailsService, SaleOrderDetailsService>();
         services.AddScoped<IPromotionsService, PromotionsService>();
+        services.AddScoped<IProductPromotionsService, ProductPromotionsService>();
+        services.AddScoped<IOrderPromotionsService, OrderPromotionsService>();
+        services.AddScoped<IComboPromotionsService, ComboPromotionsService>();
 
         return services;
     }

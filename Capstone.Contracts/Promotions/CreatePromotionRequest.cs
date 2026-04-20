@@ -3,12 +3,11 @@ using System.Text.Json.Serialization;
 namespace Capstone.Contracts.Promotions;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "promotionType")]
-[JsonDerivedType(typeof(CreateProductPromotionRequest), "PRODUCT")]
-[JsonDerivedType(typeof(CreateComboPromotionRequest),   "COMBO")]
-[JsonDerivedType(typeof(CreateOrderPromotionRequest),   "ORDER")]
+[JsonDerivedType(typeof(CreateProductPromotionRequest), "Product")]
+[JsonDerivedType(typeof(CreateComboPromotionRequest),   "Combo")]
+[JsonDerivedType(typeof(CreateOrderPromotionRequest),   "Order")]
 public abstract class CreatePromotionRequest
 {
-    public string PromotionId { get; set; } = string.Empty;
     public string PromotionName { get; set; } = string.Empty;
     public string StartDate { get; set; } = string.Empty;
     public string EndDate { get; set; } = string.Empty;
@@ -39,8 +38,7 @@ public class ProductDiscountItemDto
 
 public class ComboDealDto
 {
-    public string? ComboId  { get; set; }
-    public string? Name     { get; set; }
+    public string Name { get; set; } = string.Empty;
     public List<ComboItemDto> Items { get; set; } = new();
     public decimal ComboPrice { get; set; }
 }

@@ -3,6 +3,7 @@ using System;
 using Capstone.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Capstone.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260419141901_AddProductPromotionTable")]
+    partial class AddProductPromotionTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,53 +24,6 @@ namespace Capstone.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("Capstone.Domain.Entities.ComboPromotion", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ComboName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("ComboPrice")
-                        .HasColumnType("numeric");
-
-                    b.Property<Guid>("PromotionId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PromotionId");
-
-                    b.ToTable("combo_promotions", (string)null);
-                });
-
-            modelBuilder.Entity("Capstone.Domain.Entities.ComboPromotionDetail", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ComboPromotionId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ComboPromotionId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("combo_promotion_details", (string)null);
-                });
 
             modelBuilder.Entity("Capstone.Domain.Entities.Customer", b =>
                 {
@@ -96,35 +52,6 @@ namespace Capstone.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("customers", (string)null);
-                });
-
-            modelBuilder.Entity("Capstone.Domain.Entities.OrderPromotion", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("DiscountType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("DiscountValue")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("MaxDiscount")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("MinValue")
-                        .HasColumnType("numeric");
-
-                    b.Property<Guid>("PromotionId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PromotionId");
-
-                    b.ToTable("order_promotions", (string)null);
                 });
 
             modelBuilder.Entity("Capstone.Domain.Entities.Product", b =>
@@ -495,47 +422,6 @@ namespace Capstone.Infrastructure.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("Capstone.Domain.Entities.ComboPromotion", b =>
-                {
-                    b.HasOne("Capstone.Domain.Entities.Promotion", "Promotion")
-                        .WithMany("ComboPromotions")
-                        .HasForeignKey("PromotionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Promotion");
-                });
-
-            modelBuilder.Entity("Capstone.Domain.Entities.ComboPromotionDetail", b =>
-                {
-                    b.HasOne("Capstone.Domain.Entities.ComboPromotion", "ComboPromotion")
-                        .WithMany("ComboPromotionDetails")
-                        .HasForeignKey("ComboPromotionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Capstone.Domain.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ComboPromotion");
-
-                    b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("Capstone.Domain.Entities.OrderPromotion", b =>
-                {
-                    b.HasOne("Capstone.Domain.Entities.Promotion", "Promotion")
-                        .WithMany("OrderPromotions")
-                        .HasForeignKey("PromotionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Promotion");
-                });
-
             modelBuilder.Entity("Capstone.Domain.Entities.Product", b =>
                 {
                     b.HasOne("Capstone.Domain.Entities.User", null)
@@ -659,11 +545,6 @@ namespace Capstone.Infrastructure.Migrations
                     b.Navigation("SaleOrder");
                 });
 
-            modelBuilder.Entity("Capstone.Domain.Entities.ComboPromotion", b =>
-                {
-                    b.Navigation("ComboPromotionDetails");
-                });
-
             modelBuilder.Entity("Capstone.Domain.Entities.Customer", b =>
                 {
                     b.Navigation("SaleOrders");
@@ -686,10 +567,6 @@ namespace Capstone.Infrastructure.Migrations
 
             modelBuilder.Entity("Capstone.Domain.Entities.Promotion", b =>
                 {
-                    b.Navigation("ComboPromotions");
-
-                    b.Navigation("OrderPromotions");
-
                     b.Navigation("ProductPromotions");
                 });
 
