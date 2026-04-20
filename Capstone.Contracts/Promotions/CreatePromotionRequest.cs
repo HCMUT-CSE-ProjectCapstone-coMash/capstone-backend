@@ -8,7 +8,6 @@ namespace Capstone.Contracts.Promotions;
 [JsonDerivedType(typeof(CreateOrderPromotionRequest),   "Order")]
 public abstract class CreatePromotionRequest
 {
-    public string PromotionId { get; set; } = string.Empty;
     public string PromotionName { get; set; } = string.Empty;
     public string StartDate { get; set; } = string.Empty;
     public string EndDate { get; set; } = string.Empty;

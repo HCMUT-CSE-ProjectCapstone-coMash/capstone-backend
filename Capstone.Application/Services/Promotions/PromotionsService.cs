@@ -32,7 +32,6 @@ public class PromotionsService : IPromotionsService
     }
     
     public async Task<Result<string>> CreatePromotion(
-        string promotionId,
         string promotionName,
         string promotionType,
         string description,
@@ -41,10 +40,12 @@ public class PromotionsService : IPromotionsService
         string createdBy
     )
     {
+        var promotionIdResult = await CreatePromotionId();
+
         var promotion = new Promotion
         {
             Id = Guid.NewGuid(),
-            PromotionId = promotionId,
+            PromotionId = promotionIdResult.Value,
             PromotionName = promotionName,
             PromotionType = promotionType,
             Description = description,

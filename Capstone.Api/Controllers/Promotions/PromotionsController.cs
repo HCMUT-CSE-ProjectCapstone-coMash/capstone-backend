@@ -1,3 +1,4 @@
+using Capstone.Application.Services.OrderPromotionsService;
 using Capstone.Application.Services.ProductPromotionsService;
 using Capstone.Application.Services.Promotions;
 using Capstone.Contracts.Promotions;
@@ -12,14 +13,17 @@ public class PromotionsController : ControllerBase
 {
     private readonly IPromotionsService _promotionsService;
     private readonly IProductPromotionsService _productPromotionsService;
+    private readonly IOrderPromotionsService _orderPromotionsService;
 
     public PromotionsController(
         IPromotionsService promotionsService,
-        IProductPromotionsService productPromotionsService
+        IProductPromotionsService productPromotionsService,
+        IOrderPromotionsService orderPromotionsService
     )
     {
         _promotionsService = promotionsService;
         _productPromotionsService = productPromotionsService;
+        _orderPromotionsService = orderPromotionsService;
     }
 
     [HttpGet("create-promotion-id")]
@@ -67,7 +71,6 @@ public class PromotionsController : ControllerBase
         }
 
         var promotionResult = await _promotionsService.CreatePromotion(
-            request.PromotionId,
             request.PromotionName,
             promotionType,
             request.Description ?? string.Empty,
@@ -85,6 +88,20 @@ public class PromotionsController : ControllerBase
                     productPromotion.ProductId,
                     productPromotion.DiscountType,
                     productPromotion.DiscountValue
+                );
+            }
+        }
+
+        if (request is CreateOrderPromotionRequest orderPromotionRequest)
+        {
+            foreach (var orderPromotion in orderPromotionRequest.Levels)
+            {
+                await _orderPromotionsService.CreateOrderPromotion(
+                    promotionResult.Value,
+                    orderPromotion.MinValue,
+                    orderPromotion.DiscountType,
+                    orderPromotion.DiscountValue,
+                    orderPromotion.MaxDiscount ?? 0
                 );
             }
         }

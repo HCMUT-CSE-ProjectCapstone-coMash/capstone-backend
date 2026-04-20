@@ -15,4 +15,5 @@ public class Promotion
 
     public User User { get; set; } = null!;
     public ICollection<ProductPromotion> ProductPromotions { get; set; } = new List<ProductPromotion>();
+    public ICollection<OrderPromotion> OrderPromotions { get; set; } = new List<OrderPromotion>();
 }
