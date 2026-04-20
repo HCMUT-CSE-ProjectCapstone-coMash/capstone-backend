@@ -10,7 +10,7 @@ public record AuthResult(
     string Token,
     string PhoneNumber,
     string Gender,
-    string DateOfBirth,
+    DateOnly DateOfBirth,
     string ImageURL
 );
 
@@ -23,6 +23,6 @@ public record UserDto(
     DateTime CreatedAt,
     string PhoneNumber,
     string Gender,
-    string DateOfBirth,
+    DateOnly DateOfBirth,
     string ImageURL
 );

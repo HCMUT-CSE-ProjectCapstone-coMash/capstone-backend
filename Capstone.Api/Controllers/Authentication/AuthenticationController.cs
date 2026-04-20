@@ -73,7 +73,7 @@ public class AuthenticationController : ControllerBase
             user.Role,
             user.PhoneNumber,
             user.Gender,
-            user.DateOfBirth,
+            user.DateOfBirth.ToString(),
             user.ImageURL,
             user.CreatedAt
         ));
@@ -126,7 +126,7 @@ public class AuthenticationController : ControllerBase
             result.Value.Role,
             result.Value.PhoneNumber,
             result.Value.Gender,
-            result.Value.DateOfBirth,
+            result.Value.DateOfBirth.ToString(),
             result.Value.ImageURL,
             result.Value.CreatedAt
         ));
@@ -150,7 +150,7 @@ public class AuthenticationController : ControllerBase
             result.Value.Role,
             result.Value.PhoneNumber,
             result.Value.Gender,
-            result.Value.DateOfBirth,
+            result.Value.DateOfBirth.ToString(),
             result.Value.ImageURL,
             result.Value.CreatedAt
         ));
@@ -192,10 +192,37 @@ public class AuthenticationController : ControllerBase
                 u.Role,
                 u.PhoneNumber,
                 u.Gender,
-                u.DateOfBirth,
+                u.DateOfBirth.ToString(),
                 u.ImageURL
             )).ToList(),
             result.Value.Total
+        ));
+    }
+
+    [HttpGet("employee/{id}")]
+    public async Task<IActionResult> GetEmployeeById([FromRoute] string id)
+    {
+        var result = await _auth.GetUserById(id);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new EmployeeResponse(
+            result.Value.Id,
+            result.Value.EmployeeId,
+            result.Value.FullName,
+            result.Value.Email,
+            result.Value.Role,
+            result.Value.PhoneNumber,
+            result.Value.Gender,
+            result.Value.DateOfBirth.ToString(),
+            result.Value.ImageURL
         ));
     }
 

@@ -10,7 +10,7 @@ public class User
     public string Role { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
     public string Gender { get; set; } = string.Empty;
-    public string DateOfBirth { get; set; } = string.Empty;
+    public DateOnly DateOfBirth { get; set; }
     public string Status { get; set; } = string.Empty;
     public string? ImageKey { get; set; } = string.Empty;
     public string? EmployeeId { get; set; } = string.Empty;

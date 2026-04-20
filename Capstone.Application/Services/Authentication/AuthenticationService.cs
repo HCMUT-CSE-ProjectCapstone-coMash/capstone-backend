@@ -66,7 +66,7 @@ public class AuthenticationService : IAuthenticationService
             Status = UserStatus.Active,
             PhoneNumber = phoneNumber,
             Gender = gender,
-            DateOfBirth = dateOfBirth,
+            DateOfBirth = DateOnly.Parse(dateOfBirth),
         }; 
 
         await _userRepository.AddUser(user);
@@ -248,7 +248,7 @@ public class AuthenticationService : IAuthenticationService
             user.Gender = gender;
 
         if (!string.IsNullOrWhiteSpace(dateOfBirth))
-            user.DateOfBirth = dateOfBirth;
+            user.DateOfBirth = DateOnly.Parse(dateOfBirth);
 
         await _userRepository.UpdateUser(user);
 
