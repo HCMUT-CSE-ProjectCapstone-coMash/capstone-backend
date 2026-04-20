@@ -8,7 +8,7 @@ public record AuthenticationResponse(
     string Role,
     string PhoneNumber,
     string Gender,
-    string DateOfBirth,
+    DateOnly DateOfBirth,
     string ImageURL,
     DateTime CreatedAt
 );

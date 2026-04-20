@@ -73,7 +73,7 @@ public class AuthenticationController : ControllerBase
             user.Role,
             user.PhoneNumber,
             user.Gender,
-            user.DateOfBirth.ToString(),
+            user.DateOfBirth,
             user.ImageURL,
             user.CreatedAt
         ));
@@ -126,7 +126,7 @@ public class AuthenticationController : ControllerBase
             result.Value.Role,
             result.Value.PhoneNumber,
             result.Value.Gender,
-            result.Value.DateOfBirth.ToString(),
+            result.Value.DateOfBirth,
             result.Value.ImageURL,
             result.Value.CreatedAt
         ));
@@ -150,7 +150,7 @@ public class AuthenticationController : ControllerBase
             result.Value.Role,
             result.Value.PhoneNumber,
             result.Value.Gender,
-            result.Value.DateOfBirth.ToString(),
+            result.Value.DateOfBirth,
             result.Value.ImageURL,
             result.Value.CreatedAt
         ));
@@ -192,7 +192,7 @@ public class AuthenticationController : ControllerBase
                 u.Role,
                 u.PhoneNumber,
                 u.Gender,
-                u.DateOfBirth.ToString(),
+                u.DateOfBirth,
                 u.ImageURL
             )).ToList(),
             result.Value.Total
@@ -221,7 +221,7 @@ public class AuthenticationController : ControllerBase
             result.Value.Role,
             result.Value.PhoneNumber,
             result.Value.Gender,
-            result.Value.DateOfBirth.ToString(),
+            result.Value.DateOfBirth,
             result.Value.ImageURL
         ));
     }

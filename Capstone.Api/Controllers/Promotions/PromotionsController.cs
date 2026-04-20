@@ -133,4 +133,39 @@ public class PromotionsController : ControllerBase
 
         return Ok(new { message = "Promotion created successfully", promotionName = request.PromotionName });
     }
+
+    [HttpGet("fetch-all")]
+    public async Task<IActionResult> FetchPromotions(
+        [FromQuery] int currentPage = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? category = null,
+        [FromQuery] string? search = null
+    )
+    {
+        var result = await _promotionsService.FetchPromotions(currentPage, pageSize, category, search);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new GetPromotionResponse(
+            result.Value.Items.Select(p => new PromotionResponse(
+                p.Id,
+                p.PromotionId,
+                p.PromotionName,
+                p.PromotionType,
+                p.Description,
+                p.PromotionStatus,
+                p.StartDate,
+                p.EndDate,
+                p.CreatedAt
+            )).ToList(),
+            result.Value.Total
+        ));
+    }
 }

@@ -8,6 +8,6 @@ public record EmployeeResponse(
     string Role,
     string PhoneNumber,
     string Gender,
-    string DateOfBirth,
+    DateOnly DateOfBirth,
     string ImageURL
 );

@@ -30,7 +30,7 @@ public class PromotionsService : IPromotionsService
 
         return Result<string>.Success(newId);
     }
-    
+
     public async Task<Result<string>> CreatePromotion(
         string promotionName,
         string promotionType,
@@ -59,5 +59,31 @@ public class PromotionsService : IPromotionsService
         await _promotionsRepository.CreatePromotion(promotion);
 
         return Result<string>.Success(promotion.Id.ToString());
+    }
+
+    public async Task<Result<PaginatedResult<PromotionDto>>> FetchPromotions(
+        int currentPage,
+        int pageSize,
+        string? category = null,
+        string? search = null
+    )
+    {
+        var (promotions, total) = await _promotionsRepository.FetchPromotions(currentPage, pageSize, category, search);
+
+        var promotionDtos = promotions.Select(p => new PromotionDto
+        {
+            Id = p.Id,
+            PromotionId = p.PromotionId,
+            PromotionName = p.PromotionName,
+            PromotionType = p.PromotionType,
+            Description = p.Description,
+            PromotionStatus = p.PromotionStatus,
+            StartDate = p.StartDate,
+            EndDate = p.EndDate,
+            CreatedAt = p.CreatedAt
+        }).ToList();
+
+        return Result<PaginatedResult<PromotionDto>>.Success(
+            new PaginatedResult<PromotionDto>(promotionDtos, total));
     }
 }

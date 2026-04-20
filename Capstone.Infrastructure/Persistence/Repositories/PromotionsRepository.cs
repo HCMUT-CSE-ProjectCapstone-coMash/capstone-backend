@@ -30,4 +30,38 @@ public class PromotionsRepository : IPromotionsRepository
         _context.Promotions.Add(promotion);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<(List<Promotion> Items, int Total)> FetchPromotions(int page, int pageSize, string? category = null, string? search = null)
+    {
+        var query = _context.Promotions.AsQueryable();
+
+        if (!string.IsNullOrEmpty(category))
+        {
+            query = query.Where(p => p.PromotionType == category);
+        }
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            var searchPattern = $"%{search}%";
+            query = query.Where(p =>
+                // match against promotion name (accent-insensitive)
+                EF.Functions.ILike(
+                    EF.Functions.Unaccent(p.PromotionName),
+                    EF.Functions.Unaccent(searchPattern))
+                ||
+                // match "KM-6" style against promotionId
+                (p.PromotionId != null && EF.Functions.ILike(p.PromotionId, searchPattern))
+            );
+        }
+
+        var total = await query.CountAsync();
+
+        var items = await query
+            .OrderByDescending(p => p.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+        
+        return (items, total);
+    }
 }
