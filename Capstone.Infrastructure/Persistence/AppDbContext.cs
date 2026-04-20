@@ -20,6 +20,8 @@ public class AppDbContext : DbContext
     public DbSet<Promotion> Promotions => Set<Promotion>();
     public DbSet<ProductPromotion> ProductPromotions => Set<ProductPromotion>();
     public DbSet<OrderPromotion> OrderPromotions => Set<OrderPromotion>();
+    public DbSet<ComboPromotion> ComboPromotions => Set<ComboPromotion>();
+    public DbSet<ComboPromotionDetail> ComboPromotionDetails => Set<ComboPromotionDetail>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -117,6 +119,9 @@ public class AppDbContext : DbContext
 
             // Promotion has many OrderPromotions and OrderPromotion has one Promotion
             entity.HasMany(p => p.OrderPromotions).WithOne(op => op.Promotion).HasForeignKey(op => op.PromotionId).OnDelete(DeleteBehavior.Cascade);
+
+            // Promotion has many ComboPromotions and ComboPromotion has one Promotion
+            entity.HasMany(p => p.ComboPromotions).WithOne(cp => cp.Promotion).HasForeignKey(cp => cp.PromotionId).OnDelete(DeleteBehavior.Cascade);
         });
 
         // ProductPromotion Table
@@ -132,6 +137,24 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<OrderPromotion>(entity =>
         {
             entity.ToTable("order_promotions");
+        });
+
+        // ComboPromotion Table
+        modelBuilder.Entity<ComboPromotion>(entity =>
+        {
+            entity.ToTable("combo_promotions");
+
+            // ComboPromotion has many ComboPromotionDetails and ComboPromotionDetail has one ComboPromotion
+            entity.HasMany(cp => cp.ComboPromotionDetails).WithOne(cpd => cpd.ComboPromotion).HasForeignKey(cpd => cpd.ComboPromotionId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ComboPromotionDetail Table
+        modelBuilder.Entity<ComboPromotionDetail>(entity =>
+        {
+            entity.ToTable("combo_promotion_details");
+
+            // ComboPromotionDetail has one Product and Product has many ComboPromotionDetails
+            entity.HasOne(cpd => cpd.Product).WithMany().HasForeignKey(cpd => cpd.ProductId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

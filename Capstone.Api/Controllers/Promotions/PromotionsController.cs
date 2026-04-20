@@ -1,3 +1,4 @@
+using Capstone.Application.Services.ComboPromotionsService;
 using Capstone.Application.Services.OrderPromotionsService;
 using Capstone.Application.Services.ProductPromotionsService;
 using Capstone.Application.Services.Promotions;
@@ -14,16 +15,19 @@ public class PromotionsController : ControllerBase
     private readonly IPromotionsService _promotionsService;
     private readonly IProductPromotionsService _productPromotionsService;
     private readonly IOrderPromotionsService _orderPromotionsService;
+    private readonly IComboPromotionsService _comboPromotionsService;
 
     public PromotionsController(
         IPromotionsService promotionsService,
         IProductPromotionsService productPromotionsService,
-        IOrderPromotionsService orderPromotionsService
+        IOrderPromotionsService orderPromotionsService,
+        IComboPromotionsService comboPromotionsService
     )
     {
         _promotionsService = promotionsService;
         _productPromotionsService = productPromotionsService;
         _orderPromotionsService = orderPromotionsService;
+        _comboPromotionsService = comboPromotionsService;
     }
 
     [HttpGet("create-promotion-id")]
@@ -70,7 +74,7 @@ public class PromotionsController : ControllerBase
                 });
         }
 
-        var promotionResult = await _promotionsService.CreatePromotion(
+        var promotionId = await _promotionsService.CreatePromotion(
             request.PromotionName,
             promotionType,
             request.Description ?? string.Empty,
@@ -84,11 +88,32 @@ public class PromotionsController : ControllerBase
             foreach (var productPromotion in productPromotionRequest.ProductDiscounts)
             {
                 await _productPromotionsService.CreateProductPromotion(
-                    promotionResult.Value,
+                    promotionId.Value,
                     productPromotion.ProductId,
                     productPromotion.DiscountType,
                     productPromotion.DiscountValue
                 );
+            }
+        }
+
+        if (request is CreateComboPromotionRequest comboPromotionRequest)
+        {
+            foreach (var comboPromotion in comboPromotionRequest.Combos)
+            {
+                var comboPromotionId = await _comboPromotionsService.CreateComboPromotion(
+                    promotionId.Value,
+                    comboPromotion.Name,
+                    comboPromotion.ComboPrice
+                );
+
+                foreach (var comboItem in comboPromotion.Items)
+                {
+                    await _comboPromotionsService.CreateComboPromotionDetail(
+                        comboPromotionId.Value,
+                        comboItem.ProductId,
+                        comboItem.Quantity
+                    );
+                }
             }
         }
 
@@ -97,7 +122,7 @@ public class PromotionsController : ControllerBase
             foreach (var orderPromotion in orderPromotionRequest.Levels)
             {
                 await _orderPromotionsService.CreateOrderPromotion(
-                    promotionResult.Value,
+                    promotionId.Value,
                     orderPromotion.MinValue,
                     orderPromotion.DiscountType,
                     orderPromotion.DiscountValue,
@@ -106,6 +131,6 @@ public class PromotionsController : ControllerBase
             }
         }
 
-        return Ok(promotionResult.Value);
+        return Ok(new { message = "Promotion created successfully", promotionName = request.PromotionName });
     }
 }

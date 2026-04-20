@@ -1,4 +1,5 @@
 using Capstone.Application.Services.Authentication;
+using Capstone.Application.Services.ComboPromotionsService;
 using Capstone.Application.Services.Customers;
 using Capstone.Application.Services.FileStorageService;
 using Capstone.Application.Services.OrderPromotionsService;
@@ -30,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<IPromotionsService, PromotionsService>();
         services.AddScoped<IProductPromotionsService, ProductPromotionsService>();
         services.AddScoped<IOrderPromotionsService, OrderPromotionsService>();
+        services.AddScoped<IComboPromotionsService, ComboPromotionsService>();
 
         return services;
     }
