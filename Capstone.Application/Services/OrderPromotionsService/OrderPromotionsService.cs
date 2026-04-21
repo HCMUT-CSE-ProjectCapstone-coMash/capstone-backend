@@ -29,4 +29,20 @@ public class OrderPromotionsService : IOrderPromotionsService
 
         return Result.Success();
     }
+
+    public async Task<Result<List<OrderPromotionDto>>> GetOrderPromotionsByPromotionId(Guid promotionId)
+    {
+        var orderPromotionList = await _orderPromotionsRepository.GetOrderPromotionsByPromotionId(promotionId);
+
+        var orderPromotionDtos = orderPromotionList.Select(op => new OrderPromotionDto
+        {
+            Id = op.Id,
+            MinValue = op.MinValue,
+            DiscountType = op.DiscountType,
+            DiscountValue = op.DiscountValue,
+            MaxDiscount = op.MaxDiscount
+        }).ToList();
+
+        return Result<List<OrderPromotionDto>>.Success(orderPromotionDtos);
+    }
 }

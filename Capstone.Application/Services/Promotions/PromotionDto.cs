@@ -1,3 +1,7 @@
+using Capstone.Application.Services.ComboPromotionsService;
+using Capstone.Application.Services.OrderPromotionsService;
+using Capstone.Application.Services.ProductPromotionsService;
+
 namespace Capstone.Application.Services.Promotions;
 
 public class PromotionDto
@@ -11,4 +15,8 @@ public class PromotionDto
     public DateOnly StartDate { get; set; }
     public DateOnly EndDate { get; set; }
     public DateTime CreatedAt { get; set; }
-}
+
+    public List<ProductPromotionDto>? ProductPromotions { get; set; }
+    public List<OrderPromotionDto>? OrderPromotions { get; set; }
+    public List<ComboPromotionDto>? ComboPromotions { get; set; }
+};

@@ -21,4 +21,6 @@ public interface IPromotionsService
         string? category = null,
         string? search = null
     );
+
+    Task<Result<PromotionDto>> GetPromotionById(string promotionId);
 }

@@ -61,7 +61,12 @@ public class PromotionsRepository : IPromotionsRepository
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
-        
+
         return (items, total);
+    }
+
+    public async Task<Promotion?> GetPromotionById(Guid promotionId)
+    {
+        return await _context.Promotions.FirstOrDefaultAsync(p => p.Id == promotionId);
     }
 }

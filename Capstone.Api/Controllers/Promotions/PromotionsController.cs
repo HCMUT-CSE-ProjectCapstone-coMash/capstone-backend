@@ -168,4 +168,37 @@ public class PromotionsController : ControllerBase
             result.Value.Total
         ));
     }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetPromotionById([FromRoute] string id)
+    {
+        var promotion = await _promotionsService.GetPromotionById(id);
+
+        if (promotion.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = promotion.Error.Code,
+                message = promotion.Error.Description
+            });
+        }
+
+        switch (promotion.Value.PromotionType)
+        {
+            case PromotionType.ProductPromotion:
+                var productPromotions = await _productPromotionsService.GetProductPromotionsByPromotionId(promotion.Value.Id);
+                promotion.Value.ProductPromotions = productPromotions.Value;
+                break;
+            case PromotionType.ComboPromotion:
+                var comboPromotions = await _comboPromotionsService.GetComboPromotionsByPromotionId(promotion.Value.Id);
+                promotion.Value.ComboPromotions = comboPromotions.Value;
+                break;
+            case PromotionType.OrderPromotion:
+                var orderPromotions = await _orderPromotionsService.GetOrderPromotionsByPromotionId(promotion.Value.Id);
+                promotion.Value.OrderPromotions = orderPromotions.Value;
+                break;
+        }
+
+        return Ok(promotion.Value);
+    }
 }

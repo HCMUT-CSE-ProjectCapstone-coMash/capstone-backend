@@ -11,4 +11,6 @@ public interface IOrderPromotionsService
         decimal discountValue,
         decimal maxDiscount
     );
+
+    Task<Result<List<OrderPromotionDto>>> GetOrderPromotionsByPromotionId(Guid promotionId);
 }

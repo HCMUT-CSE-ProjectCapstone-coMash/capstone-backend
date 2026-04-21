@@ -1,0 +1,12 @@
+using Capstone.Application.Services.Products;
+
+namespace Capstone.Application.Services.ProductPromotionsService;
+
+public class ProductPromotionDto
+{
+    public Guid Id { get; set; }
+    public ProductDto Product { get; set; } = null!;
+    public string ProductName { get; set; } = string.Empty;
+    public string DiscountType { get; set; } = string.Empty;
+    public decimal DiscountValue { get; set; }
+}

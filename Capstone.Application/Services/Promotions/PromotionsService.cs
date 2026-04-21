@@ -86,4 +86,27 @@ public class PromotionsService : IPromotionsService
         return Result<PaginatedResult<PromotionDto>>.Success(
             new PaginatedResult<PromotionDto>(promotionDtos, total));
     }
+
+    public async Task<Result<PromotionDto>> GetPromotionById(string id)
+    {
+        var promotion = await _promotionsRepository.GetPromotionById(Guid.Parse(id));
+
+        if (promotion == null)
+        {
+            return Result<PromotionDto>.Failure(new Error("PromotionNotFound", "Promotion not found"));
+        }
+
+        return Result<PromotionDto>.Success(new PromotionDto
+        {
+            Id = promotion.Id,
+            PromotionId = promotion.PromotionId,
+            PromotionName = promotion.PromotionName,
+            PromotionType = promotion.PromotionType,
+            Description = promotion.Description,
+            PromotionStatus = promotion.PromotionStatus,
+            StartDate = promotion.StartDate,
+            EndDate = promotion.EndDate,
+            CreatedAt = promotion.CreatedAt
+        });
+    }
 }
