@@ -78,6 +78,7 @@ public class PromotionsService : IPromotionsService
             PromotionType = p.PromotionType,
             Description = p.Description,
             PromotionStatus = p.PromotionStatus,
+            PromotionPhase = GetPromotionPhase(p.StartDate, p.EndDate).Value,
             StartDate = p.StartDate,
             EndDate = p.EndDate,
             CreatedAt = p.CreatedAt
@@ -104,9 +105,32 @@ public class PromotionsService : IPromotionsService
             PromotionType = promotion.PromotionType,
             Description = promotion.Description,
             PromotionStatus = promotion.PromotionStatus,
+            PromotionPhase = GetPromotionPhase(promotion.StartDate, promotion.EndDate).Value,
             StartDate = promotion.StartDate,
             EndDate = promotion.EndDate,
             CreatedAt = promotion.CreatedAt
         });
+    }
+
+    private Result<string> GetPromotionPhase(DateOnly startDate, DateOnly endDate)
+    {
+        var today = DateOnly.FromDateTime(_dateTimeProvider.UtcNow);
+
+        string phase;
+
+        if (today < startDate)
+        {
+            phase = PromotionPhase.Upcoming;
+        }
+        else if (today > endDate)
+        {
+            phase = PromotionPhase.Expired;
+        }
+        else
+        {
+            phase = PromotionPhase.Ongoing;
+        }
+
+        return Result<string>.Success(phase);
     }
 }

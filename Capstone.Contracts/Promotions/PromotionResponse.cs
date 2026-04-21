@@ -7,6 +7,7 @@ public record PromotionResponse (
     string PromotionType,
     string Description,
     string PromotionStatus,
+    string PromotionPhase,
     DateOnly StartDate,
     DateOnly EndDate,
     DateTime CreatedAt

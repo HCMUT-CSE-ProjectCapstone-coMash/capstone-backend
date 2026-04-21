@@ -161,6 +161,7 @@ public class PromotionsController : ControllerBase
                 p.PromotionType,
                 p.Description,
                 p.PromotionStatus,
+                p.PromotionPhase,
                 p.StartDate,
                 p.EndDate,
                 p.CreatedAt

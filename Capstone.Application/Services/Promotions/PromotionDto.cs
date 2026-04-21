@@ -12,6 +12,7 @@ public class PromotionDto
     public string PromotionType { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string PromotionStatus { get; set; } = string.Empty;
+    public string PromotionPhase { get; set; } = string.Empty;
     public DateOnly StartDate { get; set; }
     public DateOnly EndDate { get; set; }
     public DateTime CreatedAt { get; set; }

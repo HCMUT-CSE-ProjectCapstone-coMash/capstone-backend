@@ -112,7 +112,7 @@ public class ComboPromotionsService : IComboPromotionsService
                 Id = cp.Id,
                 ComboName = cp.ComboName,
                 ComboPrice = cp.ComboPrice,
-                ComboDetails = comboDetails
+                ComboItems = comboDetails
             });
         }
 
