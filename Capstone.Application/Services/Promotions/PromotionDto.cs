@@ -16,7 +16,7 @@ public class PromotionDto
     public DateOnly EndDate { get; set; }
     public DateTime CreatedAt { get; set; }
 
-    public List<ProductPromotionDto>? ProductPromotions { get; set; }
-    public List<OrderPromotionDto>? OrderPromotions { get; set; }
-    public List<ComboPromotionDto>? ComboPromotions { get; set; }
+    public List<ProductPromotionDto>? ProductDiscounts { get; set; }
+    public List<OrderPromotionDto>? Levels { get; set; }
+    public List<ComboPromotionDto>? Combos { get; set; }
 };

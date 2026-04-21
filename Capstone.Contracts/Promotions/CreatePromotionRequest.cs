@@ -38,8 +38,8 @@ public class ProductDiscountItemDto
 
 public class ComboDealDto
 {
-    public string Name { get; set; } = string.Empty;
-    public List<ComboItemDto> Items { get; set; } = new();
+    public string ComboName { get; set; } = string.Empty;
+    public List<ComboItemDto> ComboItems { get; set; } = new();
     public decimal ComboPrice { get; set; }
 }
 

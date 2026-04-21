@@ -102,11 +102,11 @@ public class PromotionsController : ControllerBase
             {
                 var comboPromotionId = await _comboPromotionsService.CreateComboPromotion(
                     promotionId.Value,
-                    comboPromotion.Name,
+                    comboPromotion.ComboName,
                     comboPromotion.ComboPrice
                 );
 
-                foreach (var comboItem in comboPromotion.Items)
+                foreach (var comboItem in comboPromotion.ComboItems)
                 {
                     await _comboPromotionsService.CreateComboPromotionDetail(
                         comboPromotionId.Value,
@@ -187,15 +187,15 @@ public class PromotionsController : ControllerBase
         {
             case PromotionType.ProductPromotion:
                 var productPromotions = await _productPromotionsService.GetProductPromotionsByPromotionId(promotion.Value.Id);
-                promotion.Value.ProductPromotions = productPromotions.Value;
+                promotion.Value.ProductDiscounts = productPromotions.Value;
                 break;
             case PromotionType.ComboPromotion:
                 var comboPromotions = await _comboPromotionsService.GetComboPromotionsByPromotionId(promotion.Value.Id);
-                promotion.Value.ComboPromotions = comboPromotions.Value;
+                promotion.Value.Combos = comboPromotions.Value;
                 break;
             case PromotionType.OrderPromotion:
                 var orderPromotions = await _orderPromotionsService.GetOrderPromotionsByPromotionId(promotion.Value.Id);
-                promotion.Value.OrderPromotions = orderPromotions.Value;
+                promotion.Value.Levels = orderPromotions.Value;
                 break;
         }
 

@@ -80,7 +80,6 @@ public class ProductPromotionsService : IProductPromotionsService
             {
                 Id = pp.Id,
                 Product = productDto,
-                ProductName = pp.Product.ProductName,
                 DiscountType = pp.DiscountType,
                 DiscountValue = pp.DiscountValue
             };
