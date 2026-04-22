@@ -238,6 +238,49 @@ public class PromotionsController : ControllerBase
         return Ok(new { message = "Promotion updated successfully", promotionName = promotionName.Value });
     }
 
+    [HttpPatch("combo/{promotionId}")]
+    public async Task<IActionResult> UpdateComboPromotion(string promotionId, [FromBody] UpdateComboPromotionRequest request)
+    {
+        var promotionName = await _promotionsService.UpdatePromotion(
+            promotionId,
+            request.PromotionName,
+            request.StartDate,
+            request.EndDate,
+            request.Description ?? string.Empty
+        );
+
+        if (promotionName.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = promotionName.Error.Code,
+                message = promotionName.Error.Description
+            });
+        }
+
+        await _comboPromotionsService.DeleteComboPromotionsByPromotionId(promotionId);
+
+        foreach (var comboPromotion in request.Combos)
+        {
+            var comboPromotionId = await _comboPromotionsService.CreateComboPromotion(
+                promotionId,
+                comboPromotion.ComboName,
+                comboPromotion.ComboPrice
+            );
+
+            foreach (var comboItem in comboPromotion.ComboItems)
+            {
+                await _comboPromotionsService.CreateComboPromotionDetail(
+                    comboPromotionId.Value,
+                    comboItem.ProductId,
+                    comboItem.Quantity
+                );
+            }
+        }
+
+        return Ok(new { message = "Promotion updated successfully", promotionName = promotionName.Value });
+    }
+
     [HttpPatch("order/{promotionId}")]
     public async Task<IActionResult> UpdateOrderPromotion(string promotionId, [FromBody] UpdateOrderPromotionRequest request)
     {

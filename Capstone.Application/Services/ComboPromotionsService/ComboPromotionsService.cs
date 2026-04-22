@@ -118,4 +118,11 @@ public class ComboPromotionsService : IComboPromotionsService
 
         return Result<List<ComboPromotionDto>>.Success(comboPromotions);
     }
+
+    public async Task<Result> DeleteComboPromotionsByPromotionId(string promotionId)
+    {
+        await _comboPromotionsRepository.DeleteComboPromotionByPromotionId(Guid.Parse(promotionId));
+
+        return Result.Success();
+    }
 }

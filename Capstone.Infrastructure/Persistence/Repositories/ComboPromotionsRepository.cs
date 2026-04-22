@@ -29,4 +29,17 @@ public class ComboPromotionsRepository : IComboPromotionsRepository
             .Where(co => co.PromotionId == promotionId)
             .ToListAsync();
     }
+
+    public async Task DeleteComboPromotionByPromotionId(Guid promotionId)
+    {
+        var comboPromotions = await _context.ComboPromotions
+            .Where(co => co.PromotionId == promotionId)
+            .ToListAsync();
+
+        if (comboPromotions.Any())
+        {
+            _context.ComboPromotions.RemoveRange(comboPromotions);
+            await _context.SaveChangesAsync();
+        }
+    }
 }
