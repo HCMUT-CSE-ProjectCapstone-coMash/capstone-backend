@@ -45,4 +45,11 @@ public class OrderPromotionsService : IOrderPromotionsService
 
         return Result<List<OrderPromotionDto>>.Success(orderPromotionDtos);
     }
+
+    public async Task<Result> DeleteOrderPromotionsByPromotionId(string promotionId)
+    {
+        await _orderPromotionsRepository.DeleteOrderPromotionsByPromotionId(Guid.Parse(promotionId));
+
+        return Result.Success();
+    }
 }

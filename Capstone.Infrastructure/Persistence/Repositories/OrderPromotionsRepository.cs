@@ -23,4 +23,15 @@ public class OrderPromotionsRepository : IOrderPromotionsRepository
     {
         return await _context.OrderPromotions.Where(op => op.PromotionId == promotionId).ToListAsync();
     }
+
+    public async Task DeleteOrderPromotionsByPromotionId(Guid promotionId)
+    {
+        var orderPromotions = await _context.OrderPromotions.Where(op => op.PromotionId == promotionId).ToListAsync();
+
+        if (orderPromotions.Any())
+        {
+            _context.OrderPromotions.RemoveRange(orderPromotions);
+            await _context.SaveChangesAsync();
+        }
+    }
 }

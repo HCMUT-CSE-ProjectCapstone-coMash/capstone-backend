@@ -234,7 +234,43 @@ public class PromotionsController : ControllerBase
                 productPromotion.DiscountValue
             );
         }
-        
+
+        return Ok(new { message = "Promotion updated successfully", promotionName = promotionName.Value });
+    }
+
+    [HttpPatch("order/{promotionId}")]
+    public async Task<IActionResult> UpdateOrderPromotion(string promotionId, [FromBody] UpdateOrderPromotionRequest request)
+    {
+        var promotionName = await _promotionsService.UpdatePromotion(
+            promotionId,
+            request.PromotionName,
+            request.StartDate,
+            request.EndDate,
+            request.Description ?? string.Empty
+        );
+
+        if (promotionName.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = promotionName.Error.Code,
+                message = promotionName.Error.Description
+            });
+        }
+
+        await _orderPromotionsService.DeleteOrderPromotionsByPromotionId(promotionId);
+
+        foreach (var orderPromotion in request.Levels)
+        {
+            await _orderPromotionsService.CreateOrderPromotion(
+                promotionId,
+                orderPromotion.MinValue,
+                orderPromotion.DiscountType,
+                orderPromotion.DiscountValue,
+                orderPromotion.MaxDiscount ?? 0
+            );
+        }
+
         return Ok(new { message = "Promotion updated successfully", promotionName = promotionName.Value });
     }
 }

@@ -13,4 +13,6 @@ public interface IOrderPromotionsService
     );
 
     Task<Result<List<OrderPromotionDto>>> GetOrderPromotionsByPromotionId(Guid promotionId);
+
+    Task<Result> DeleteOrderPromotionsByPromotionId(string promotionId);
 }
