@@ -202,4 +202,39 @@ public class PromotionsController : ControllerBase
 
         return Ok(promotion.Value);
     }
+
+    [HttpPatch("product/{promotionId}")]
+    public async Task<IActionResult> UpdateProductPromotion(string promotionId, [FromBody] UpdateProductPromotionRequest request)
+    {
+        var promotionName = await _promotionsService.UpdatePromotion(
+            promotionId,
+            request.PromotionName,
+            request.StartDate,
+            request.EndDate,
+            request.Description ?? string.Empty
+        );
+
+        if (promotionName.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = promotionName.Error.Code,
+                message = promotionName.Error.Description
+            });
+        }
+
+        await _productPromotionsService.DeleteProductPromotionsByPromotionId(Guid.Parse(promotionId));
+
+        foreach (var productPromotion in request.ProductDiscounts)
+        {
+            await _productPromotionsService.CreateProductPromotion(
+                promotionId,
+                productPromotion.ProductId,
+                productPromotion.DiscountType,
+                productPromotion.DiscountValue
+            );
+        }
+        
+        return Ok(new { message = "Promotion updated successfully", promotionName = promotionName.Value });
+    }
 }

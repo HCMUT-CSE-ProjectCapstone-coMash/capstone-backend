@@ -89,4 +89,11 @@ public class ProductPromotionsService : IProductPromotionsService
 
         return Result<List<ProductPromotionDto>>.Success(productPromotions);
     }
+
+    public async Task<Result> DeleteProductPromotionsByPromotionId(Guid promotionId)
+    {
+        await _productPromotionsRepository.DeleteProductPromotionsByPromotionId(promotionId);
+
+        return Result.Success();
+    }
 }

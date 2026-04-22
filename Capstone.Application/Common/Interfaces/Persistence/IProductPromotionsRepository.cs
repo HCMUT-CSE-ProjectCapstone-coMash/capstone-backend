@@ -7,4 +7,6 @@ public interface IProductPromotionsRepository
     Task CreateProductPromotion(ProductPromotion productPromotion);
 
     Task<List<ProductPromotion>> GetProductPromotionsByPromotionId(Guid promotionId);
+
+    Task DeleteProductPromotionsByPromotionId(Guid promotionId);
 }

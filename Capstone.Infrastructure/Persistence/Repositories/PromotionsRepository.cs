@@ -69,4 +69,10 @@ public class PromotionsRepository : IPromotionsRepository
     {
         return await _context.Promotions.FirstOrDefaultAsync(p => p.Id == promotionId);
     }
+
+    public async Task UpdatePromotion(Promotion promotion)
+    {
+        _context.Promotions.Update(promotion);
+        await _context.SaveChangesAsync();
+    }
 }

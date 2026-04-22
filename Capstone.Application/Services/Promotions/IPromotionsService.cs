@@ -23,4 +23,12 @@ public interface IPromotionsService
     );
 
     Task<Result<PromotionDto>> GetPromotionById(string promotionId);
+
+    Task<Result<string>> UpdatePromotion(
+        string promotionId,
+        string promotionName,
+        string startDate,
+        string endDate,
+        string description
+    );
 }

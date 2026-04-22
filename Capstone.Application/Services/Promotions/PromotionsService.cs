@@ -133,4 +133,29 @@ public class PromotionsService : IPromotionsService
 
         return Result<string>.Success(phase);
     }
+
+    public async Task<Result<string>> UpdatePromotion(
+        string promotionId,
+        string promotionName,
+        string startDate,
+        string endDate,
+        string description
+    )
+    {
+        var promotion = await _promotionsRepository.GetPromotionById(Guid.Parse(promotionId));
+
+        if (promotion == null)
+        {
+            return Result<string>.Failure(new Error("PromotionNotFound", "Promotion not found"));
+        }
+
+        promotion.PromotionName = promotionName;
+        promotion.StartDate = DateOnly.Parse(startDate);
+        promotion.EndDate = DateOnly.Parse(endDate);
+        promotion.Description = description;
+
+        await _promotionsRepository.UpdatePromotion(promotion);
+
+        return Result<string>.Success(promotion.PromotionName);
+    }
 }

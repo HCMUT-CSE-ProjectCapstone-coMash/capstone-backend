@@ -28,4 +28,17 @@ public class ProductPromotionsRepository : IProductPromotionsRepository
             .Where(pp => pp.PromotionId == promotionId)
             .ToListAsync();
     }
+
+    public async Task DeleteProductPromotionsByPromotionId(Guid promotionId)
+    {
+        var productPromotions = await _context.ProductPromotions
+            .Where(pp => pp.PromotionId == promotionId)
+            .ToListAsync();
+
+        if (productPromotions.Any())
+        {
+            _context.ProductPromotions.RemoveRange(productPromotions);
+            await _context.SaveChangesAsync();
+        }
+    }
 }
