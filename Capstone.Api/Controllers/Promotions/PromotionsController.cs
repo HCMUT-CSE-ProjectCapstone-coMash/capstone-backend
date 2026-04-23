@@ -316,4 +316,35 @@ public class PromotionsController : ControllerBase
 
         return Ok(new { message = "Promotion updated successfully", promotionName = promotionName.Value });
     }
+
+    [HttpGet("get-promotions/{productId}")]
+    public async Task<IActionResult> GetPromotionsByProductId(string productId)
+    {
+        var productPromotions = await _promotionsService.GetProductPromotionsByProductId(productId);
+
+        if (productPromotions.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = productPromotions.Error.Code,
+                message = productPromotions.Error.Description
+            });
+        }
+
+        var comboPromotions = await _promotionsService.GetComboPromotionsByProductId(productId);
+
+        if (comboPromotions.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = comboPromotions.Error.Code,
+                message = comboPromotions.Error.Description
+            });
+        }
+
+        return Ok(new {
+            ProductPromotions = productPromotions.Value,
+            ComboPromotions = comboPromotions.Value
+        });
+    }
 }

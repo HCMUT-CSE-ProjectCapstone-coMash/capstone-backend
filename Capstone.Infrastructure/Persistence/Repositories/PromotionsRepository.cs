@@ -75,4 +75,25 @@ public class PromotionsRepository : IPromotionsRepository
         _context.Promotions.Update(promotion);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<List<Promotion>> GetProductPromotionsByProductId(Guid productId)
+    {
+        return await _context.Promotions
+            .Where(p => p.ProductPromotions.Any(pp => pp.ProductId == productId))
+            .Include(p => p.ProductPromotions)
+                .ThenInclude(pp => pp.Product)
+                    .ThenInclude(p => p.ProductQuantities)
+            .ToListAsync();
+    }
+
+    public async Task<List<Promotion>> GetComboPromotionsByProductId(Guid productId)
+    {
+        return await _context.Promotions
+            .Where(p => p.ComboPromotions.Any(cp => cp.ComboPromotionDetails.Any(cpd => cpd.ProductId == productId)))
+            .Include(p => p.ComboPromotions)
+                .ThenInclude(cp => cp.ComboPromotionDetails)
+                    .ThenInclude(cpd => cpd.Product)
+                        .ThenInclude(p => p.ProductQuantities)
+            .ToListAsync();
+    }
 }

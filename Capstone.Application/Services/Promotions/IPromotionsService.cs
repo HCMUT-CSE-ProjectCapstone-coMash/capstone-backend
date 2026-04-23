@@ -31,4 +31,8 @@ public interface IPromotionsService
         string endDate,
         string description
     );
+
+    Task<Result<List<PromotionDto>>> GetProductPromotionsByProductId(string productId);
+
+    Task<Result<List<PromotionDto>>> GetComboPromotionsByProductId(string productId);
 }

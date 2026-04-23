@@ -1,6 +1,10 @@
 using Capstone.Application.Common;
 using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Application.Common.Interfaces.Services;
+using Capstone.Application.Services.ComboPromotionsService;
+using Capstone.Application.Services.FileStorageService;
+using Capstone.Application.Services.ProductPromotionsService;
+using Capstone.Application.Services.Products;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
 
@@ -9,16 +13,41 @@ namespace Capstone.Application.Services.Promotions;
 public class PromotionsService : IPromotionsService
 {
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly IFileStorageService _fileStorageService;
 
     private readonly IPromotionsRepository _promotionsRepository;
 
     public PromotionsService(
         IDateTimeProvider dateTimeProvider,
+        IFileStorageService fileStorageService,
         IPromotionsRepository promotionsRepository
     )
     {
         _dateTimeProvider = dateTimeProvider;
+        _fileStorageService = fileStorageService;
         _promotionsRepository = promotionsRepository;
+    }
+
+    private Result<string> GetPromotionPhase(DateOnly startDate, DateOnly endDate)
+    {
+        var today = DateOnly.FromDateTime(_dateTimeProvider.UtcNow);
+
+        string phase;
+
+        if (today < startDate)
+        {
+            phase = PromotionPhase.Upcoming;
+        }
+        else if (today > endDate)
+        {
+            phase = PromotionPhase.Expired;
+        }
+        else
+        {
+            phase = PromotionPhase.Ongoing;
+        }
+
+        return Result<string>.Success(phase);
     }
 
     public async Task<Result<string>> CreatePromotionId()
@@ -112,28 +141,6 @@ public class PromotionsService : IPromotionsService
         });
     }
 
-    private Result<string> GetPromotionPhase(DateOnly startDate, DateOnly endDate)
-    {
-        var today = DateOnly.FromDateTime(_dateTimeProvider.UtcNow);
-
-        string phase;
-
-        if (today < startDate)
-        {
-            phase = PromotionPhase.Upcoming;
-        }
-        else if (today > endDate)
-        {
-            phase = PromotionPhase.Expired;
-        }
-        else
-        {
-            phase = PromotionPhase.Ongoing;
-        }
-
-        return Result<string>.Success(phase);
-    }
-
     public async Task<Result<string>> UpdatePromotion(
         string promotionId,
         string promotionName,
@@ -157,5 +164,161 @@ public class PromotionsService : IPromotionsService
         await _promotionsRepository.UpdatePromotion(promotion);
 
         return Result<string>.Success(promotion.PromotionName);
+    }
+
+    public async Task<Result<List<PromotionDto>>> GetProductPromotionsByProductId(string productId)
+    {
+        var promotions = await _promotionsRepository.GetProductPromotionsByProductId(Guid.Parse(productId));
+
+        var ongoingPromotions = promotions.Where(p =>
+            GetPromotionPhase(p.StartDate, p.EndDate).Value == PromotionPhase.Ongoing
+        ).ToList();
+
+        var result = new List<PromotionDto>();
+
+        foreach (var promotion in ongoingPromotions)
+        {
+            var productPromotions = new List<ProductPromotionDto>();
+
+            foreach (var pp in promotion.ProductPromotions)
+            {
+                var product = pp.Product;
+
+                var imageUrl = "";
+                if (!string.IsNullOrEmpty(product.ImageKey))
+                {
+                    var imageResult = await _fileStorageService.GetImageUrlAsync(product.ImageKey);
+                    imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
+                }
+
+                var productDto = new ProductDto
+                (
+                    product.Id,
+                    product.ProductId,
+                    product.ProductName,
+                    product.Category,
+                    product.Color,
+                    product.Pattern,
+                    product.SizeType,
+                    product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+                    product.CreatedBy,
+                    product.CreatedAt,
+                    product.Status,
+                    imageUrl,
+                    product.VectorId,
+                    product.SalePrice,
+                    product.ImportPrice
+                );
+
+                productPromotions.Add(new ProductPromotionDto
+                {
+                    Id = pp.Id,
+                    Product = productDto,
+                    DiscountType = pp.DiscountType,
+                    DiscountValue = pp.DiscountValue
+                });
+            }
+
+            result.Add(new PromotionDto
+            {
+                Id = promotion.Id,
+                PromotionId = promotion.PromotionId,
+                PromotionName = promotion.PromotionName,
+                PromotionType = promotion.PromotionType,
+                Description = promotion.Description,
+                PromotionStatus = promotion.PromotionStatus,
+                PromotionPhase = GetPromotionPhase(promotion.StartDate, promotion.EndDate).Value,
+                StartDate = promotion.StartDate,
+                EndDate = promotion.EndDate,
+                CreatedAt = promotion.CreatedAt,
+                ProductDiscounts = productPromotions
+            });
+        }
+
+        return Result<List<PromotionDto>>.Success(result);
+    }
+
+    public async Task<Result<List<PromotionDto>>> GetComboPromotionsByProductId(string productId)
+    {
+        var promotions = await _promotionsRepository.GetComboPromotionsByProductId(Guid.Parse(productId));
+
+        var ongoingPromotions = promotions.Where(p =>
+            GetPromotionPhase(p.StartDate, p.EndDate).Value == PromotionPhase.Ongoing
+        ).ToList();
+
+        var result = new List<PromotionDto>();
+
+        foreach (var promotion in ongoingPromotions)
+        {
+            var comboPromotions = new List<ComboPromotionDto>();
+
+            foreach (var cp in promotion.ComboPromotions)
+            {
+                var comboPromotionDetails = new List<ComboPromotionDetailDto>();
+
+                foreach (var cpd in cp.ComboPromotionDetails)
+                {
+                    var product = cpd.Product;
+
+                    var imageUrl = "";
+                    if (!string.IsNullOrEmpty(product.ImageKey))
+                    {
+                        var imageResult = await _fileStorageService.GetImageUrlAsync(product.ImageKey);
+                        imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
+                    }
+
+                    var productDto = new ProductDto
+                    (
+                        product.Id,
+                        product.ProductId,
+                        product.ProductName,
+                        product.Category,
+                        product.Color,
+                        product.Pattern,
+                        product.SizeType,
+                        product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+                        product.CreatedBy,
+                        product.CreatedAt,
+                        product.Status,
+                        imageUrl,
+                        product.VectorId,
+                        product.SalePrice,
+                        product.ImportPrice
+                    );
+
+                    comboPromotionDetails.Add(new ComboPromotionDetailDto
+                    {
+                        Id = cpd.Id,
+                        Product = productDto,
+                        Quantity = cpd.Quantity
+                    });
+                }
+
+                comboPromotions.Add(new ComboPromotionDto
+                {
+                    Id = cp.Id,
+                    ComboName = cp.ComboName,
+                    ComboPrice = cp.ComboPrice,
+                    ComboItems = comboPromotionDetails
+                });
+            }
+
+            result.Add(new PromotionDto
+            {
+                Id = promotion.Id,
+                PromotionId = promotion.PromotionId,
+                PromotionName = promotion.PromotionName,
+                PromotionType = promotion.PromotionType,
+                Description = promotion.Description,
+                PromotionStatus = promotion.PromotionStatus,
+                PromotionPhase = GetPromotionPhase(promotion.StartDate, promotion.EndDate).Value,
+                StartDate = promotion.StartDate,
+                EndDate = promotion.EndDate,
+                CreatedAt = promotion.CreatedAt,
+                Combos = comboPromotions
+            });
+        }
+
+        return Result<List<PromotionDto>>.Success(result);
     }
 }
