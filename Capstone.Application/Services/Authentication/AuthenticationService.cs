@@ -67,6 +67,7 @@ public class AuthenticationService : IAuthenticationService
             PhoneNumber = phoneNumber,
             Gender = gender,
             DateOfBirth = DateOnly.Parse(dateOfBirth),
+            HasChangedPassword = "False"
         }; 
 
         await _userRepository.AddUser(user);
@@ -82,7 +83,8 @@ public class AuthenticationService : IAuthenticationService
             user.PhoneNumber,
             user.Gender,
             user.DateOfBirth,
-            string.Empty
+            string.Empty,
+            user.HasChangedPassword
         ));
     }
 
@@ -114,15 +116,45 @@ public class AuthenticationService : IAuthenticationService
     {
         var user = await _userRepository.GetUserByEmail(email);
 
-        if (user is null || !_passwordHasher.Verify(password, user.Password))
+        if (user is null)
         {
             return Result<AuthResult>.Failure(new Error(AuthErrors.InvalidCredentials.Code, AuthErrors.InvalidCredentials.Description));
         }
 
-        if (user.Status != UserStatus.Active)
+        if (user.Status == UserStatus.Deleted)
         {
             return Result<AuthResult>.Failure(new Error(AuthErrors.UserDeleted.Code, AuthErrors.UserDeleted.Description));
         }
+
+        if (user.Status == UserStatus.Locked)
+        {
+            return Result<AuthResult>.Failure(new Error(AuthErrors.UserLocked.Code, AuthErrors.UserLocked.Description));
+        }
+
+        if (!_passwordHasher.Verify(password, user.Password))
+        {
+            user.FailedLoginAttempts += 1;
+            Console.WriteLine($"Failed login attempts for user: {user.FailedLoginAttempts}");
+            
+            if (user.FailedLoginAttempts >= 5)
+            {
+                user.Status = UserStatus.Locked;
+                await _userRepository.UpdateUser(user);
+                return Result<AuthResult>.Failure(new Error(AuthErrors.UserLocked.Code, AuthErrors.UserLocked.Description));
+            }
+            
+            await _userRepository.UpdateUser(user);
+            return Result<AuthResult>.Failure(new Error(AuthErrors.InvalidCredentials.Code, AuthErrors.InvalidCredentials.Description));
+        }
+
+        // Reset failed login attempts on successful login
+        if (user.FailedLoginAttempts > 0)
+        {
+            user.FailedLoginAttempts = 0;
+            await _userRepository.UpdateUser(user);
+        }
+
+        
         var imageUrl = "";
         if (!string.IsNullOrEmpty(user.ImageKey))
         {
@@ -141,7 +173,8 @@ public class AuthenticationService : IAuthenticationService
             user.PhoneNumber,
             user.Gender,
             user.DateOfBirth,
-            imageUrl
+            imageUrl,
+            user.HasChangedPassword
         ));
     }
 
@@ -154,7 +187,7 @@ public class AuthenticationService : IAuthenticationService
             return Result<UserDto>.Failure(new Error(AuthErrors.UserNotExisted.Code, AuthErrors.UserNotExisted.Description));
         }
 
-        if (user.Status != UserStatus.Active)
+        if (user.Status == UserStatus.Deleted)
         {
             return Result<UserDto>.Failure(new Error(AuthErrors.UserDeleted.Code, AuthErrors.UserDeleted.Description));
         }
@@ -176,7 +209,8 @@ public class AuthenticationService : IAuthenticationService
             user.PhoneNumber,
             user.Gender,
             user.DateOfBirth,
-            imageUrl
+            imageUrl,
+            user.HasChangedPassword
         ));
     }
     public async Task<Result<PaginatedResult<UserDto>>> GetAllEmployees(int page, int pageSize, string? search = null)
@@ -204,7 +238,8 @@ public class AuthenticationService : IAuthenticationService
                 employee.PhoneNumber,
                 employee.Gender,
                 employee.DateOfBirth,
-                imageUrl
+                imageUrl,
+                employee.HasChangedPassword
             ));
         }
         
@@ -228,7 +263,7 @@ public class AuthenticationService : IAuthenticationService
             return Result<string>.Failure(new Error("NotFound", "User not found."));
         }
 
-        if (user.Status != UserStatus.Active)
+        if (user.Status == UserStatus.Deleted)
         {
             return Result<string>.Failure(new Error(AuthErrors.UserDeleted.Code, AuthErrors.UserDeleted.Description));
         }
@@ -277,5 +312,41 @@ public class AuthenticationService : IAuthenticationService
         }
 
         return Result<string>.Success(user.FullName);
+    }
+
+    public async Task<Result> ResetPassword(string userId)
+    {
+        var user = await _userRepository.GetUserById(Guid.Parse(userId));
+
+        if (user is null)
+        {
+            return Result.Failure(new Error("UserNotFound", "User not found."));
+        }
+
+        user.Password = _passwordHasher.Hash("123456");
+        user.Status = UserStatus.Active;
+        user.HasChangedPassword = "False";
+        user.FailedLoginAttempts = 0;
+
+        await _userRepository.UpdateUser(user);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> ChangePassword(string userId, string newPassword)
+    {
+        var user = await _userRepository.GetUserById(Guid.Parse(userId));
+
+        if (user is null)
+        {
+            return Result.Failure(new Error("UserNotFound", "User not found."));
+        }
+
+        user.Password = _passwordHasher.Hash(newPassword);
+        user.HasChangedPassword = "True";
+
+        await _userRepository.UpdateUser(user);
+
+        return Result.Success();
     }
 }

@@ -12,6 +12,8 @@ public class User
     public string Gender { get; set; } = string.Empty;
     public DateOnly DateOfBirth { get; set; }
     public string Status { get; set; } = string.Empty;
+    public int FailedLoginAttempts { get; set; }
+    public string HasChangedPassword { get; set; } = string.Empty;
     public string? ImageKey { get; set; } = string.Empty;
     public string? EmployeeId { get; set; } = string.Empty;
 }
