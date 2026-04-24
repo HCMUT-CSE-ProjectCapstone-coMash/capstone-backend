@@ -10,12 +10,16 @@ namespace Capstone.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
+            migrationBuilder.DropColumn(
+                name: "HasChangedPassword",
+                table: "users");
+
+            migrationBuilder.AddColumn<bool>(
                 name: "HasChangedPassword",
                 table: "users",
-                type: "text",
+                type: "boolean",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: false);
         }
 
         /// <inheritdoc />
@@ -24,6 +28,14 @@ namespace Capstone.Infrastructure.Migrations
             migrationBuilder.DropColumn(
                 name: "HasChangedPassword",
                 table: "users");
+
+            migrationBuilder.AddColumn<string>(
+                name: "HasChangedPassword",
+                table: "users",
+                type: "text",
+                nullable: false,
+                defaultValue: "False");
         }
-    }
+            }
+    
 }

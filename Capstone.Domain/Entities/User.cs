@@ -13,7 +13,7 @@ public class User
     public DateOnly DateOfBirth { get; set; }
     public string Status { get; set; } = string.Empty;
     public int FailedLoginAttempts { get; set; }
-    public string HasChangedPassword { get; set; } = string.Empty;
+    public bool HasChangedPassword { get; set; } = false;
     public string? ImageKey { get; set; } = string.Empty;
     public string? EmployeeId { get; set; } = string.Empty;
 }

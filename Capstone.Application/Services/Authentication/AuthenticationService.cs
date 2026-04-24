@@ -67,7 +67,7 @@ public class AuthenticationService : IAuthenticationService
             PhoneNumber = phoneNumber,
             Gender = gender,
             DateOfBirth = DateOnly.Parse(dateOfBirth),
-            HasChangedPassword = "False"
+            HasChangedPassword = false
         }; 
 
         await _userRepository.AddUser(user);
@@ -325,7 +325,7 @@ public class AuthenticationService : IAuthenticationService
 
         user.Password = _passwordHasher.Hash("123456");
         user.Status = UserStatus.Active;
-        user.HasChangedPassword = "False";
+        user.HasChangedPassword = false;
         user.FailedLoginAttempts = 0;
 
         await _userRepository.UpdateUser(user);
@@ -343,7 +343,7 @@ public class AuthenticationService : IAuthenticationService
         }
 
         user.Password = _passwordHasher.Hash(newPassword);
-        user.HasChangedPassword = "True";
+        user.HasChangedPassword = true;
 
         await _userRepository.UpdateUser(user);
 

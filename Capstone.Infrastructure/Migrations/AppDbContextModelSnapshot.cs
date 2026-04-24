@@ -473,9 +473,8 @@ namespace Capstone.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("HasChangedPassword")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<bool>("HasChangedPassword")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("ImageKey")
                         .HasColumnType("text");
