@@ -254,6 +254,14 @@ public class PromotionsService : IPromotionsService
 
             foreach (var cp in promotion.ComboPromotions)
             {
+                var hasInsufficientStock = cp.ComboPromotionDetails.Any(cpd => 
+                    cpd.Product.ProductQuantities.Sum(q => q.Quantities) < cpd.Quantity);
+
+                if (hasInsufficientStock)
+                {
+                    continue;
+                }
+
                 var comboPromotionDetails = new List<ComboPromotionDetailDto>();
 
                 foreach (var cpd in cp.ComboPromotionDetails)
@@ -301,6 +309,11 @@ public class PromotionsService : IPromotionsService
                     ComboPrice = cp.ComboPrice,
                     ComboItems = comboPromotionDetails
                 });
+            }
+
+            if (comboPromotions.Count == 0)
+            {
+                continue;
             }
 
             result.Add(new PromotionDto
