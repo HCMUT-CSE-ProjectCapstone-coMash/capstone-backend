@@ -20,7 +20,7 @@ public class ProductPromotionsService : IProductPromotionsService
         _productPromotionsRepository = productPromotionsRepository;
     }
 
-    public async Task<Result> CreateProductPromotion(string promotionId, string productId, string discountType, decimal discountValue)
+    public async Task<Result> CreateProductPromotion(string promotionId, string productId, string discountType, double discountValue)
     {
         var productPromotion = new ProductPromotion
         {

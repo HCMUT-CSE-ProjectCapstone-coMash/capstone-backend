@@ -6,8 +6,9 @@ public class ComboPromotionDto
 {
     public Guid Id { get; set; }
     public string ComboName { get; set; } = string.Empty;
-    public decimal ComboPrice { get; set; }
+    public double ComboPrice { get; set; }
     public List<ComboPromotionDetailDto> ComboItems { get; set; } = new();
+    public Guid PromotionId { get; set; }
 }
 
 public class ComboPromotionDetailDto

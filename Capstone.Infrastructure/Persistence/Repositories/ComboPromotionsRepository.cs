@@ -42,4 +42,9 @@ public class ComboPromotionsRepository : IComboPromotionsRepository
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task<ComboPromotion?> GetComboPromotionById(Guid comboPromotionId)
+    {
+        return await _context.ComboPromotions.Include(co => co.ComboPromotionDetails).FirstOrDefaultAsync(co => co.Id == comboPromotionId);
+    }
 }

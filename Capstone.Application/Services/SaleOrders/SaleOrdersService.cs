@@ -1,6 +1,10 @@
 using Capstone.Application.Common;
 using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Application.Common.Interfaces.Services;
+using Capstone.Application.Services.ComboPromotionsService;
+using Capstone.Application.Services.FileStorageService;
+using Capstone.Application.Services.ProductPromotionsService;
+using Capstone.Application.Services.Products;
 using Capstone.Application.Services.SaleOrderDetails;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
@@ -10,12 +14,17 @@ namespace Capstone.Application.Services.SaleOrders;
 public class SaleOrdersService : ISaleOrdersService
 {
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly IFileStorageService _fileStorageService;
 
     private readonly ISaleOrdersRepository _saleOrdersRepository;
 
-    public SaleOrdersService(IDateTimeProvider dateTimeProvider, ISaleOrdersRepository saleOrdersRepository)
+    public SaleOrdersService(
+        IDateTimeProvider dateTimeProvider,
+        IFileStorageService fileStorageService,
+        ISaleOrdersRepository saleOrdersRepository)
     {
         _dateTimeProvider = dateTimeProvider;
+        _fileStorageService = fileStorageService;
         _saleOrdersRepository = saleOrdersRepository;
     }
 
@@ -96,17 +105,55 @@ public class SaleOrdersService : ISaleOrdersService
         if (saleOrder == null)
             return Result<SaleOrderDto>.Failure(new Error("SaleOrderNotFound", "Sale order not found"));
 
-        var details = saleOrder.SaleOrderDetails.Select(d => new SaleOrderDetailDto
+        var details = new List<SaleOrderDetailDto>();
+
+        foreach (var detail in saleOrder.SaleOrderDetails)
         {
-            Id = d.Id,
-            ProductId = d.ProductId,
-            ProductName = d.Product.ProductName,
-            SelectedSize = d.SelectedSize,
-            Quantity = d.Quantity,
-            UnitPrice = d.UnitPrice,
-            Discount = d.Discount,
-            SubTotal = d.SubTotal
-        }).ToList();
+            var imageUrl = "";
+            if (!string.IsNullOrEmpty(detail.Product.ImageKey))
+            {
+                var imageResult = await _fileStorageService.GetImageUrlAsync(detail.Product.ImageKey);
+                imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
+            }
+
+            var productPromotionDto = detail.ProductPromotion != null
+                ? new ProductPromotionDto
+                {
+                    Id = detail.ProductPromotion.Id,
+                    DiscountType = detail.ProductPromotion.DiscountType,
+                    DiscountValue = detail.ProductPromotion.DiscountValue,
+                    PromotionId = detail.ProductPromotion.Promotion.Id,
+                }
+                : null;
+
+            var comboPromotionDto = detail.ComboPromotion != null
+                ? new ComboPromotionDto
+                {
+                    Id = detail.ComboPromotion.Id,
+                    ComboName = detail.ComboPromotion.ComboName,
+                    ComboPrice = detail.ComboPromotion.ComboPrice,
+                    PromotionId = detail.ComboPromotion.Promotion.Id,
+                }
+                : null;
+
+            var detailDto = new SaleOrderDetailDto
+            {
+                Id = detail.Id,
+                ProductId = detail.ProductId,
+                ProductName = detail.Product.ProductName,
+                ImageUrl = imageUrl,
+                SelectedSize = detail.SelectedSize,
+                Quantity = detail.Quantity,
+                UnitPrice = detail.UnitPrice,
+                Discount = detail.Discount,
+                SubTotal = detail.SubTotal,
+                Profit = detail.Profit,
+                ProductPromotion = productPromotionDto,
+                ComboPromotion = comboPromotionDto
+            };
+
+            details.Add(detailDto);
+        }
 
         var dto = new SaleOrderDto
         {
@@ -120,7 +167,8 @@ public class SaleOrdersService : ISaleOrdersService
             DebitMoney = saleOrder.DebitMoney,
             CreatedAt = saleOrder.CreatedAt,
             Details = details,
-            TotalPrice = saleOrder.TotalPrice
+            TotalPrice = saleOrder.TotalPrice,
+            TotalProfit = saleOrder.TotalProfit
         };
 
         return Result<SaleOrderDto>.Success(dto);

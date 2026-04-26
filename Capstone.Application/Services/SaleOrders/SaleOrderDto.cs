@@ -16,5 +16,6 @@ public class SaleOrderDto
     public double Discount { get; set; }
     public double TotalPrice { get; set; }
     public double TotalProfit { get; set; }
+    
     public List<SaleOrderDetailDto> Details { get; set; } = new();
 }

@@ -32,6 +32,12 @@ public class SaleOrdersRepository : ISaleOrdersRepository
         return await _context.SaleOrders
             .Include(so => so.SaleOrderDetails)
                 .ThenInclude(d => d.Product)
+            .Include(so => so.SaleOrderDetails)
+                .ThenInclude(d => d.ProductPromotion)
+                    .ThenInclude(pp => pp!.Promotion)
+            .Include(so => so.SaleOrderDetails)
+                .ThenInclude(d => d.ComboPromotion)
+                    .ThenInclude(cp => cp!.Promotion)
             .Include(so => so.Customer)
             .Include(so => so.User)
             .FirstOrDefaultAsync(so => so.Id == saleOrderId);

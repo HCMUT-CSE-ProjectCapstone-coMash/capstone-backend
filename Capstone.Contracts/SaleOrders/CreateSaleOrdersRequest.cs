@@ -4,13 +4,27 @@ public record SaleProductRequest(
     string ProductId,
     string SelectedSize,
     int Quantity,
-    double Discount
+    double Discount,
+    string PromotionId
+);
+
+public record SaleComboItemRequest(
+    string ProductId,
+    string SelectedSize,
+    int Quantity
+);
+
+public record SaleComboRequest(
+    string ComboDealId,
+    int Quantity,
+    List<SaleComboItemRequest> Items
 );
 
 public record CreateSaleOrdersRequest(
     string CustomerId,
     string UserId,
     string PaymentMethod,
-    double DebitMoney,
-    List<SaleProductRequest> Products
+    double DebtAmount,
+    List<SaleProductRequest> Products,
+    List<SaleComboRequest> Combos
 );

@@ -9,4 +9,6 @@ public interface IComboPromotionsRepository
     Task<List<ComboPromotion>> GetComboPromotionsByPromotionId(Guid promotionId);
 
     Task DeleteComboPromotionByPromotionId(Guid promotionId);
+
+    Task<ComboPromotion?> GetComboPromotionById(Guid comboPromotionId);
 }

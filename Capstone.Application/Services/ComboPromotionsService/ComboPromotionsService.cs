@@ -25,7 +25,7 @@ public class ComboPromotionsService : IComboPromotionsService
         _comboPromotionDetailsRepository = comboPromotionDetailsRepository;
     }
 
-    public async Task<Result<string>> CreateComboPromotion(string promotionId, string comboName, decimal comboPrice)
+    public async Task<Result<string>> CreateComboPromotion(string promotionId, string comboName, double comboPrice)
     {
         var newComboPromotion = new ComboPromotion
         {

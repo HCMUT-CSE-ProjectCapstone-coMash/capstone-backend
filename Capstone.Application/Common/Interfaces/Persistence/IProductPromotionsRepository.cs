@@ -9,4 +9,6 @@ public interface IProductPromotionsRepository
     Task<List<ProductPromotion>> GetProductPromotionsByPromotionId(Guid promotionId);
 
     Task DeleteProductPromotionsByPromotionId(Guid promotionId);
+
+    Task<ProductPromotion?> GetProductPromotionById(Guid productPromotionId);
 }

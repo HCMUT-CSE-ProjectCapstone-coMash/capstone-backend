@@ -4,11 +4,20 @@ namespace Capstone.Application.Services.SaleOrderDetails;
 
 public interface ISaleOrderDetailsService
 {
-    Task<Result> CreateSaleOrderDetail(
+    Task<Result> CreateSaleOrderDetailForProductPromotion(
         string SaleOrderId,
         string ProductId,
         string SelectedSize,
         int Quantity,
-        double Discount
+        double Discount,
+        string PromotionId
+    );
+
+    Task<Result> CreateSaleOrderDetailForComboPromotion(
+        string SaleOrderId,
+        string ProductId,
+        string SelectedSize,
+        int Quantity,
+        string PromotionId
     );
 }

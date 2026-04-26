@@ -33,14 +33,14 @@ public class ProductDiscountItemDto
 {
     public string ProductId { get; set; } = string.Empty;
     public string DiscountType { get; set; } = string.Empty; // "PERCENT" | "FIXED"
-    public decimal DiscountValue { get; set; }
+    public double DiscountValue { get; set; }
 }
 
 public class ComboDealDto
 {
     public string ComboName { get; set; } = string.Empty;
     public List<ComboItemDto> ComboItems { get; set; } = new();
-    public decimal ComboPrice { get; set; }
+    public double ComboPrice { get; set; }
 }
 
 public class ComboItemDto

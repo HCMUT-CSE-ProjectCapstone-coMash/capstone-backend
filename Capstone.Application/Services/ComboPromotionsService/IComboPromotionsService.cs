@@ -4,7 +4,7 @@ namespace Capstone.Application.Services.ComboPromotionsService;
 
 public interface IComboPromotionsService
 {
-    Task<Result<string>> CreateComboPromotion(string promotionId, string comboName, decimal comboPrice);
+    Task<Result<string>> CreateComboPromotion(string promotionId, string comboName, double comboPrice);
 
     Task<Result> CreateComboPromotionDetail(string comboPromotionId, string productId, int quantity);
 

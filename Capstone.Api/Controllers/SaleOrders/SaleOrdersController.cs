@@ -24,62 +24,44 @@ public class SaleOrdersController : ControllerBase
     [HttpPost("create")]
     public async Task<IActionResult> CreateSaleOrders([FromBody] CreateSaleOrdersRequest request)
     {
-        var saleOrderResponse = await _saleOrdersService.CreateSaleOrder(
+        var saleOrderId = await _saleOrdersService.CreateSaleOrder(
             request.CustomerId,
             request.UserId,
             request.PaymentMethod,
-            request.DebitMoney
+            request.DebtAmount
         );
 
         for (int i = 0; i < request.Products.Count; i++)
         {
-            var product = request.Products[i];
-            await _saleOrderDetailsService.CreateSaleOrderDetail(
-                saleOrderResponse.Value,
-                product.ProductId,
-                product.SelectedSize,
-                product.Quantity,
-                product.Discount
-            );
+            await _saleOrderDetailsService.CreateSaleOrderDetailForProductPromotion(
+               saleOrderId.Value,
+               request.Products[i].ProductId,
+               request.Products[i].SelectedSize,
+               request.Products[i].Quantity,
+               request.Products[i].Discount,
+               request.Products[i].PromotionId
+           );
         }
 
-        await _saleOrdersService.UpdateTotalPriceAndTotalProfit(saleOrderResponse.Value);
-
-        var result = await _saleOrdersService.GetSaleOrderById(saleOrderResponse.Value);
-
-        if (result.IsFailure)
+        for (int i = 0; i < request.Combos.Count; i++)
         {
-            return BadRequest(new
+            for (int j = 0; j < request.Combos[i].Items.Count; j++)
             {
-                error = result.Error.Code,
-                message = result.Error.Description
-            });
+                await _saleOrderDetailsService.CreateSaleOrderDetailForComboPromotion(
+                    saleOrderId.Value,
+                    request.Combos[i].Items[j].ProductId,
+                    request.Combos[i].Items[j].SelectedSize,
+                    request.Combos[i].Items[j].Quantity * request.Combos[i].Quantity,
+                    request.Combos[i].ComboDealId
+                );
+            }
         }
 
-        return Ok(new SaleOrderResponse(
-            result.Value.Id,
-            result.Value.SaleOrderId,
-            result.Value.CustomerId,
-            result.Value.CustomerName,
-            result.Value.CreatedBy,
-            result.Value.CreatedByName,
-            result.Value.PaymentMethod,
-            result.Value.DebitMoney,
-            result.Value.CreatedAt,
-            result.Value.TotalPrice,
-            result.Value.TotalProfit,
-            result.Value.Details.Select(d => new SaleOrderDetailResponse(
-                d.Id,
-                d.ProductId,
-                d.ProductName,
-                d.SelectedSize,
-                d.Quantity,
-                d.UnitPrice,
-                d.Discount,
-                d.SubTotal,
-                d.Profit
-            )).ToList()
-        ));
+        await _saleOrdersService.UpdateTotalPriceAndTotalProfit(saleOrderId.Value);
+
+        var result = await _saleOrdersService.GetSaleOrderById(saleOrderId.Value);
+
+        return Ok(result.Value);
     }
 
     [HttpGet("fetch-all")]
@@ -96,29 +78,23 @@ public class SaleOrdersController : ControllerBase
             });
         }
 
-        return Ok(new { items = result.Value.Items.Select(s => new SaleOrderResponse(
-            s.Id,
-            s.SaleOrderId,
-            s.CustomerId,
-            s.CustomerName,
-            s.CreatedBy,
-            s.CreatedByName,
-            s.PaymentMethod,
-            s.DebitMoney,
-            s.CreatedAt,
-            s.TotalPrice,
-            s.TotalProfit,
-            s.Details.Select(d => new SaleOrderDetailResponse(
-                d.Id,
-                d.ProductId,
-                d.ProductName,
-                d.SelectedSize,
-                d.Quantity,
-                d.UnitPrice,
-                d.Discount,
-                d.SubTotal,
-                d.Profit
-            )).ToList()
-        )).ToList(), total = result.Value.Total });
+        return Ok(result.Value);
+    }
+
+    [HttpGet("{saleOrderId}")]
+    public async Task<IActionResult> GetSaleOrderById([FromRoute] string saleOrderId)
+    {
+        var result = await _saleOrdersService.GetSaleOrderById(saleOrderId);
+
+        if (result.IsFailure)
+        {
+            return NotFound(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
     }
 }

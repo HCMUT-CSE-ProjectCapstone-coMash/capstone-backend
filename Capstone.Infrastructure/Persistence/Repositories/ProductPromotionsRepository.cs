@@ -41,4 +41,13 @@ public class ProductPromotionsRepository : IProductPromotionsRepository
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task<ProductPromotion?> GetProductPromotionById(Guid productPromotionId)
+    {
+        return await _context.ProductPromotions
+            .AsNoTracking()
+            .Include(pp => pp.Product)
+                .ThenInclude(p => p.ProductQuantities)
+            .FirstOrDefaultAsync(pp => pp.Id == productPromotionId);
+    }
 }
