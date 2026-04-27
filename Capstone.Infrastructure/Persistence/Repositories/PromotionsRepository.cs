@@ -1,4 +1,5 @@
 using Capstone.Application.Common.Interfaces.Persistence;
+using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -95,5 +96,10 @@ public class PromotionsRepository : IPromotionsRepository
                     .ThenInclude(cpd => cpd.Product)
                         .ThenInclude(p => p.ProductQuantities)
             .ToListAsync();
+    }
+
+    public async Task<List<Promotion>> GetOrderPromotions()
+    {
+        return await _context.Promotions.Where(p => p.PromotionType == PromotionType.OrderPromotion).Include(p => p.OrderPromotions).ToListAsync();
     }
 }

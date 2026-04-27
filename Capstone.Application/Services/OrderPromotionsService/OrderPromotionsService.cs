@@ -13,7 +13,7 @@ public class OrderPromotionsService : IOrderPromotionsService
         _orderPromotionsRepository = orderPromotionsRepository;
     }
 
-    public async Task<Result> CreateOrderPromotion(string promotionId, decimal minValue, string discountType, decimal discountValue, decimal maxDiscount)
+    public async Task<Result> CreateOrderPromotion(string promotionId, double minValue, string discountType, double discountValue, double maxDiscount)
     {
         var newOrderPromotion = new OrderPromotion
         {

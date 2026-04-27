@@ -35,4 +35,6 @@ public interface IPromotionsService
     Task<Result<List<PromotionDto>>> GetProductPromotionsByProductId(string productId);
 
     Task<Result<List<PromotionDto>>> GetComboPromotionsByProductId(string productId);
+
+    Task<Result<List<PromotionDto>>> GetActiveOrderPromotions();
 }

@@ -15,6 +15,8 @@ public interface IPromotionsRepository
     Task UpdatePromotion(Promotion promotion);
 
     Task<List<Promotion>> GetProductPromotionsByProductId(Guid productId);
-    
+
     Task<List<Promotion>> GetComboPromotionsByProductId(Guid productId);
+
+    Task<List<Promotion>> GetOrderPromotions();
 }

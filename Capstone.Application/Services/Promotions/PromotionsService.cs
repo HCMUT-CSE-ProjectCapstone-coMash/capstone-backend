@@ -3,6 +3,7 @@ using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Application.Common.Interfaces.Services;
 using Capstone.Application.Services.ComboPromotionsService;
 using Capstone.Application.Services.FileStorageService;
+using Capstone.Application.Services.OrderPromotionsService;
 using Capstone.Application.Services.ProductPromotionsService;
 using Capstone.Application.Services.Products;
 using Capstone.Domain.Common;
@@ -254,7 +255,7 @@ public class PromotionsService : IPromotionsService
 
             foreach (var cp in promotion.ComboPromotions)
             {
-                var hasInsufficientStock = cp.ComboPromotionDetails.Any(cpd => 
+                var hasInsufficientStock = cp.ComboPromotionDetails.Any(cpd =>
                     cpd.Product.ProductQuantities.Sum(q => q.Quantities) < cpd.Quantity);
 
                 if (hasInsufficientStock)
@@ -329,6 +330,45 @@ public class PromotionsService : IPromotionsService
                 EndDate = promotion.EndDate,
                 CreatedAt = promotion.CreatedAt,
                 Combos = comboPromotions
+            });
+        }
+
+        return Result<List<PromotionDto>>.Success(result);
+    }
+
+    public async Task<Result<List<PromotionDto>>> GetActiveOrderPromotions()
+    {
+        var promotions = await _promotionsRepository.GetOrderPromotions();
+
+        var ongoingPromotions = promotions.Where(p =>
+            GetPromotionPhase(p.StartDate, p.EndDate).Value == PromotionPhase.Ongoing
+        ).ToList();
+
+        var result = new List<PromotionDto>();
+
+        foreach (var promotion in ongoingPromotions)
+        {
+            var promotionLevels = promotion.OrderPromotions.Select(pl => new OrderPromotionDto
+            {
+                MinValue = pl.MinValue,
+                DiscountType = pl.DiscountType,
+                DiscountValue = pl.DiscountValue,
+                MaxDiscount = pl.MaxDiscount
+            }).ToList();
+
+            result.Add(new PromotionDto
+            {
+                Id = promotion.Id,
+                PromotionId = promotion.PromotionId,
+                PromotionName = promotion.PromotionName,
+                PromotionType = promotion.PromotionType,
+                Description = promotion.Description,
+                PromotionStatus = promotion.PromotionStatus,
+                PromotionPhase = GetPromotionPhase(promotion.StartDate, promotion.EndDate).Value,
+                StartDate = promotion.StartDate,
+                EndDate = promotion.EndDate,
+                CreatedAt = promotion.CreatedAt,
+                Levels = promotionLevels
             });
         }
 

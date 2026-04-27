@@ -1,4 +1,5 @@
 using Capstone.Application.Common;
+using Capstone.Application.Services.Promotions;
 
 namespace Capstone.Application.Services.OrderPromotionsService;
 
@@ -6,10 +7,10 @@ public interface IOrderPromotionsService
 {
     Task<Result> CreateOrderPromotion(
         string promotionId,
-        decimal minValue,
+        double minValue,
         string discountType,
-        decimal discountValue,
-        decimal maxDiscount
+        double discountValue,
+        double maxDiscount
     );
 
     Task<Result<List<OrderPromotionDto>>> GetOrderPromotionsByPromotionId(Guid promotionId);

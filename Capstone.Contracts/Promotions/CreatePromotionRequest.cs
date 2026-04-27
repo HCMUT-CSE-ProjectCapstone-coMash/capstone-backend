@@ -51,8 +51,8 @@ public class ComboItemDto
 
 public class PromotionLevelDto
 {
-    public decimal MinValue { get; set; }
+    public double MinValue { get; set; }
     public string DiscountType { get; set; } = string.Empty;
-    public decimal DiscountValue { get; set; }
-    public decimal? MaxDiscount { get; set; }
+    public double DiscountValue { get; set; }
+    public double? MaxDiscount { get; set; }
 }

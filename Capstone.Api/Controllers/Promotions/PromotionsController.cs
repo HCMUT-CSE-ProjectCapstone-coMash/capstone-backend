@@ -342,9 +342,27 @@ public class PromotionsController : ControllerBase
             });
         }
 
-        return Ok(new {
+        return Ok(new
+        {
             ProductPromotions = productPromotions.Value,
             ComboPromotions = comboPromotions.Value
         });
+    }
+
+    [HttpGet("get-order-promotions")]
+    public async Task<IActionResult> GetOrderPromotions()
+    {
+        var orderPromotions = await _promotionsService.GetActiveOrderPromotions();
+
+        if (orderPromotions.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = orderPromotions.Error.Code,
+                message = orderPromotions.Error.Description
+            });
+        }
+
+        return Ok(orderPromotions.Value);
     }
 }
