@@ -15,7 +15,4 @@ public static class AuthErrors
 
     public static readonly Error UserDeleted =
         new("Auth.UserDeleted", "Người dùng đã bị xóa");
-
-    public static readonly Error UserLocked =
-        new("Auth.UserLocked", "Tài khoản đã bị khóa. Vui lòng liên hệ chủ cửa hàng");
 }

@@ -19,8 +19,4 @@ public interface IAuthenticationService
     Task<Result<PaginatedResult<UserDto>>> GetAllEmployees(int page, int pageSize, string? search = null);
     
     Task<Result<string>> CreateEmployeeId();
-
-    Task<Result> ResetPassword(string userId);
-
-    Task<Result> ChangePassword(string userId, string newPassword);
 }
