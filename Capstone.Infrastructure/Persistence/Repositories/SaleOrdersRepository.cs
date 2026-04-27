@@ -38,6 +38,8 @@ public class SaleOrdersRepository : ISaleOrdersRepository
             .Include(so => so.SaleOrderDetails)
                 .ThenInclude(d => d.ComboPromotion)
                     .ThenInclude(cp => cp!.Promotion)
+            .Include(so => so.AppliedOrderPromotion)
+                .ThenInclude(op => op!.Promotion) 
             .Include(so => so.Customer)
             .Include(so => so.User)
             .FirstOrDefaultAsync(so => so.Id == saleOrderId);

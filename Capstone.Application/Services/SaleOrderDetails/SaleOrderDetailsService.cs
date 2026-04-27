@@ -103,31 +103,28 @@ public class SaleOrderDetailsService : ISaleOrderDetailsService
         string SaleOrderId,
         string ProductId,
         string SelectedSize,
-        int Quantity,
+        int TotalProductQuantity,
+        int ComboQuantity,
         string PromotionId
     )
     {
         var product = await _productsRepository.GetProductById(Guid.Parse(ProductId));
-
         if (product == null)
-        {
             return Result.Failure(new Error("ProductNotFound", "Product not found"));
-        }
 
         var comboPromotion = await _comboPromotionsRepository.GetComboPromotionById(Guid.Parse(PromotionId));
-
         if (comboPromotion == null)
-        {
             return Result.Failure(new Error("ComboPromotionNotFound", "Combo promotion not found"));
-        }
 
-        var TotalProductInCombo = comboPromotion.ComboPromotionDetails.Sum(d => d.Quantity);
+        var grossComboValue = comboPromotion.ComboPromotionDetails.Sum(d => d.Product.SalePrice * d.Quantity);
 
-        var UnitPrice = comboPromotion.ComboPrice / TotalProductInCombo;
+        var thisItemOriginalValue = product.SalePrice * (TotalProductQuantity / ComboQuantity);
+        var proportion = grossComboValue > 0 ? thisItemOriginalValue / grossComboValue : 0;
 
-        var SubTotal = Quantity * UnitPrice;
-
-        var Profit = SubTotal - (Quantity * product.ImportPrice);
+        var allocatedPricePerCombo = Math.Round(comboPromotion.ComboPrice * proportion, 2);
+        var unitPrice = Math.Round(allocatedPricePerCombo / (TotalProductQuantity / ComboQuantity), 2);
+        var subTotal = Math.Round(unitPrice * TotalProductQuantity, 2);
+        var profit = Math.Round(subTotal - (product.ImportPrice * TotalProductQuantity), 2);
 
         var saleOrderDetail = new SaleOrderDetail
         {
@@ -135,11 +132,11 @@ public class SaleOrderDetailsService : ISaleOrderDetailsService
             SaleOrderId = Guid.Parse(SaleOrderId),
             ProductId = Guid.Parse(ProductId),
             SelectedSize = SelectedSize,
-            Quantity = Quantity,
+            Quantity = TotalProductQuantity,
             Discount = 0,
-            UnitPrice = UnitPrice,
-            SubTotal = SubTotal,
-            Profit = Profit,
+            UnitPrice = unitPrice,
+            SubTotal = subTotal,
+            Profit = profit,
             ProductPromotionId = null,
             ComboPromotionId = Guid.Parse(PromotionId)
         };
@@ -153,7 +150,7 @@ public class SaleOrderDetailsService : ISaleOrderDetailsService
             return Result.Failure(new Error("ProductQuantityNotFound", "Product quantity not found"));
         }
 
-        productQuantity.Quantities -= Quantity;
+        productQuantity.Quantities -= TotalProductQuantity;
 
         await _productQuantitiesRepository.UpdateProductQuantity(productQuantity);
 

@@ -51,13 +51,14 @@ public class SaleOrdersController : ControllerBase
                     saleOrderId.Value,
                     request.Combos[i].Items[j].ProductId,
                     request.Combos[i].Items[j].SelectedSize,
-                    request.Combos[i].Items[j].Quantity * request.Combos[i].Quantity,
+                    request.Combos[i].Items[j].Quantity,
+                    request.Combos[i].Quantity,
                     request.Combos[i].ComboDealId
                 );
             }
         }
 
-        await _saleOrdersService.UpdateTotalPriceAndTotalProfit(saleOrderId.Value);
+        await _saleOrdersService.UpdateTotalPriceAndTotalProfit(saleOrderId.Value, request.OrderPromotionId);
 
         var result = await _saleOrdersService.GetSaleOrderById(saleOrderId.Value);
 

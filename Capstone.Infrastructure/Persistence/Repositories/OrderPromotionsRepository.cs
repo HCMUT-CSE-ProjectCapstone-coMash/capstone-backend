@@ -34,4 +34,9 @@ public class OrderPromotionsRepository : IOrderPromotionsRepository
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task<OrderPromotion?> GetOrderPromotionByOrderPromotionId(Guid orderPromotionId)
+    {
+        return await _context.OrderPromotions.FirstOrDefaultAsync(op => op.Id == orderPromotionId);
+    }
 }

@@ -26,5 +26,6 @@ public record CreateSaleOrdersRequest(
     string PaymentMethod,
     double DebtAmount,
     List<SaleProductRequest> Products,
-    List<SaleComboRequest> Combos
+    List<SaleComboRequest> Combos,
+    string OrderPromotionId
 );

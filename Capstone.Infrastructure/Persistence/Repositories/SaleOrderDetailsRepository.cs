@@ -24,4 +24,9 @@ public class SaleOrderDetailsRepository : ISaleOrderDetailsRepository
         return await _context.SaleOrderDetails.AnyAsync(sod => sod.ProductId == productId);
     }
 
+    public async Task UpdateSaleOrderDetail(SaleOrderDetail saleOrderDetail)
+    {
+        _context.SaleOrderDetails.Update(saleOrderDetail);
+        await _context.SaveChangesAsync();
+    }
 }

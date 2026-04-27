@@ -9,5 +9,7 @@ namespace Capstone.Application.Common.Interfaces.Persistence
         Task<List<OrderPromotion>> GetOrderPromotionsByPromotionId(Guid promotionId);
 
         Task DeleteOrderPromotionsByPromotionId(Guid promotionId);
+
+        Task<OrderPromotion?> GetOrderPromotionByOrderPromotionId(Guid orderPromotionId);
     }
 }

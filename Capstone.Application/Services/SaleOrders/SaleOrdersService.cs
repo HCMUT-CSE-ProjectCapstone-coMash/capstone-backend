@@ -3,8 +3,9 @@ using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Application.Common.Interfaces.Services;
 using Capstone.Application.Services.ComboPromotionsService;
 using Capstone.Application.Services.FileStorageService;
+using Capstone.Application.Services.OrderPromotionsService;
 using Capstone.Application.Services.ProductPromotionsService;
-using Capstone.Application.Services.Products;
+
 using Capstone.Application.Services.SaleOrderDetails;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
@@ -17,15 +18,22 @@ public class SaleOrdersService : ISaleOrdersService
     private readonly IFileStorageService _fileStorageService;
 
     private readonly ISaleOrdersRepository _saleOrdersRepository;
+    private readonly IOrderPromotionsRepository _orderPromotionsRepository;
+    private readonly ISaleOrderDetailsRepository _saleOrderDetailsRepository;
 
     public SaleOrdersService(
         IDateTimeProvider dateTimeProvider,
         IFileStorageService fileStorageService,
-        ISaleOrdersRepository saleOrdersRepository)
+        ISaleOrdersRepository saleOrdersRepository,
+        IOrderPromotionsRepository orderPromotionsRepository,
+        ISaleOrderDetailsRepository saleOrderDetailsRepository
+    )
     {
         _dateTimeProvider = dateTimeProvider;
         _fileStorageService = fileStorageService;
         _saleOrdersRepository = saleOrdersRepository;
+        _orderPromotionsRepository = orderPromotionsRepository;
+        _saleOrderDetailsRepository = saleOrderDetailsRepository;
     }
 
     public async Task<Result<string>> CreateSaleOrder(
@@ -58,18 +66,54 @@ public class SaleOrdersService : ISaleOrdersService
         return Result<string>.Success(newSaleOrder.Id.ToString());
     }
 
-    public async Task<Result> UpdateTotalPriceAndTotalProfit(string saleOrderId)
+    public async Task<Result> UpdateTotalPriceAndTotalProfit(string saleOrderId, string orderPromotionId)
     {
         var saleOrder = await _saleOrdersRepository.GetSaleOrderWithDetails(Guid.Parse(saleOrderId));
 
         if (saleOrder == null)
             return Result.Failure(new Error("SaleOrderNotFound", "Sale order not found"));
 
-        var totalPrice = saleOrder.SaleOrderDetails.Sum(d => d.SubTotal);
-        var totalProfit = saleOrder.SaleOrderDetails.Sum(d => d.Profit);
+        var grossTotal = saleOrder.SaleOrderDetails.Sum(d => d.SubTotal);
 
-        saleOrder.TotalPrice = totalPrice;
-        saleOrder.TotalProfit = totalProfit;
+        double orderDiscountAmount = 0;
+        if (!string.IsNullOrEmpty(orderPromotionId))
+        {
+            var orderPromotionResult = await _orderPromotionsRepository.GetOrderPromotionByOrderPromotionId(Guid.Parse(orderPromotionId));
+
+            if (orderPromotionResult == null)
+                return Result.Failure(new Error("OrderPromotionNotFound", "Order promotion not found"));
+
+            if (orderPromotionResult.DiscountType == DiscountType.Percent)
+            {
+                orderDiscountAmount = Math.Min(
+                    grossTotal * (orderPromotionResult.DiscountValue / 100),
+                    orderPromotionResult.MaxDiscount > 0 ? orderPromotionResult.MaxDiscount : double.MaxValue
+                );
+            }
+            else if (orderPromotionResult.DiscountType == DiscountType.Fixed)
+            {
+                orderDiscountAmount = orderPromotionResult.DiscountValue;
+            }
+
+            saleOrder.AppliedOrderPromotionId = Guid.Parse(orderPromotionId);
+        }
+
+        var finalTotal = grossTotal - orderDiscountAmount;
+
+        foreach (var detail in saleOrder.SaleOrderDetails)
+        {
+            var proportion = grossTotal > 0 ? detail.SubTotal / grossTotal : 0;
+            var lineDiscount = Math.Round(orderDiscountAmount * proportion, 2);
+            var lineEffectiveSubTotal = detail.SubTotal - lineDiscount;
+
+            detail.Profit = Math.Round(lineEffectiveSubTotal - (detail.Product.ImportPrice * detail.Quantity));
+
+            await _saleOrderDetailsRepository.UpdateSaleOrderDetail(detail);
+        }
+
+        saleOrder.TotalPrice = finalTotal;
+        saleOrder.TotalProfit = saleOrder.SaleOrderDetails.Sum(d => d.Profit);
+
         await _saleOrdersRepository.UpdateSaleOrder(saleOrder);
 
         return Result.Success();
@@ -85,6 +129,7 @@ public class SaleOrdersService : ISaleOrdersService
             SaleOrderId = so.SaleOrderId,
             CustomerId = so.CustomerId,
             CustomerName = so.Customer?.CustomerName,
+            CustomerPhone = so.Customer?.CustomerPhoneNumber,
             CreatedBy = so.CreatedBy,
             CreatedByName = so.User.FullName,
             PaymentMethod = so.PaymentMethod,
@@ -156,12 +201,26 @@ public class SaleOrdersService : ISaleOrdersService
             details.Add(detailDto);
         }
 
+        var orderPromotion = saleOrder.AppliedOrderPromotion != null
+            ? new OrderPromotionDto
+            {
+                Id = saleOrder.AppliedOrderPromotion.Id,
+                DiscountType = saleOrder.AppliedOrderPromotion.DiscountType,
+                DiscountValue = saleOrder.AppliedOrderPromotion.DiscountValue,
+                MaxDiscount = saleOrder.AppliedOrderPromotion.MaxDiscount,
+                MinValue = saleOrder.AppliedOrderPromotion.MinValue,
+            }
+            : null;
+
+        var originalTotalPrice = saleOrder.SaleOrderDetails.Sum(d => d.SubTotal);
+
         var dto = new SaleOrderDto
         {
             Id = saleOrder.Id,
             SaleOrderId = saleOrder.SaleOrderId,
             CustomerId = saleOrder.CustomerId,
             CustomerName = saleOrder.Customer?.CustomerName,
+            CustomerPhone = saleOrder.Customer?.CustomerPhoneNumber,
             CreatedBy = saleOrder.CreatedBy,
             CreatedByName = saleOrder.User.FullName,
             PaymentMethod = saleOrder.PaymentMethod,
@@ -169,7 +228,10 @@ public class SaleOrdersService : ISaleOrdersService
             CreatedAt = saleOrder.CreatedAt,
             Details = details,
             TotalPrice = saleOrder.TotalPrice,
-            TotalProfit = saleOrder.TotalProfit
+            TotalProfit = saleOrder.TotalProfit,
+            OrignalTotalPrice = originalTotalPrice,
+            AppliedOrderPromotion = orderPromotion,
+            AppliedOrderPromotionName = saleOrder.AppliedOrderPromotion != null ? saleOrder.AppliedOrderPromotion.Promotion.PromotionName : null
         };
 
         return Result<SaleOrderDto>.Success(dto);

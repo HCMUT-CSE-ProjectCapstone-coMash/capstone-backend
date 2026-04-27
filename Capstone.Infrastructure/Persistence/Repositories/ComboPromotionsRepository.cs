@@ -45,6 +45,9 @@ public class ComboPromotionsRepository : IComboPromotionsRepository
 
     public async Task<ComboPromotion?> GetComboPromotionById(Guid comboPromotionId)
     {
-        return await _context.ComboPromotions.Include(co => co.ComboPromotionDetails).FirstOrDefaultAsync(co => co.Id == comboPromotionId);
+        return await _context.ComboPromotions
+            .Include(cp => cp.ComboPromotionDetails)
+                .ThenInclude(cod => cod.Product)
+            .FirstOrDefaultAsync(cp => cp.Id == comboPromotionId);
     }
 }
