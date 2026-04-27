@@ -11,8 +11,11 @@ public class SaleOrder
     public DateTime CreatedAt { get; set; }
     public double TotalPrice { get; set; }
     public double TotalProfit { get; set; }
+
+    public Guid? AppliedOrderPromotionId { get; set; }
+    public OrderPromotion? AppliedOrderPromotion { get; set; }
+
     public Customer? Customer { get; set; }
-    
     public User User { get; set; } = null!;
     public ICollection<SaleOrderDetail> SaleOrderDetails { get; set; } = new List<SaleOrderDetail>();
 }

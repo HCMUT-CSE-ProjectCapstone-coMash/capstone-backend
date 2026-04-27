@@ -92,6 +92,9 @@ public class AppDbContext : DbContext
 
             // SaleOrder has one Customer and Customer has many SaleOrders
             entity.HasOne(so => so.Customer).WithMany(c => c.SaleOrders).HasForeignKey(so => so.CustomerId).IsRequired(false);
+
+            // SaleOrder has one OrderPromotion (AppliedOrderPromotion) and OrderPromotion has many SaleOrders
+            entity.HasOne(so => so.AppliedOrderPromotion).WithMany().HasForeignKey(so => so.AppliedOrderPromotionId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
         });
 
         // SaleOrderDetail Table
