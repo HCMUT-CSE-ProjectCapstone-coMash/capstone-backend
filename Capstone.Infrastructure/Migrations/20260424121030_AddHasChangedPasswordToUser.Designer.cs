@@ -3,6 +3,7 @@ using System;
 using Capstone.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Capstone.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260424121030_AddHasChangedPasswordToUser")]
+    partial class AddHasChangedPasswordToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,8 +35,8 @@ namespace Capstone.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<double>("ComboPrice")
-                        .HasColumnType("double precision");
+                    b.Property<decimal>("ComboPrice")
+                        .HasColumnType("numeric");
 
                     b.Property<Guid>("PromotionId")
                         .HasColumnType("uuid");
@@ -198,8 +201,8 @@ namespace Capstone.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<double>("DiscountValue")
-                        .HasColumnType("double precision");
+                    b.Property<decimal>("DiscountValue")
+                        .HasColumnType("numeric");
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
@@ -409,16 +412,10 @@ namespace Capstone.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("ComboPromotionId")
-                        .HasColumnType("uuid");
-
                     b.Property<double>("Discount")
                         .HasColumnType("double precision");
 
                     b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("ProductPromotionId")
                         .HasColumnType("uuid");
 
                     b.Property<double>("Profit")
@@ -442,11 +439,7 @@ namespace Capstone.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ComboPromotionId");
-
                     b.HasIndex("ProductId");
-
-                    b.HasIndex("ProductPromotionId");
 
                     b.HasIndex("SaleOrderId");
 
@@ -657,21 +650,11 @@ namespace Capstone.Infrastructure.Migrations
 
             modelBuilder.Entity("Capstone.Domain.Entities.SaleOrderDetail", b =>
                 {
-                    b.HasOne("Capstone.Domain.Entities.ComboPromotion", "ComboPromotion")
-                        .WithMany()
-                        .HasForeignKey("ComboPromotionId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Capstone.Domain.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Capstone.Domain.Entities.ProductPromotion", "ProductPromotion")
-                        .WithMany()
-                        .HasForeignKey("ProductPromotionId")
-                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Capstone.Domain.Entities.SaleOrder", "SaleOrder")
                         .WithMany("SaleOrderDetails")
@@ -679,11 +662,7 @@ namespace Capstone.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ComboPromotion");
-
                     b.Navigation("Product");
-
-                    b.Navigation("ProductPromotion");
 
                     b.Navigation("SaleOrder");
                 });

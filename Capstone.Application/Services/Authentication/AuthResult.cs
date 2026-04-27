@@ -11,7 +11,8 @@ public record AuthResult(
     string PhoneNumber,
     string Gender,
     DateOnly DateOfBirth,
-    string ImageURL
+    string ImageURL,
+    bool HasChangedPassword
 );
 
 public record UserDto(
@@ -24,5 +25,6 @@ public record UserDto(
     string PhoneNumber,
     string Gender,
     DateOnly DateOfBirth,
-    string ImageURL
+    string ImageURL,
+    bool HasChangedPassword
 );
