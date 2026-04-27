@@ -123,6 +123,7 @@ public class SaleOrdersService : ISaleOrdersService
                     DiscountType = detail.ProductPromotion.DiscountType,
                     DiscountValue = detail.ProductPromotion.DiscountValue,
                     PromotionId = detail.ProductPromotion.Promotion.Id,
+                    PromotionName = detail.ProductPromotion.Promotion.PromotionName
                 }
                 : null;
 

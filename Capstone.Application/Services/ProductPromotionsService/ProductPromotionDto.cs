@@ -9,4 +9,5 @@ public class ProductPromotionDto
     public string DiscountType { get; set; } = string.Empty;
     public double DiscountValue { get; set; }
     public Guid PromotionId { get; set; }
+    public string PromotionName { get; set; } = string.Empty;
 }
