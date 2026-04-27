@@ -350,6 +350,7 @@ public class PromotionsService : IPromotionsService
         {
             var promotionLevels = promotion.OrderPromotions.Select(pl => new OrderPromotionDto
             {
+                Id = pl.Id,
                 MinValue = pl.MinValue,
                 DiscountType = pl.DiscountType,
                 DiscountValue = pl.DiscountValue,
