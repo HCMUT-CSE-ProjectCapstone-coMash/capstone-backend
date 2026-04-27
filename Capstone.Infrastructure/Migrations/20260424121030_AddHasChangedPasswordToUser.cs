@@ -10,9 +10,7 @@ namespace Capstone.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "HasChangedPassword",
-                table: "users");
+            migrationBuilder.Sql("ALTER TABLE users DROP COLUMN IF EXISTS \"HasChangedPassword\";");
 
             migrationBuilder.AddColumn<bool>(
                 name: "HasChangedPassword",
@@ -20,6 +18,7 @@ namespace Capstone.Infrastructure.Migrations
                 type: "boolean",
                 nullable: false,
                 defaultValue: false);
+
         }
 
         /// <inheritdoc />
