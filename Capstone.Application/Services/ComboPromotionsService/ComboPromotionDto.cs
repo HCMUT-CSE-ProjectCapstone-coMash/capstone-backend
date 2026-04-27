@@ -14,6 +14,7 @@ public class ComboPromotionDto
 public class ComboPromotionDetailDto
 {
     public Guid Id { get; set; }
+    public Guid ProductId { get; set; }
     public ProductDto Product { get; set; } = null!;
     public int Quantity { get; set; }
 }

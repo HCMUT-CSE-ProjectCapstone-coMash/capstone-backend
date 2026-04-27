@@ -5,7 +5,7 @@ using Capstone.Application.Services.ComboPromotionsService;
 using Capstone.Application.Services.FileStorageService;
 using Capstone.Application.Services.OrderPromotionsService;
 using Capstone.Application.Services.ProductPromotionsService;
-
+using Capstone.Application.Services.Products;
 using Capstone.Application.Services.SaleOrderDetails;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
@@ -179,6 +179,12 @@ public class SaleOrdersService : ISaleOrdersService
                     ComboName = detail.ComboPromotion.ComboName,
                     ComboPrice = detail.ComboPromotion.ComboPrice,
                     PromotionId = detail.ComboPromotion.Promotion.Id,
+                    ComboItems = detail.ComboPromotion.ComboPromotionDetails.Select(cpd => new ComboPromotionDetailDto
+                    {
+                        Id = cpd.Id,
+                        ProductId = cpd.Product.Id,
+                        Quantity = cpd.Quantity
+                    }).ToList()
                 }
                 : null;
 
@@ -229,7 +235,7 @@ public class SaleOrdersService : ISaleOrdersService
             Details = details,
             TotalPrice = saleOrder.TotalPrice,
             TotalProfit = saleOrder.TotalProfit,
-            OrignalTotalPrice = originalTotalPrice,
+            OriginalTotalPrice = originalTotalPrice,
             AppliedOrderPromotion = orderPromotion,
             AppliedOrderPromotionName = saleOrder.AppliedOrderPromotion != null ? saleOrder.AppliedOrderPromotion.Promotion.PromotionName : null
         };

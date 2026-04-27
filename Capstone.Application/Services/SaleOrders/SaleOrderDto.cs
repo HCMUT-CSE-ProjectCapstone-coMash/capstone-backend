@@ -18,7 +18,7 @@ public class SaleOrderDto
     public double Discount { get; set; }
     public double TotalPrice { get; set; }
     public double TotalProfit { get; set; }
-    public double OrignalTotalPrice { get; set; }
+    public double OriginalTotalPrice { get; set; }
     public string? AppliedOrderPromotionName { get; set; }
     public OrderPromotionDto? AppliedOrderPromotion { get; set; }
 
