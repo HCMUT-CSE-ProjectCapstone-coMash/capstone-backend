@@ -266,4 +266,43 @@ public class AuthenticationController : ControllerBase
 
         return Ok(new { message = "Employee deleted successfully", employeeName = result.Value });
     }
+
+    [HttpPost("reset-password/{userId}")]
+    public async Task<IActionResult> ResetPassword([FromRoute] string userId)
+    {
+        var result = await _auth.ResetPassword(userId);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new { message = "Password reset successfully" });
+    }
+
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+            return Unauthorized();
+
+        var result = await _auth.ChangePassword(userIdClaim.Value, request.NewPassword);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new { message = "Password changed successfully" });
+    }
 }
