@@ -104,7 +104,6 @@ public class SaleOrderDetailsService : ISaleOrderDetailsService
         string ProductId,
         string SelectedSize,
         int TotalProductQuantity,
-        int ComboQuantity,
         string PromotionId
     )
     {
@@ -118,13 +117,10 @@ public class SaleOrderDetailsService : ISaleOrderDetailsService
 
         var grossComboValue = comboPromotion.ComboPromotionDetails.Sum(d => d.Product.SalePrice * d.Quantity);
 
-        var thisItemOriginalValue = product.SalePrice * (TotalProductQuantity / ComboQuantity);
-        var proportion = grossComboValue > 0 ? thisItemOriginalValue / grossComboValue : 0;
-
-        var allocatedPricePerCombo = Math.Round(comboPromotion.ComboPrice * proportion, 2);
-        var unitPrice = Math.Round(allocatedPricePerCombo / (TotalProductQuantity / ComboQuantity), 2);
-        var subTotal = Math.Round(unitPrice * TotalProductQuantity, 2);
-        var profit = Math.Round(subTotal - (product.ImportPrice * TotalProductQuantity), 2);
+        var discountRatio = comboPromotion.ComboPrice / grossComboValue;
+        var unitPrice = Math.Round(product.SalePrice * discountRatio, 2);
+        var subTotal = unitPrice * TotalProductQuantity;
+        var profit = subTotal - (TotalProductQuantity * product.ImportPrice);
 
         var saleOrderDetail = new SaleOrderDetail
         {

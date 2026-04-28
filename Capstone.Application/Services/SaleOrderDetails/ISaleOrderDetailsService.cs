@@ -18,7 +18,6 @@ public interface ISaleOrderDetailsService
         string ProductId,
         string SelectedSize,
         int TotalProductQuantity,
-        int ComboQuantity,
         string PromotionId
     );
 }

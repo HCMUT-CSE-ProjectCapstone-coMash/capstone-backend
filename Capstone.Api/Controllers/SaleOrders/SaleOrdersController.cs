@@ -52,7 +52,6 @@ public class SaleOrdersController : ControllerBase
                     request.Combos[i].Items[j].ProductId,
                     request.Combos[i].Items[j].SelectedSize,
                     request.Combos[i].Items[j].Quantity,
-                    request.Combos[i].Quantity,
                     request.Combos[i].ComboDealId
                 );
             }
