@@ -97,38 +97,4 @@ public class SaleOrdersController : ControllerBase
 
         return Ok(result.Value);
     }
-
-    [HttpGet("fetch-all-by-employee/{employeeId}")]
-    public async Task<IActionResult> FetchAllSaleOrdersByEmployeeId([FromRoute] string employeeId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
-    {
-        var result = await _saleOrdersService.FetchAllSaleOrdersByEmployeeId(employeeId, page, pageSize, search);
-
-        if (result.IsFailure)
-        {
-            return BadRequest(new
-            {
-                error = result.Error.Code,
-                message = result.Error.Description
-            });
-        }
-
-        return Ok(result.Value);
-    }
-
-    [HttpGet("fetch-all-by-customer/{customerId}")]
-    public async Task<IActionResult> FetchAllSaleOrdersByCustomerId([FromRoute] string customerId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
-    {
-        var result = await _saleOrdersService.FetchAllSaleOrdersByCustomerId(customerId, page, pageSize, search);
-
-        if (result.IsFailure)
-        {
-            return BadRequest(new
-            {
-                error = result.Error.Code,
-                message = result.Error.Description
-            });
-        }
-
-        return Ok(result.Value);
-    }
 }
