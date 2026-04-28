@@ -46,7 +46,7 @@ public class SaleOrdersService : ISaleOrdersService
         var maxNumber = await _saleOrdersRepository.GetMaxIdNumber();
         var saleOrderId = $"HD-{maxNumber + 1}";
 
-        var newDebitMoney= PaymentMethodStatus.Debit == PaymentMethod
+        var newDebitMoney = PaymentMethodStatus.Debit == PaymentMethod
             ? DebitMoney
             : 0;
 
@@ -142,7 +142,7 @@ public class SaleOrdersService : ISaleOrdersService
 
         return Result<PaginatedResult<SaleOrderDto>>.Success(new PaginatedResult<SaleOrderDto>(saleOrderDtos, saleOrders.Total));
     }
- 
+
     public async Task<Result<SaleOrderDto>> GetSaleOrderById(string saleOrderId)
     {
         var saleOrder = await _saleOrdersRepository.GetSaleOrderWithDetails(Guid.Parse(saleOrderId));
@@ -241,5 +241,29 @@ public class SaleOrdersService : ISaleOrdersService
         };
 
         return Result<SaleOrderDto>.Success(dto);
+    }
+
+    public async Task<Result<PaginatedResult<SaleOrderDto>>> FetchAllSaleOrdersByEmployeeId(string employeeId, int page, int pageSize, string? search = null)
+    {
+        var saleOrders = await _saleOrdersRepository.FetchAllSaleOrdersByEmployeeId(Guid.Parse(employeeId), page, pageSize, search);
+
+        var saleOrderDtos = saleOrders.Items.Select(so => new SaleOrderDto
+        {
+            Id = so.Id,
+            SaleOrderId = so.SaleOrderId,
+            CustomerId = so.CustomerId,
+            CustomerName = so.Customer?.CustomerName,
+            CustomerPhone = so.Customer?.CustomerPhoneNumber,
+            CreatedBy = so.CreatedBy,
+            CreatedByName = so.User.FullName,
+            PaymentMethod = so.PaymentMethod,
+            DebitMoney = so.DebitMoney,
+            CreatedAt = so.CreatedAt,
+            TotalPrice = so.TotalPrice,
+            TotalProfit = so.TotalProfit,
+            Details = new List<SaleOrderDetailDto>()
+        }).ToList();
+
+        return Result<PaginatedResult<SaleOrderDto>>.Success(new PaginatedResult<SaleOrderDto>(saleOrderDtos, saleOrders.Total));
     }
 }

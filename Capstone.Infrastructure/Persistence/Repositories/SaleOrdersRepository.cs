@@ -43,7 +43,7 @@ public class SaleOrdersRepository : ISaleOrdersRepository
                     .ThenInclude(cp => cp!.ComboPromotionDetails)
                         .ThenInclude(cpd => cpd.Product)
             .Include(so => so.AppliedOrderPromotion)
-                .ThenInclude(op => op!.Promotion) 
+                .ThenInclude(op => op!.Promotion)
             .Include(so => so.Customer)
             .Include(so => so.User)
             .FirstOrDefaultAsync(so => so.Id == saleOrderId);
@@ -77,7 +77,31 @@ public class SaleOrdersRepository : ISaleOrdersRepository
         if (!string.IsNullOrEmpty(search))
         {
             query = query.Where(
-                so => so.SaleOrderId.Contains(search) 
+                so => so.SaleOrderId.Contains(search)
+                || EF.Functions.Unaccent(so.Customer!.CustomerName).Contains(EF.Functions.Unaccent(search)));
+        }
+
+        var total = await query.CountAsync();
+        var orders = await query
+            .OrderByDescending(so => so.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (orders, total);
+    }
+
+    public async Task<(List<SaleOrder> Items, int Total)> FetchAllSaleOrdersByEmployeeId(Guid employeeId, int page, int pageSize, string? search = null)
+    {
+        var query = _context.SaleOrders
+            .Include(so => so.Customer)
+            .Include(so => so.User)
+            .Where(so => so.CreatedBy == employeeId);
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            query = query.Where(
+                so => so.SaleOrderId.Contains(search)
                 || EF.Functions.Unaccent(so.Customer!.CustomerName).Contains(EF.Functions.Unaccent(search)));
         }
 
