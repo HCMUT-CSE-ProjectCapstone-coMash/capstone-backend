@@ -148,4 +148,37 @@ public class CustomersService : ICustomersService
             0
         ));
     }
+
+    public async Task<Result<CustomerDto>> FetchCustomerById(string customerId)
+    {
+        var customer = await _customers.GetCustomerById(Guid.Parse(customerId));
+
+        if (customer == null)
+        {
+            return Result<CustomerDto>.Failure(new Error("CustomerNotFound", "Khách hàng không tồn tại"));
+        }
+
+        var debitOrders = customer.SaleOrders
+            .Where(so => so.PaymentMethod == PaymentMethodStatus.Debit)
+            .ToList();
+
+        var totalDebit = debitOrders.Sum(so => so.DebitMoney);
+        var debitDays = 0;
+
+        if (debitOrders.Any())
+        {
+            var earliestDebitAt = debitOrders.Min(so => so.CreatedAt);
+            debitDays = (int)Math.Max(0, (_dateTimeProvider.UtcNow - earliestDebitAt).TotalDays);
+        }
+
+        return Result<CustomerDto>.Success(new CustomerDto(
+            customer.Id,
+            customer.CustomerName,
+            customer.CustomerPhoneNumber,
+            customer.CustomerStatus,
+            customer.CreatedAt,
+            totalDebit,
+            debitDays
+        ));
+    }
 }

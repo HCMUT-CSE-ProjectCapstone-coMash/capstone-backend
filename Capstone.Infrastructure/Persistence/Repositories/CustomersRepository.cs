@@ -74,4 +74,11 @@ public class CustomersRepository : ICustomersRepository
 
         return (items, total);
     }
+
+    public async Task<Customer?> GetCustomerById(Guid customerId)
+    {
+        return await _context.Customers
+            .Include(c => c.SaleOrders)
+            .FirstOrDefaultAsync(c => c.Id == customerId);
+    }
 }

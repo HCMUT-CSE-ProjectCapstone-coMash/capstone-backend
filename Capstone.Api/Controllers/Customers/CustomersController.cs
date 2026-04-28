@@ -122,4 +122,29 @@ public class CustomersController : ControllerBase
             result.Value.DebitDays
         ));
     }
+
+    [HttpGet("{customerId}")]
+    public async Task<IActionResult> FetchCustomerById([FromRoute] string customerId)
+    {
+        var result = await _customersService.FetchCustomerById(customerId);
+
+        if (result.IsFailure)
+        {
+            return NotFound(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new CustomersResponse(
+            result.Value.Id,
+            result.Value.CustomerName,
+            result.Value.CustomerPhone,
+            result.Value.CustomerStatus,
+            result.Value.CreatedAt,
+            result.Value.DebitMoney,
+            result.Value.DebitDays
+        ));
+    }
 }
