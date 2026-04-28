@@ -266,4 +266,28 @@ public class SaleOrdersService : ISaleOrdersService
 
         return Result<PaginatedResult<SaleOrderDto>>.Success(new PaginatedResult<SaleOrderDto>(saleOrderDtos, saleOrders.Total));
     }
+
+    public async Task<Result<PaginatedResult<SaleOrderDto>>> FetchAllSaleOrdersByCustomerId(string customerId, int page, int pageSize, string? search = null)
+    {
+        var saleOrders = await _saleOrdersRepository.FetchAllSaleOrdersByCustomerId(Guid.Parse(customerId), page, pageSize, search);
+
+        var saleOrderDtos = saleOrders.Items.Select(so => new SaleOrderDto
+        {
+            Id = so.Id,
+            SaleOrderId = so.SaleOrderId,
+            CustomerId = so.CustomerId,
+            CustomerName = so.Customer?.CustomerName,
+            CustomerPhone = so.Customer?.CustomerPhoneNumber,
+            CreatedBy = so.CreatedBy,
+            CreatedByName = so.User.FullName,
+            PaymentMethod = so.PaymentMethod,
+            DebitMoney = so.DebitMoney,
+            CreatedAt = so.CreatedAt,
+            TotalPrice = so.TotalPrice,
+            TotalProfit = so.TotalProfit,
+            Details = new List<SaleOrderDetailDto>()
+        }).ToList();
+
+        return Result<PaginatedResult<SaleOrderDto>>.Success(new PaginatedResult<SaleOrderDto>(saleOrderDtos, saleOrders.Total));
+    }
 }
