@@ -164,11 +164,6 @@ public class ProductsOrdersService : IProductsOrdersService
                 await _fileStorageService.DeleteImageAsync(product.ImageKey);
             }
 
-            if (!string.IsNullOrEmpty(product.VectorId))
-            {
-                await _vectorStoreProvider.DeleteImageAsync(product.VectorId);
-            }
-
             await _productsRepository.DeleteProductAsync(product.Id);
         }
 
@@ -311,11 +306,6 @@ public class ProductsOrdersService : IProductsOrdersService
                 if (!string.IsNullOrEmpty(product.ImageKey))
                 {
                     await _fileStorageService.DeleteImageAsync(product.ImageKey);
-                }
-
-                if (!string.IsNullOrEmpty(product.VectorId))
-                {
-                    await _vectorStoreProvider.DeleteImageAsync(product.VectorId);
                 }
 
                 await _productsRepository.DeleteProductAsync(product.Id);

@@ -19,7 +19,6 @@ public class ProductsService : IProductsService
     private readonly IFileStorageService _fileStorageService;
 
     private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly IVectorStoreProvider _vectorStoreProvider;
     private readonly IPromptProvider _promptProvider;
 
     public ProductsService(
@@ -31,7 +30,6 @@ public class ProductsService : IProductsService
         ISaleOrderDetailsRepository saleOrderDetailsRepository,
         IDateTimeProvider dateTimeProvider,
         IFileStorageService fileStorageService,
-        IVectorStoreProvider vectorStoreProvider,
         IPromptProvider promptProvider
     )
     {
@@ -43,7 +41,6 @@ public class ProductsService : IProductsService
         _saleOrderDetailsRepository = saleOrderDetailsRepository;
         _dateTimeProvider = dateTimeProvider;
         _fileStorageService = fileStorageService;
-        _vectorStoreProvider = vectorStoreProvider;
         _promptProvider = promptProvider;
     }
 
@@ -80,7 +77,7 @@ public class ProductsService : IProductsService
         return Result<string>.Success(newProduct.Id.ToString());
     }
 
-    public async Task<Result> UpdateProductImageKey(string productId, string imageKey)
+    public async Task<Result> UpdateProductImageKey(string productId, string imageKey, string vectorId)
     {
         var product = await _productsRepository.GetProductById(Guid.Parse(productId));
 
@@ -88,6 +85,7 @@ public class ProductsService : IProductsService
             return Result.Failure(new Error("ProductNotFound", "Product not found."));
 
         product.ImageKey = imageKey;
+        product.VectorId = vectorId;
 
         await _productsRepository.UpdateProduct(product);
 
@@ -100,50 +98,6 @@ public class ProductsService : IProductsService
 
         if (product == null)
             return Result<ProductDto>.Failure(new Error("ProductNotFound", "Product not found."));
-
-        var imageUrl = "";
-        if (!string.IsNullOrEmpty(product.ImageKey))
-        {
-            var imageResult = await _fileStorageService.GetImageUrlAsync(product.ImageKey);
-            imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
-        }
-
-        return Result<ProductDto>.Success(new ProductDto(
-            product.Id,
-            product.ProductId,
-            product.ProductName,
-            product.Category,
-            product.Color,
-            product.Pattern,
-            product.SizeType,
-            product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
-            product.CreatedBy,
-            product.CreatedAt,
-            product.Status,
-            imageUrl,
-            product.VectorId,
-            product.SalePrice,
-            product.ImportPrice
-        ));
-    }
-
-    // Tìm kiếm sản phẩm tương tự dựa trên hình ảnh
-    public async Task<Result<ProductDto>> SearchProductSimilar(string ImageBase64)
-    {
-        var similarProducts = await _vectorStoreProvider.SearchSimilarProductsAsync(ImageBase64);
-
-        if (similarProducts.Count == 0)
-            return Result<ProductDto>.Failure(new Error("NoSimilarProducts", "No similar products found."));
-
-        var mostSimilarProduct = similarProducts.Where(p => p.Metadata != null).MaxBy(p => p.Score);
-
-        if (mostSimilarProduct?.Metadata == null)
-            return Result<ProductDto>.Failure(new Error("NoSimilarProducts", "No similar products found."));
-
-        var product = await _productsRepository.GetProductById(Guid.Parse(mostSimilarProduct.Metadata.Id));
-
-        if (product == null)
-            return Result<ProductDto>.Failure(new Error("ProductNotFound", "The similar product was not found."));
 
         var imageUrl = "";
         if (!string.IsNullOrEmpty(product.ImageKey))

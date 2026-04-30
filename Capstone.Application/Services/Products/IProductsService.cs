@@ -14,11 +14,9 @@ public interface IProductsService
         string createdBy
     );
 
-    Task<Result> UpdateProductImageKey(string productId, string imageKey);
+    Task<Result> UpdateProductImageKey(string productId, string imageKey, string vectorId);
 
     Task<Result<ProductDto>> FetchProductById(string id);
-
-    Task<Result<ProductDto>> SearchProductSimilar(string ImageBase64);
 
     Task<Result<AnalyzeProductDto>> AnalyzeImage(string ImageBase64);
 

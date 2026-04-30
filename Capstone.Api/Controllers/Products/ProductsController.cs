@@ -2,6 +2,7 @@ using Capstone.Application.Services.FileStorageService;
 using Capstone.Application.Services.ProductQuantitesService;
 using Capstone.Application.Services.Products;
 using Capstone.Application.Services.ProductsOrdersDetailService;
+using Capstone.Application.Services.ProductVectorService;
 using Capstone.Contracts.Products;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ public class ProductsController : ControllerBase
     private readonly IProductsService _productsSerivce;
     private readonly IProductQuantitiesService _productQuantitiesService;
     private readonly IProductsOrdersDetailService _productsOrdersDetailService;
+    private readonly IProductVectorService _productVectorService;
 
     private readonly IFileStorageService _fileStorageService;
 
@@ -22,13 +24,15 @@ public class ProductsController : ControllerBase
         IProductsService productsSerivce,
         IProductQuantitiesService productQuantitiesService,
         IProductsOrdersDetailService productsOrdersDetailService,
-        IFileStorageService fileStorageService
+        IFileStorageService fileStorageService,
+        IProductVectorService vectorStoreService
     )
     {
         _productsSerivce = productsSerivce;
         _productQuantitiesService = productQuantitiesService;
         _productsOrdersDetailService = productsOrdersDetailService;
         _fileStorageService = fileStorageService;
+        _productVectorService = vectorStoreService;
     }
 
     [Authorize]
@@ -64,44 +68,14 @@ public class ProductsController : ControllerBase
                 extension
             );
 
-            await _productsSerivce.UpdateProductImageKey(productResult.Value, ImageResult.Value);
+            var imageUrl = await _fileStorageService.GetImageUrlAsync(ImageResult.Value);
+
+            var vectorResult = await _productVectorService.InsertImageAsync(imageUrl.Value, productResult.Value);
+
+            await _productsSerivce.UpdateProductImageKey(productResult.Value, ImageResult.Value, vectorResult.Value);
         }
 
         var result = await _productsSerivce.FetchProductById(productResult.Value);
-
-        if (result.IsFailure)
-        {
-            return BadRequest(new
-            {
-                error = result.Error.Code,
-                message = result.Error.Description
-            });
-        }
-
-        return Ok(new ProductResponse(
-            result.Value.Id,
-            result.Value.ProductId,
-            result.Value.ProductName,
-            result.Value.Category,
-            result.Value.Color,
-            result.Value.Pattern,
-            result.Value.SizeType,
-            result.Value.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
-            result.Value.CreatedBy,
-            result.Value.CreatedAt,
-            result.Value.Status,
-            result.Value.ImageURL,
-            result.Value.VectorId,
-            result.Value.SalePrice,
-            result.Value.ImportPrice
-        ));
-    }
-
-    [Authorize]
-    [HttpPost("similar")]
-    public async Task<IActionResult> SearchProductSimilar([FromBody] SearchProductSimilarRequest request)
-    {
-        var result = await _productsSerivce.SearchProductSimilar(request.ImageBase64);
 
         if (result.IsFailure)
         {
@@ -239,7 +213,11 @@ public class ProductsController : ControllerBase
                 extension
             );
 
-            await _productsSerivce.UpdateProductImageKey(productResult.Value, ImageResult.Value);
+            var imageUrl = await _fileStorageService.GetImageUrlAsync(ImageResult.Value);
+
+            var vectorResult = await _productVectorService.InsertImageAsync(imageUrl.Value, productResult.Value);
+
+            await _productsSerivce.UpdateProductImageKey(productResult.Value, ImageResult.Value, vectorResult.Value);
         }
 
         var result = await _productsSerivce.FetchProductById(productResult.Value);
