@@ -20,4 +20,10 @@ public class ProductVectorService : IProductVectorService
 
         return Result<string>.Success(vectorId);
     }
+
+    public async Task<Result> DeleteImageAsync(string vectorId)
+    {
+        await _vectorStoreProvider.DeleteImageAsync(vectorId);
+        return Result.Success();
+    }
 }

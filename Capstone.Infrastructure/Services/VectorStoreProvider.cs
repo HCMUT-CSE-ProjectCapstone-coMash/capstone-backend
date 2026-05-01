@@ -16,7 +16,7 @@ public class VectorStoreProvider : IVectorStoreProvider
         _httpClient = httpClient;
         _settings = settings.Value;
     }
-    
+
     public async Task<string> InsertImageAsync(string imageUrl, object metadata)
     {
         var payload = new
@@ -34,6 +34,15 @@ public class VectorStoreProvider : IVectorStoreProvider
 
         var result = await response.Content.ReadFromJsonAsync<InsertResponse>();
         return result?.VectorId ?? string.Empty;
+    }
+
+    public async Task DeleteImageAsync(string vectorId)
+    {
+        var response = await _httpClient.DeleteAsync(
+            _settings.DatabaseURL + $"/databases/{_settings.DatabaseID}/documents/{vectorId}"
+        );
+
+        response.EnsureSuccessStatusCode();
     }
 }
 

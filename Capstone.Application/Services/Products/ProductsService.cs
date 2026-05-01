@@ -2,6 +2,7 @@ using Capstone.Application.Common;
 using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Application.Common.Interfaces.Services;
 using Capstone.Application.Services.FileStorageService;
+using Capstone.Application.Services.ProductVectorService;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
 
@@ -20,6 +21,7 @@ public class ProductsService : IProductsService
 
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IPromptProvider _promptProvider;
+    private readonly IProductVectorService _productVectorService;
 
     public ProductsService(
         IProductsRepository productsRepository,
@@ -30,7 +32,8 @@ public class ProductsService : IProductsService
         ISaleOrderDetailsRepository saleOrderDetailsRepository,
         IDateTimeProvider dateTimeProvider,
         IFileStorageService fileStorageService,
-        IPromptProvider promptProvider
+        IPromptProvider promptProvider,
+        IProductVectorService productVectorService
     )
     {
         _productsRepository = productsRepository;
@@ -42,6 +45,7 @@ public class ProductsService : IProductsService
         _dateTimeProvider = dateTimeProvider;
         _fileStorageService = fileStorageService;
         _promptProvider = promptProvider;
+        _productVectorService = productVectorService;
     }
 
     // Tạo sản phẩm mới
@@ -668,6 +672,7 @@ public class ProductsService : IProductsService
         }
         else
         {
+            await _productVectorService.DeleteImageAsync(product.VectorId);
             await _productsRepository.DeleteProductAsync(product.Id);
         }
 

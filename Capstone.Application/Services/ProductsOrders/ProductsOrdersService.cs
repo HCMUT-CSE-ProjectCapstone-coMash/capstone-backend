@@ -3,6 +3,7 @@ using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Application.Common.Interfaces.Services;
 using Capstone.Application.Services.FileStorageService;
 using Capstone.Application.Services.Products;
+using Capstone.Application.Services.ProductVectorService;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
 
@@ -12,7 +13,7 @@ public class ProductsOrdersService : IProductsOrdersService
 {
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IFileStorageService _fileStorageService;
-    private readonly IVectorStoreProvider _vectorStoreProvider;
+    private readonly IProductVectorService _productVectorService;
     private readonly IProductsOrdersRepository _productsOrdersRepository;
     private readonly IProductsOrdersDetailsRepository _productsOrdersDetailsRepository;
     private readonly IProductQuantitiesRepository _productQuantitiesRepository;
@@ -22,7 +23,7 @@ public class ProductsOrdersService : IProductsOrdersService
     public ProductsOrdersService(
         IDateTimeProvider dateTimeProvider,
         IFileStorageService fileStorageService,
-        IVectorStoreProvider vectorStoreProvider,
+        IProductVectorService productVectorService,
         IProductsOrdersRepository productsOrdersRepository,
         IProductsOrdersDetailsRepository productsOrdersDetailsRepository,
         IProductQuantitiesRepository productQuantitiesRepository,
@@ -32,7 +33,7 @@ public class ProductsOrdersService : IProductsOrdersService
     {
         _dateTimeProvider = dateTimeProvider;
         _fileStorageService = fileStorageService;
-        _vectorStoreProvider = vectorStoreProvider;
+        _productVectorService = productVectorService;
         _productsOrdersRepository = productsOrdersRepository;
         _productsOrdersDetailsRepository = productsOrdersDetailsRepository;
         _productQuantitiesRepository = productQuantitiesRepository;
@@ -162,6 +163,11 @@ public class ProductsOrdersService : IProductsOrdersService
             if (!string.IsNullOrEmpty(product.ImageKey))
             {
                 await _fileStorageService.DeleteImageAsync(product.ImageKey);
+            }
+
+            if (!string.IsNullOrEmpty(product.VectorId))
+            {
+                await _productVectorService.DeleteImageAsync(product.VectorId);
             }
 
             await _productsRepository.DeleteProductAsync(product.Id);
@@ -306,6 +312,11 @@ public class ProductsOrdersService : IProductsOrdersService
                 if (!string.IsNullOrEmpty(product.ImageKey))
                 {
                     await _fileStorageService.DeleteImageAsync(product.ImageKey);
+                }
+
+                if (!string.IsNullOrEmpty(product.VectorId))
+                {
+                    await _productVectorService.DeleteImageAsync(product.VectorId);
                 }
 
                 await _productsRepository.DeleteProductAsync(product.Id);
