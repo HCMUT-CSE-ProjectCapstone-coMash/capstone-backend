@@ -96,4 +96,10 @@ public class ProductsOrdersRepository : IProductsOrdersRepository
         return await _context.ProductsOrders
             .AnyAsync(user => user.CreatedBy == employeeId);
     }
+
+    public async Task<int> GetTotalSendingProductsOrders()
+    {
+        return await _context.ProductsOrders
+            .CountAsync(po => po.OrderStatus == ProductsOrderStatus.Sending);
+    }
 }

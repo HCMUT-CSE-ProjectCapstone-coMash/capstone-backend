@@ -276,7 +276,7 @@ public class ProductsOrdersService : IProductsOrdersService
             else if (product.Status == ProductStatus.Approved)
             {
                 foreach (var quantityChange in detail.QuantityChanges)
-                { 
+                {
                     var existingQuantity = product.ProductQuantities.FirstOrDefault(q => q.Size == quantityChange.Size);
                     if (existingQuantity != null)
                     {
@@ -330,5 +330,11 @@ public class ProductsOrdersService : IProductsOrdersService
         await _productsOrdersRepository.DeleteProductsOrder(productsOrder);
 
         return Result<string>.Success(productsOrder.Id.ToString());
+    }
+
+    public async Task<Result<int>> GetTotalSendingProductsOrders()
+    {
+        var total = await _productsOrdersRepository.GetTotalSendingProductsOrders();
+        return Result<int>.Success(total);
     }
 }

@@ -188,4 +188,21 @@ public class ProductsOrdersController : ControllerBase
 
         return Ok(new { message = "Products order deleted successfully", orderId = result.Value });
     }
+
+    [HttpGet("fetch-sending")]
+    public async Task<IActionResult> GetTotalSendingProductsOrders()
+    {
+        var result = await _productsOrdersService.GetTotalSendingProductsOrders();
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new { total = result.Value });
+    }
 }

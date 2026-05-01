@@ -11,4 +11,5 @@ public interface IProductsOrdersService
     Task<Result<ProductsOrdersDto>> GetProductsOrderById(string orderId);
     Task<Result<string>> ApproveProductsOrder(string orderId);
     Task<Result<string>> DeleteProductsOrder(string orderId);
+    Task<Result<int>> GetTotalSendingProductsOrders();
 }
