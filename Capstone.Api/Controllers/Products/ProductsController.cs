@@ -129,23 +129,9 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPost("fetch-similar")]
-    public async Task<IActionResult> FetchSimilarProducts([FromForm] FetchSimilarProductsRequest request)
+    public async Task<IActionResult> FetchSimilarProducts([FromBody] FetchSimilarProductsRequest request)
     {
-        var extension = Path.GetExtension(request.Image.FileName);
-
-        var ImageResult = await _fileStorageService.UploadImageAsync(
-            "temporary",
-            Guid.NewGuid().ToString(),
-            request.Image.OpenReadStream(),
-            request.Image.ContentType,
-            extension
-        );
-
-        var imageUrl = await _fileStorageService.GetImageUrlAsync(ImageResult.Value);
-
-        var result = await _productVectorService.FetchSimilarProducts(imageUrl.Value);
-
-        await _fileStorageService.DeleteImageAsync(ImageResult.Value);
+        var result = await _productVectorService.FetchSimilarProducts(request.ImageBase64);
 
         return Ok(result.Value.Select(p => new ProductWithOrderStatusResponse(
             p.Id,

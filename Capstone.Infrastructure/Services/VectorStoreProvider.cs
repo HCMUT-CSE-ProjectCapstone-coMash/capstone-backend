@@ -45,11 +45,11 @@ public class VectorStoreProvider : IVectorStoreProvider
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task<List<SearchResult>> SearchImageAsync(string imageUrl)
+    public async Task<List<SearchResult>> SearchImageAsync(string imageBase64)
     {
         var payload = new
         {
-            image_url = imageUrl,
+            image = imageBase64,
             top_k = 3
         };
 

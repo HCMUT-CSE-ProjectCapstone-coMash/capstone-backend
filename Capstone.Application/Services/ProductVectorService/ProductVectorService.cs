@@ -41,9 +41,11 @@ public class ProductVectorService : IProductVectorService
         return Result.Success();
     }
 
-    public async Task<Result<List<ProductWithOrderStatusDto>>> FetchSimilarProducts(string imageUrl)
+    public async Task<Result<List<ProductWithOrderStatusDto>>> FetchSimilarProducts(string imageBase64)
     {
-        var searchResults = await _vectorStoreProvider.SearchImageAsync(imageUrl);
+        var base64Data = imageBase64.Contains(",") ? imageBase64.Split(',')[1] : imageBase64;
+
+        var searchResults = await _vectorStoreProvider.SearchImageAsync(base64Data);
 
         var filteredResults = searchResults?.Where(r => r.Score >= 0.6f).ToList();
 

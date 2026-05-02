@@ -8,7 +8,7 @@ public interface IVectorStoreProvider
 
     Task DeleteImageAsync(string vectorId);
 
-    Task<List<SearchResult>> SearchImageAsync(string imageUrl);
+    Task<List<SearchResult>> SearchImageAsync(string imageBase64);
 }
 
 public record ProductMetadata(
