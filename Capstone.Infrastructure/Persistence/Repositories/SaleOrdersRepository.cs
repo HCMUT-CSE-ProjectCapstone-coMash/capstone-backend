@@ -76,11 +76,15 @@ public class SaleOrdersRepository : ISaleOrdersRepository
 
         if (!string.IsNullOrEmpty(search))
         {
-            query = query.Where(
-                so => so.SaleOrderId.Contains(search)
-                || EF.Functions.Unaccent(so.Customer!.CustomerName).Contains(EF.Functions.Unaccent(search)));
-        }
+            var searchPattern = $"%{search}%";
 
+            query = query.Where(
+                so => EF.Functions.ILike(so.SaleOrderId, searchPattern)
+                || EF.Functions.ILike(
+                    EF.Functions.Unaccent(so.Customer!.CustomerName),
+                    EF.Functions.Unaccent(searchPattern)));
+        }
+        
         var total = await query.CountAsync();
         var orders = await query
             .OrderByDescending(so => so.CreatedAt)
