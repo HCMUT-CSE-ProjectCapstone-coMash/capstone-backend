@@ -10,5 +10,6 @@ public record AuthenticationResponse(
     string Gender,
     DateOnly DateOfBirth,
     string ImageURL,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    bool HasChangedPassword
 );

@@ -75,7 +75,8 @@ public class AuthenticationController : ControllerBase
             user.Gender,
             user.DateOfBirth,
             user.ImageURL,
-            user.CreatedAt
+            user.CreatedAt,
+            user.HasChangedPassword
         ));
     }
 
@@ -128,7 +129,8 @@ public class AuthenticationController : ControllerBase
             result.Value.Gender,
             result.Value.DateOfBirth,
             result.Value.ImageURL,
-            result.Value.CreatedAt
+            result.Value.CreatedAt,
+            result.Value.HasChangedPassword
         ));
     }
 
@@ -152,7 +154,8 @@ public class AuthenticationController : ControllerBase
             result.Value.Gender,
             result.Value.DateOfBirth,
             result.Value.ImageURL,
-            result.Value.CreatedAt
+            result.Value.CreatedAt,
+            result.Value.HasChangedPassword
         ));
     }
 
