@@ -44,9 +44,32 @@ public class VectorStoreProvider : IVectorStoreProvider
 
         response.EnsureSuccessStatusCode();
     }
+
+    public async Task<List<SearchResult>> SearchImageAsync(string imageUrl)
+    {
+        var payload = new
+        {
+            image_url = imageUrl,
+            top_k = 3
+        };
+
+        var response = await _httpClient.PostAsJsonAsync(
+            _settings.DatabaseURL + $"/databases/{_settings.DatabaseID}/search",
+            payload
+        );
+
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<SearchResponse>();
+        return result?.Results ?? new List<SearchResult>();
+    }
 }
 
 public record InsertResponse(
     [property: JsonPropertyName("status")] string Status,
     [property: JsonPropertyName("vector_id")] string VectorId
+);
+
+public record SearchResponse(
+    [property: JsonPropertyName("results")] List<SearchResult> Results
 );

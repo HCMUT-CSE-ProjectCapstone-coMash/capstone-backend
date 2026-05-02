@@ -128,6 +128,45 @@ public class ProductsController : ControllerBase
         ));
     }
 
+    [HttpPost("fetch-similar")]
+    public async Task<IActionResult> FetchSimilarProducts([FromForm] FetchSimilarProductsRequest request)
+    {
+        var extension = Path.GetExtension(request.Image.FileName);
+
+        var ImageResult = await _fileStorageService.UploadImageAsync(
+            "temporary",
+            Guid.NewGuid().ToString(),
+            request.Image.OpenReadStream(),
+            request.Image.ContentType,
+            extension
+        );
+
+        var imageUrl = await _fileStorageService.GetImageUrlAsync(ImageResult.Value);
+
+        var result = await _productVectorService.FetchSimilarProducts(imageUrl.Value);
+
+        await _fileStorageService.DeleteImageAsync(ImageResult.Value);
+
+        return Ok(result.Value.Select(p => new ProductWithOrderStatusResponse(
+            p.Id,
+            p.ProductId,
+            p.ProductName,
+            p.Category,
+            p.Color,
+            p.Pattern,
+            p.SizeType,
+            p.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+            p.CreatedBy,
+            p.CreatedAt,
+            p.Status,
+            p.ImageURL,
+            p.VectorId,
+            p.SalePrice,
+            p.ImportPrice,
+            p.IsInPendingOrder
+        )).ToList());
+    }
+ 
     [HttpGet("fetch-by-name/{productName}")]
     public async Task<IActionResult> FetchApprovedProductByName([FromRoute] string productName)
     {
