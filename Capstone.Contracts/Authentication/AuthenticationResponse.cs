@@ -13,3 +13,18 @@ public record AuthenticationResponse(
     DateTime CreatedAt,
     bool HasChangedPassword
 );
+
+public record AuthenticationMobileResponse(
+    string AccessToken,
+    Guid Id,
+    string EmployeeId,
+    string FullName,
+    string Email,
+    string Role,
+    string PhoneNumber,
+    string Gender,
+    DateOnly DateOfBirth,
+    string ImageURL,
+    DateTime CreatedAt,
+    bool HasChangedPassword
+);
