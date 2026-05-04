@@ -119,9 +119,9 @@ public class SaleOrdersService : ISaleOrdersService
         return Result.Success();
     }
 
-    public async Task<Result<PaginatedResult<SaleOrderDto>>> FetchAllSaleOrders(int page, int pageSize, string? search = null)
+    public async Task<Result<PaginatedResult<SaleOrderDto>>> FetchAllSaleOrders(int page, int pageSize, string? timeRange = null, string? search = null)
     {
-        var saleOrders = await _saleOrdersRepository.FetchAllSaleOrders(page, pageSize, search);
+        var saleOrders = await _saleOrdersRepository.FetchAllSaleOrders(page, pageSize, timeRange, search);
 
         var saleOrderDtos = saleOrders.Items.Select(so => new SaleOrderDto
         {
