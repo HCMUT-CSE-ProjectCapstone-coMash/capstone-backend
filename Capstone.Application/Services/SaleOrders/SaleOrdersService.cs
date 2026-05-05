@@ -293,7 +293,7 @@ public class SaleOrdersService : ISaleOrdersService
 
     public async Task<Result<List<SaleOrderDto>>> GetAllSaleOrdersWithDebt(string customerId)
     {
-        var saleOrders = await _saleOrdersRepository.GetAllSaleOrdersWithDebt(customerId);
+        var saleOrders = await _saleOrdersRepository.GetAllSaleOrdersWithDebt(Guid.Parse(customerId));
 
         var saleOrderDtos = saleOrders.Select(so => new SaleOrderDto
         {
