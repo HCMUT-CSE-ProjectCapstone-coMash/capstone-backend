@@ -291,9 +291,9 @@ public class SaleOrdersService : ISaleOrdersService
         return Result<PaginatedResult<SaleOrderDto>>.Success(new PaginatedResult<SaleOrderDto>(saleOrderDtos, saleOrders.Total));
     }
 
-    public async Task<Result<List<SaleOrderDto>>> GetAllSaleOrdersWithDebt()
+    public async Task<Result<List<SaleOrderDto>>> GetAllSaleOrdersWithDebt(string customerId)
     {
-        var saleOrders = await _saleOrdersRepository.GetAllSaleOrdersWithDebt();
+        var saleOrders = await _saleOrdersRepository.GetAllSaleOrdersWithDebt(customerId);
 
         var saleOrderDtos = saleOrders.Select(so => new SaleOrderDto
         {

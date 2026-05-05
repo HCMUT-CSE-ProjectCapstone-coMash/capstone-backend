@@ -21,5 +21,5 @@ public interface ISaleOrdersService
 
     Task<Result<PaginatedResult<SaleOrderDto>>> FetchAllSaleOrdersByCustomerId(string customerId, int page, int pageSize, string? search = null);
 
-    Task<Result<List<SaleOrderDto>>> GetAllSaleOrdersWithDebt();
+    Task<Result<List<SaleOrderDto>>> GetAllSaleOrdersWithDebt(string customerId);
 }

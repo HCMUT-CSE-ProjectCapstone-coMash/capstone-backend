@@ -98,10 +98,10 @@ public class SaleOrdersController : ControllerBase
         return Ok(result.Value);
     }
 
-    [HttpGet("get-sale-orders-with-debt")]
-    public async Task<IActionResult> GetAllSaleOrdersWithDebt()
+    [HttpGet("get-sale-orders-with-debt/{customerId}")]
+    public async Task<IActionResult> GetAllSaleOrdersWithDebt([FromRoute] string customerId)
     {
-        var result = await _saleOrdersService.GetAllSaleOrdersWithDebt();
+        var result = await _saleOrdersService.GetAllSaleOrdersWithDebt(customerId);
 
         if (result.IsFailure)
         {
