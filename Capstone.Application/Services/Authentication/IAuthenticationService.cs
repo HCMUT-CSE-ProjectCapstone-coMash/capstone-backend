@@ -22,5 +22,5 @@ public interface IAuthenticationService
 
     Task<Result> ResetPassword(string userId);
 
-    Task<Result> ChangePassword(string userId, string newPassword);
+    Task<Result<AuthResult>> ChangePassword(string userId, string newPassword);
 }

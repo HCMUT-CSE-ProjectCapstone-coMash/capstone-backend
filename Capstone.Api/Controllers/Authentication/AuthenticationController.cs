@@ -306,6 +306,26 @@ public class AuthenticationController : ControllerBase
             });
         }
 
-        return Ok(new { message = "Password changed successfully" });
+        Response.Cookies.Append("accessToken", result.Value.Token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddMinutes(60)
+        });
+
+        return Ok(new AuthenticationResponse(
+            result.Value.Id,
+            result.Value.EmployeeId,
+            result.Value.FullName,
+            result.Value.Email,
+            result.Value.Role,
+            result.Value.PhoneNumber,
+            result.Value.Gender,
+            result.Value.DateOfBirth,
+            result.Value.ImageURL,
+            result.Value.CreatedAt,
+            result.Value.HasChangedPassword
+        ));
     }
 }

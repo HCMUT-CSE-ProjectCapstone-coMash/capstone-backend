@@ -333,13 +333,13 @@ public class AuthenticationService : IAuthenticationService
         return Result.Success();
     }
 
-    public async Task<Result> ChangePassword(string userId, string newPassword)
+    public async Task<Result<AuthResult>> ChangePassword(string userId, string newPassword)
     {
         var user = await _userRepository.GetUserById(Guid.Parse(userId));
 
         if (user is null)
         {
-            return Result.Failure(new Error("UserNotFound", "User not found."));
+            return Result<AuthResult>.Failure(new Error("UserNotFound", "User not found."));
         }
 
         user.Password = _passwordHasher.Hash(newPassword);
@@ -347,6 +347,26 @@ public class AuthenticationService : IAuthenticationService
 
         await _userRepository.UpdateUser(user);
 
-        return Result.Success();
+        var imageUrl = "";
+        if (!string.IsNullOrEmpty(user.ImageKey))
+        {
+            var imageResult = await _fileStorageService.GetImageUrlAsync(user.ImageKey);
+            imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
+        }
+
+        return Result<AuthResult>.Success(new AuthResult(
+            user.Id,
+            user.EmployeeId ?? string.Empty,
+            user.FullName,
+            user.Email,
+            user.Role,
+            user.CreatedAt,
+            _jwtTokenGenerator.GenerateToken(user.Id, user.FullName, user.Role, user.HasChangedPassword),
+            user.PhoneNumber,
+            user.Gender,
+            user.DateOfBirth,
+            imageUrl,
+            user.HasChangedPassword
+        ));
     }
 }
