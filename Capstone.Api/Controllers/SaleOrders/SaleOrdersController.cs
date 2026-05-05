@@ -99,7 +99,7 @@ public class SaleOrdersController : ControllerBase
     }
 
     [HttpGet("fetch-all-by-employee/{employeeId}")]
-    public async Task<IActionResult> FetchAllSaleOrdersByEmployeeId([FromRoute] string employeeId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? period = null, [FromQuery] string? search = null)
+    public async Task<IActionResult> FetchAllSaleOrdersByEmployeeId([FromRoute] string employeeId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
     {
         var result = await _saleOrdersService.FetchAllSaleOrdersByEmployeeId(employeeId, page, pageSize, search);
 
@@ -116,7 +116,7 @@ public class SaleOrdersController : ControllerBase
     }
 
     [HttpGet("fetch-all-by-customer/{customerId}")]
-    public async Task<IActionResult> FetchAllSaleOrdersByCustomerId([FromRoute] string customerId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? period = null, [FromQuery] string? search = null)
+    public async Task<IActionResult> FetchAllSaleOrdersByCustomerId([FromRoute] string customerId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
     {
         var result = await _saleOrdersService.FetchAllSaleOrdersByCustomerId(customerId, page, pageSize, search);
 

@@ -1,5 +1,6 @@
 using Capstone.Application.Common;
 using Capstone.Application.Common.Interfaces.Persistence;
+using Capstone.Application.Common.Interfaces.Services;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -9,10 +10,12 @@ namespace Capstone.Infrastructure.Persistence.Repositories;
 public class SaleOrdersRepository : ISaleOrdersRepository
 {
     private readonly AppDbContext _context;
+    private readonly IDateTimeProvider _dateTimeProvider;
 
-    public SaleOrdersRepository(AppDbContext context)
+    public SaleOrdersRepository(AppDbContext context, IDateTimeProvider dateTimeProvider)
     {
         _context = context;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task CreateSaleOrder(SaleOrder saleOrder)
@@ -49,51 +52,6 @@ public class SaleOrdersRepository : ISaleOrdersRepository
             .FirstOrDefaultAsync(so => so.Id == saleOrderId);
     }
 
-    private static (DateTime? Start, DateTime? End) ResolvePeriodRange(string? period)
-    {
-        if (string.IsNullOrWhiteSpace(period))
-            return (null, null);
-
-        var vnTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-        var nowVN = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vnTimeZone);
-        var today = DateOnly.FromDateTime(nowVN);
-
-        static DateTime UtcFromVn(DateOnly date, TimeZoneInfo timeZone)
-        {
-            var localMidnight = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0, DateTimeKind.Unspecified);
-            return TimeZoneInfo.ConvertTimeToUtc(localMidnight, timeZone);
-        }
-
-        var normalized = period.Trim().ToLowerInvariant();
-        DateTime? start = null;
-        DateTime? end = null;
-
-        if (normalized == "today")
-        {
-            start = UtcFromVn(today, vnTimeZone);
-            end = UtcFromVn(today.AddDays(1), vnTimeZone);
-        }
-        else if (normalized == "yesterday")
-        {
-            start = UtcFromVn(today.AddDays(-1), vnTimeZone);
-            end = UtcFromVn(today, vnTimeZone);
-        }
-        else if (normalized == "this_week")
-        {
-            var startOfWeek = today.AddDays(-((int)today.DayOfWeek == 0 ? 6 : (int)today.DayOfWeek - 1));
-            start = UtcFromVn(startOfWeek, vnTimeZone);
-            end = UtcFromVn(startOfWeek.AddDays(7), vnTimeZone);
-        }
-        else if (normalized == "this_month")
-        {
-            var startOfMonth = new DateOnly(today.Year, today.Month, 1);
-            start = UtcFromVn(startOfMonth, vnTimeZone);
-            end = UtcFromVn(startOfMonth.AddMonths(1), vnTimeZone);
-        }
-
-        return (start, end);
-    }
-
     public async Task<int> GetMaxIdNumber()
     {
         var lastId = await _context.SaleOrders
@@ -119,6 +77,27 @@ public class SaleOrdersRepository : ISaleOrdersRepository
             .Include(so => so.User)
             .AsQueryable();
 
+        var now = _dateTimeProvider.UtcNow;
+
+        query = timeRange switch
+        {
+            "today" => query.Where(so =>
+                so.CreatedAt.Date == now.Date),
+
+            "yesterday" => query.Where(so =>
+                so.CreatedAt.Date == now.Date.AddDays(-1)),
+
+            "this_week" => query.Where(so =>
+                so.CreatedAt >= now.Date.AddDays(-(int)now.DayOfWeek)
+                && so.CreatedAt < now.Date.AddDays(7 - (int)now.DayOfWeek)),
+
+            "this_month" => query.Where(so =>
+                so.CreatedAt.Year == now.Year
+                && so.CreatedAt.Month == now.Month),
+
+            _ => query
+        };
+
         if (!string.IsNullOrEmpty(search))
         {
             var searchPattern = $"%{search}%";
@@ -130,12 +109,6 @@ public class SaleOrdersRepository : ISaleOrdersRepository
                     EF.Functions.Unaccent(searchPattern)));
         }
 
-        var (start, end) = ResolvePeriodRange(timeRange);
-        if (start.HasValue && end.HasValue)
-        {
-            query = query.Where(so => so.CreatedAt >= start.Value && so.CreatedAt < end.Value);
-        }
-        
         var total = await query.CountAsync();
         var orders = await query
             .OrderByDescending(so => so.CreatedAt)
