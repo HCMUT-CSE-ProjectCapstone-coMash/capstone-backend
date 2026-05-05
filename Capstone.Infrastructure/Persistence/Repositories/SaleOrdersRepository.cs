@@ -167,12 +167,12 @@ public class SaleOrdersRepository : ISaleOrdersRepository
         return (orders, total);
     }
 
-    public async Task<List<SaleOrder>> GetAllSaleOrdersWithDebt(string customerId)
+    public async Task<List<SaleOrder>> GetAllSaleOrdersWithDebt(Guid customerId)
     {
         return await _context.SaleOrders
             .Include(so => so.Customer)
             .Include(so => so.User)
-            .Where(so => so.DebitMoney > 0 && so.CustomerId == Guid.Parse(customerId))
+            .Where(so => so.DebitMoney > 0 && so.CustomerId == customerId)
             .OrderByDescending(so => so.CreatedAt)
             .ToListAsync();
     }
