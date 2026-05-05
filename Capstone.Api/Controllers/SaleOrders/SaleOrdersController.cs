@@ -98,6 +98,23 @@ public class SaleOrdersController : ControllerBase
         return Ok(result.Value);
     }
 
+    [HttpGet("get-sale-orders-with-debt")]
+    public async Task<IActionResult> GetAllSaleOrdersWithDebt()
+    {
+        var result = await _saleOrdersService.GetAllSaleOrdersWithDebt();
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
+    }
+
     [HttpGet("fetch-all-by-employee/{employeeId}")]
     public async Task<IActionResult> FetchAllSaleOrdersByEmployeeId([FromRoute] string employeeId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? period = null, [FromQuery] string? search = null)
     {
