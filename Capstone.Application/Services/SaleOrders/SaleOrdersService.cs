@@ -314,4 +314,57 @@ public class SaleOrdersService : ISaleOrdersService
 
         return Result<List<SaleOrderDto>>.Success(saleOrderDtos);
     }
+
+    public async Task<Result<List<SaleOrderDto>>> PayDebt(string customerId, double paymentAmount)
+    {
+        var saleOrders = await _saleOrdersRepository.GetAllSaleOrdersWithDebt(Guid.Parse(customerId));
+
+        if (!saleOrders.Any())
+            return Result<List<SaleOrderDto>>.Failure(new Error("NoDebt", "Customer has no debt"));
+
+        var sortedOrders = saleOrders.OrderBy(so => so.CreatedAt).ToList();
+
+        var remainingPayment = paymentAmount;
+
+        foreach (var order in sortedOrders)
+        {
+            if (remainingPayment <= 0)
+                break;
+
+            if (order.DebitMoney > 0)
+            {
+                if (remainingPayment >= order.DebitMoney)
+                {
+                    remainingPayment -= order.DebitMoney;
+                    order.DebitMoney = 0;
+                }
+                else
+                {
+                    order.DebitMoney -= remainingPayment;
+                    remainingPayment = 0;
+                }
+
+                await _saleOrdersRepository.UpdateSaleOrder(order);
+            }
+        }
+
+        var saleOrderDtos = saleOrders.Select(so => new SaleOrderDto
+        {
+            Id = so.Id,
+            SaleOrderId = so.SaleOrderId,
+            CustomerId = so.CustomerId,
+            CustomerName = so.Customer?.CustomerName,
+            CustomerPhone = so.Customer?.CustomerPhoneNumber,
+            CreatedBy = so.CreatedBy,
+            CreatedByName = so.User.FullName,
+            PaymentMethod = so.PaymentMethod,
+            DebitMoney = so.DebitMoney,
+            CreatedAt = so.CreatedAt,
+            TotalPrice = so.TotalPrice,
+            TotalProfit = so.TotalProfit,
+            Details = new List<SaleOrderDetailDto>()
+        }).ToList();
+
+        return Result<List<SaleOrderDto>>.Success(saleOrderDtos);
+    }
 }

@@ -148,4 +148,21 @@ public class SaleOrdersController : ControllerBase
 
         return Ok(result.Value);
     }
+
+    [HttpPost("pay-debt/{customerId}")]
+    public async Task<IActionResult> PayDebt([FromRoute] string customerId, [FromBody] PayDebtRequest request)
+    {
+        var result = await _saleOrdersService.PayDebt(customerId, request.PaymentAmount);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
+    }
 }
