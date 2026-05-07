@@ -22,6 +22,7 @@ public class AppDbContext : DbContext
     public DbSet<OrderPromotion> OrderPromotions => Set<OrderPromotion>();
     public DbSet<ComboPromotion> ComboPromotions => Set<ComboPromotion>();
     public DbSet<ComboPromotionDetail> ComboPromotionDetails => Set<ComboPromotionDetail>();
+    public DbSet<TemporaryProduct> TemporaryProducts => Set<TemporaryProduct>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -164,6 +165,12 @@ public class AppDbContext : DbContext
 
             // ComboPromotionDetail has one Product and Product has many ComboPromotionDetails
             entity.HasOne(cpd => cpd.Product).WithMany().HasForeignKey(cpd => cpd.ProductId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // TemporaryProduct Table
+        modelBuilder.Entity<TemporaryProduct>(entity =>
+        {
+            entity.ToTable("temporary_products");
         });
     }
 }

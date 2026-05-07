@@ -17,15 +17,19 @@ public class PromptProvider : IPromptProvider
         _client = new AnthropicClient(new Anthropic.Core.ClientOptions { ApiKey = _claudeSettings.ApiKey });
     }
 
-    public async Task<AnalyzeProduct> AnalyzeImageWithClaude(string imageBase64, string[] categories, string[] colors, string[] patterns)
+    public async Task<AnalyzeProduct> AnalyzeImageWithClaude(string imageBase64)
     {
+        string[] AllowedCategories = ["Đầm", "Áo", "Quần", "Váy"];
+        string[] AllowedColors = ["Đỏ", "Đen", "Trắng", "Cam", "Vàng", "Xanh Lá", "Xanh Dương", "Tím", "Hồng", "Nâu", "Xám"];
+        string[] AllowedPatterns = ["Trơn", "Sọc Dọc", "Sọc Ngang", "Caro", "Hoa Văn"];
+
         var prompt = $$"""
             Analyze this product image and return ONLY a JSON object with no markdown or preamble.
             Pick the best match for each field from the allowed values only.
 
-            Allowed categories: {{string.Join(", ", categories)}}
-            Allowed colors: {{string.Join(", ", colors)}}
-            Allowed patterns: {{string.Join(", ", patterns)}}
+            Allowed categories: {{string.Join(", ", AllowedCategories)}}
+            Allowed colors: {{string.Join(", ", AllowedColors)}}
+            Allowed patterns: {{string.Join(", ", AllowedPatterns)}}
 
             Return this exact shape:
             {

@@ -41,6 +41,7 @@ public static class DependencyInjection
         services.AddScoped<IOrderPromotionsRepository, OrderPromotionsRepository>();
         services.AddScoped<IComboPromotionsRepository, ComboPromotionsRepository>();
         services.AddScoped<IComboPromotionDetailsRepository, ComboPromotionDetailsRepository>();
+        services.AddScoped<ITemporaryProductsRepository, TemporaryProductsRepository>();
 
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();

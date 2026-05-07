@@ -3,6 +3,7 @@ using Capstone.Application.Services.ProductQuantitesService;
 using Capstone.Application.Services.Products;
 using Capstone.Application.Services.ProductsOrdersDetailService;
 using Capstone.Application.Services.ProductVectorService;
+using Capstone.Application.Services.TemporaryProducts;
 using Capstone.Contracts.Products;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,7 @@ public class ProductsController : ControllerBase
     private readonly IProductQuantitiesService _productQuantitiesService;
     private readonly IProductsOrdersDetailService _productsOrdersDetailService;
     private readonly IProductVectorService _productVectorService;
+    private readonly ITemporaryProductsService _temporaryProductsService;
 
     private readonly IFileStorageService _fileStorageService;
 
@@ -25,7 +27,8 @@ public class ProductsController : ControllerBase
         IProductQuantitiesService productQuantitiesService,
         IProductsOrdersDetailService productsOrdersDetailService,
         IFileStorageService fileStorageService,
-        IProductVectorService vectorStoreService
+        IProductVectorService vectorStoreService,
+        ITemporaryProductsService temporaryProductsService
     )
     {
         _productsSerivce = productsSerivce;
@@ -33,6 +36,7 @@ public class ProductsController : ControllerBase
         _productsOrdersDetailService = productsOrdersDetailService;
         _fileStorageService = fileStorageService;
         _productVectorService = vectorStoreService;
+        _temporaryProductsService = temporaryProductsService;
     }
 
     [Authorize]
@@ -152,7 +156,7 @@ public class ProductsController : ControllerBase
             p.IsInPendingOrder
         )).ToList());
     }
- 
+
     [HttpGet("fetch-by-name/{productName}")]
     public async Task<IActionResult> FetchApprovedProductByName([FromRoute] string productName)
     {
@@ -456,5 +460,41 @@ public class ProductsController : ControllerBase
         }
 
         return Ok(new { message = "Product deleted successfully", productName = result.Value });
+    }
+
+    [HttpPost("create-temporary")]
+    public async Task<IActionResult> CreateTemporaryProduct([FromForm] CreateTemporaryProductRequest request)
+    {
+        var extension = Path.GetExtension(request.Image.FileName);
+
+        var imageKeyResult = await _fileStorageService.UploadImageAsync(
+            "temporary-products",
+            Guid.NewGuid().ToString(),
+            request.Image.OpenReadStream(),
+            request.Image.ContentType,
+            extension
+        );
+
+        if (imageKeyResult.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = imageKeyResult.Error.Code,
+                message = imageKeyResult.Error.Description
+            });
+        }
+
+        var result = await _temporaryProductsService.CreateTemporaryProduct(request.ImageBase64, imageKeyResult.Value);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+        
+        return Ok(new { message = "Temporary product created successfully" });
     }
 }

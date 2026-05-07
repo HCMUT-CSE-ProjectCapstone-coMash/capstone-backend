@@ -131,11 +131,7 @@ public class ProductsService : IProductsService
 
     public async Task<Result<AnalyzeProductDto>> AnalyzeImage(string ImageBase64)
     {
-        string[] AllowedCategories = ["Đầm", "Áo", "Quần", "Váy"];
-        string[] AllowedColors = ["Đỏ", "Đen", "Trắng", "Cam", "Vàng", "Xanh Lá", "Xanh Dương", "Tím", "Hồng", "Nâu", "Xám"];
-        string[] AllowedPatterns = ["Trơn", "Sọc Dọc", "Sọc Ngang", "Caro", "Hoa Văn"];
-
-        var analyzedProduct = await _promptProvider.AnalyzeImageWithClaude(ImageBase64, AllowedCategories, AllowedColors, AllowedPatterns);
+        var analyzedProduct = await _promptProvider.AnalyzeImageWithClaude(ImageBase64);
 
         var prefix = GetCategoryPrefix(analyzedProduct.Category);
         var maxNumber = await _productsRepository.GetMaxIdNumberByCategoryAsync(prefix);
