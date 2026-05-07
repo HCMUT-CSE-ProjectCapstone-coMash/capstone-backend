@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.Configure<BucketSettings>(config.GetSection("BucketSettings"));
         services.Configure<VectorStoreSettings>(config.GetSection("VectorStoreSettings"));
         services.Configure<GeminiSettings>(config.GetSection("GeminiSettings"));
+        services.Configure<ClaudeSettings>(config.GetSection("ClaudeSettings"));
 
         services.AddScoped<IUsersRepository, UsersRepository>();
         services.AddScoped<IProductsRepository, ProductsRepository>();
