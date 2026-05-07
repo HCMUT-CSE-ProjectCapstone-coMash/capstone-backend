@@ -47,7 +47,7 @@ public class ProductVectorService : IProductVectorService
 
         var searchResults = await _vectorStoreProvider.SearchImageAsync(base64Data);
 
-        var filteredResults = searchResults?.Where(r => r.Score >= 0.6f).ToList();
+        var filteredResults = searchResults?.Where(r => r.Score >= 0.9f).ToList();
 
         if (filteredResults == null || filteredResults.Count == 0)
         {
