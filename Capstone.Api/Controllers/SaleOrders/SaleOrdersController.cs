@@ -182,4 +182,21 @@ public class SaleOrdersController : ControllerBase
 
         return Ok(result.Value);
     }
+
+    [HttpGet("top-customers-spending-stats")]
+    public async Task<IActionResult> GetTopCustomersSpendingStats()
+    {
+        var result = await _saleOrdersService.GetTopCustomersSpendingStats(5);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
+    }
 }

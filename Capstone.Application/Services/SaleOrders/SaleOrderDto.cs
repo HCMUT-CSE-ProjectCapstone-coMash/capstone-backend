@@ -25,6 +25,7 @@ public class SaleOrderDto
     public List<SaleOrderDetailDto> Details { get; set; } = new();
 }
 
+// -- Income stats --
 public class IncomeGroupDto
 {
     public string Key { get; set; } = "";
@@ -37,3 +38,18 @@ public class IncomeStatsDto
     public double Total { get; set; }
     public List<IncomeGroupDto> Groups { get; set; } = [];
 } 
+
+// -- Customer spending stats --
+public class TopCustomerDto
+{
+    public Guid CustomerId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public double Total { get; set; }
+}
+
+public class TopCustomerStatsDto
+{
+    public List<TopCustomerDto> Customers { get; set; } = [];
+    public double WalkInTotal { get; set; }
+    public double GrandTotal { get; set; }
+}

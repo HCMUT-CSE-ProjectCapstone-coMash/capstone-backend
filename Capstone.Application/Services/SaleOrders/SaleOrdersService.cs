@@ -389,4 +389,23 @@ public class SaleOrdersService : ISaleOrdersService
 
         return Result<IncomeStatsDto>.Success(incomeStatsDto);
     }
+
+    public async Task<Result<TopCustomerStatsDto>> GetTopCustomersSpendingStats(int limit)
+    {
+        var result = await _saleOrdersRepository.GetTopCustomersSpendingStats(limit);
+
+        var topCustomerStatsDto = new TopCustomerStatsDto
+        {
+            Customers = result.Customers.Select(c => new TopCustomerDto
+            {
+                CustomerId = c.CustomerId,
+                Name = c.Name,
+                Total = c.Total
+            }).ToList(),
+            WalkInTotal = result.WalkInTotal,
+            GrandTotal = result.GrandTotal
+        };
+
+        return Result<TopCustomerStatsDto>.Success(topCustomerStatsDto);
+    }
 }

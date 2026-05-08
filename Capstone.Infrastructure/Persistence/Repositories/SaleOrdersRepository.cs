@@ -180,7 +180,7 @@ public class SaleOrdersRepository : ISaleOrdersRepository
     public async Task<IncomeStatsDto> GetIncomeStats(string period)
     {
         var now = _dateTimeProvider.UtcNow.AddHours(7);
-        
+
         var jsDay = (int)now.DayOfWeek;  
         var daysToMonday = jsDay == 0 ? -6 : 1 - jsDay;
         var weekStart = now.Date.AddDays(daysToMonday);      
@@ -257,6 +257,36 @@ public class SaleOrdersRepository : ISaleOrdersRepository
             Groups = groups,
         };
     }
+
+    public async Task<TopCustomerStatsDto> GetTopCustomersSpendingStats(int limit)
+    {
+        var grandTotal = await _context.SaleOrders.Where(so => so.TotalPrice > 0).SumAsync(so => so.TotalPrice);
+
+        var topCustomers = await _context.SaleOrders
+            .Where(so => so.TotalPrice > 0 && so.CustomerId != null)
+            .GroupBy(so => new { so.CustomerId, so.Customer!.CustomerName })
+            .Select(g => new TopCustomerDto
+            {
+                CustomerId = g.Key.CustomerId!.Value,
+                Name = g.Key.CustomerName,
+                Total = g.Sum(o => o.TotalPrice),
+            })
+            .OrderByDescending(x => x.Total)
+            .Take(limit)
+            .ToListAsync();
+
+        var walkInTotal = await _context.SaleOrders
+            .Where(so => so.TotalPrice > 0 && so.CustomerId == null)
+            .SumAsync(so => so.TotalPrice);
+            
+        return new TopCustomerStatsDto
+        {
+            Customers  = topCustomers,
+            WalkInTotal = walkInTotal,
+            GrandTotal = grandTotal,
+        };
+    }
+
 
     private static int GetWeekOfMonth(DateTime date)
     {

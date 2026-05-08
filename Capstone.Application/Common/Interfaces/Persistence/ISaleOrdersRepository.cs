@@ -14,8 +14,10 @@ public interface ISaleOrdersRepository
     Task<(List<SaleOrder> Items, int Total)> FetchAllSaleOrdersByCustomerId(Guid customerId, int page, int pageSize, string? search = null);
     Task<List<SaleOrder>> GetAllSaleOrdersWithDebt(Guid customerId);
     Task<IncomeStatsDto> GetIncomeStats(string period);
+    Task<TopCustomerStatsDto> GetTopCustomersSpendingStats(int limit);
 }
 
+// --
 public class IncomeGroupDto
 {
     public string Key { get; set; } = "";
@@ -28,3 +30,18 @@ public class IncomeStatsDto
     public double Total { get; set; }
     public List<IncomeGroupDto> Groups { get; set; } = [];
 } 
+
+// -- 
+public class TopCustomerDto
+{
+    public Guid CustomerId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public double Total { get; set; }
+}
+
+public class TopCustomerStatsDto
+{
+    public List<TopCustomerDto> Customers { get; set; } = [];
+    public double WalkInTotal { get; set; }
+    public double GrandTotal { get; set; }
+}
