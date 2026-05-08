@@ -24,7 +24,7 @@ public class CustomersService : ICustomersService
         var customerDtos = customer.Select(c =>
         {
             var debitOrders = c.SaleOrders
-                .Where(so => so.PaymentMethod == PaymentMethodStatus.Debit)
+                .Where(so => so.PaymentMethod == PaymentMethodStatus.Debit && so.DebitMoney > 0)
                 .ToList();
 
             var totalDebit = debitOrders.Sum(so => so.DebitMoney);
@@ -57,7 +57,7 @@ public class CustomersService : ICustomersService
         var customerDtos = customer.Select(c =>
         {
             var debitOrders = c.SaleOrders
-                .Where(so => so.PaymentMethod == PaymentMethodStatus.Debit)
+                .Where(so => so.PaymentMethod == PaymentMethodStatus.Debit && so.DebitMoney > 0)
                 .ToList();
 
             var totalDebit = debitOrders.Sum(so => so.DebitMoney);
@@ -90,7 +90,7 @@ public class CustomersService : ICustomersService
         var customerDtos = customers.Select(c =>
         {
             var debitOrders = c.SaleOrders
-                .Where(so => so.PaymentMethod == PaymentMethodStatus.Debit)
+                .Where(so => so.PaymentMethod == PaymentMethodStatus.Debit && so.DebitMoney > 0)
                 .ToList();
 
             var totalDebit = debitOrders.Sum(so => so.DebitMoney);
@@ -159,7 +159,7 @@ public class CustomersService : ICustomersService
         }
 
         var debitOrders = customer.SaleOrders
-            .Where(so => so.PaymentMethod == PaymentMethodStatus.Debit)
+            .Where(so => so.PaymentMethod == PaymentMethodStatus.Debit && so.DebitMoney > 0)
             .ToList();
 
         var totalDebit = debitOrders.Sum(so => so.DebitMoney);

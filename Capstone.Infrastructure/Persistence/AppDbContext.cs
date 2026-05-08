@@ -171,6 +171,9 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<TemporaryProduct>(entity =>
         {
             entity.ToTable("temporary_products");
+
+            // TemporaryProduct has one User (CreatedBy) and User has many TemporaryProducts
+            entity.HasOne(tp => tp.User).WithMany().HasForeignKey(tp => tp.CreatedBy).OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

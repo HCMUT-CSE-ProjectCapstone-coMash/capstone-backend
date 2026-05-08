@@ -462,8 +462,8 @@ public class ProductsController : ControllerBase
         return Ok(new { message = "Product deleted successfully", productName = result.Value });
     }
 
-    [HttpPost("create-temporary")]
-    public async Task<IActionResult> CreateTemporaryProduct([FromForm] CreateTemporaryProductRequest request)
+    [HttpPost("create-temporary/{userId}")]
+    public async Task<IActionResult> CreateTemporaryProduct([FromForm] CreateTemporaryProductRequest request, [FromRoute] string userId)
     {
         var extension = Path.GetExtension(request.Image.FileName);
 
@@ -484,7 +484,7 @@ public class ProductsController : ControllerBase
             });
         }
 
-        var result = await _temporaryProductsService.CreateTemporaryProduct(request.ImageBase64, imageKeyResult.Value);
+        var result = await _temporaryProductsService.CreateTemporaryProduct(request.ImageBase64, imageKeyResult.Value, userId);
 
         if (result.IsFailure)
         {
@@ -494,7 +494,41 @@ public class ProductsController : ControllerBase
                 message = result.Error.Description
             });
         }
-        
+
         return Ok(new { message = "Temporary product created successfully" });
+    }
+
+    [HttpGet("fetch-temporary/{userId}")]
+    public async Task<IActionResult> FetchTemporaryProduct([FromRoute] string userId)
+    {
+        var result = await _temporaryProductsService.GetTemporaryProductsByUserId(userId);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
+    }
+
+    [HttpDelete("delete-temporary/{temporaryProductId}")]
+    public async Task<IActionResult> DeleteTemporaryProduct([FromRoute] string temporaryProductId)
+    {
+        var result = await _temporaryProductsService.DeleteTemporaryProduct(temporaryProductId);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new { message = "Temporary product deleted successfully" });
     }
 }
