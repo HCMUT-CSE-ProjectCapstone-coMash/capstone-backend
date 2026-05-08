@@ -24,3 +24,16 @@ public class SaleOrderDto
 
     public List<SaleOrderDetailDto> Details { get; set; } = new();
 }
+
+public class IncomeGroupDto
+{
+    public string Key { get; set; } = "";
+    public double Total { get; set; }
+}
+
+public class IncomeStatsDto
+{
+    public string Period { get; set; } = "";
+    public double Total { get; set; }
+    public List<IncomeGroupDto> Groups { get; set; } = [];
+} 

@@ -165,4 +165,21 @@ public class SaleOrdersController : ControllerBase
 
         return Ok(result.Value);
     }
+
+    [HttpGet("income-stats")]
+    public async Task<IActionResult> GetIncomeStats([FromQuery] string period = "day")
+    {
+        var result = await _saleOrdersService.GetIncomeStats(period);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
+    }
 }

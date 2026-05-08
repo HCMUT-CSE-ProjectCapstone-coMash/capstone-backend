@@ -367,4 +367,26 @@ public class SaleOrdersService : ISaleOrdersService
 
         return Result<List<SaleOrderDto>>.Success(saleOrderDtos);
     }
+
+    public async Task<Result<IncomeStatsDto>> GetIncomeStats(string period)
+    {
+        var validPeriods = new[] { "day", "week", "month", "quarter" };
+        if (!validPeriods.Contains(period))
+            return Result<IncomeStatsDto>.Failure(new Error("InvalidPeriod", "Period must be day, week, month or quarter"));
+
+        var result = await _saleOrdersRepository.GetIncomeStats(period);
+
+        var incomeStatsDto = new IncomeStatsDto
+        {
+            Period = period,
+            Total = result.Total,
+            Groups = result.Groups.Select(g => new IncomeGroupDto
+            {
+                Key = g.Key,
+                Total = g.Total
+            }).ToList()
+        };
+
+        return Result<IncomeStatsDto>.Success(incomeStatsDto);
+    }
 }

@@ -176,4 +176,94 @@ public class SaleOrdersRepository : ISaleOrdersRepository
             .OrderByDescending(so => so.CreatedAt)
             .ToListAsync();
     }
+
+    public async Task<IncomeStatsDto> GetIncomeStats(string period)
+    {
+        var now = _dateTimeProvider.UtcNow.AddHours(7);
+        
+        var jsDay = (int)now.DayOfWeek;  
+        var daysToMonday = jsDay == 0 ? -6 : 1 - jsDay;
+        var weekStart = now.Date.AddDays(daysToMonday);      
+        var weekEnd   = weekStart.AddDays(7);                    
+
+        var weekStartUtc = weekStart.AddHours(-7);
+        var weekEndUtc   = weekEnd.AddHours(-7);
+
+        var query = _context.SaleOrders.AsQueryable();
+
+        query = period switch
+        {
+            "day"     => query.Where(so => so.CreatedAt >= weekStartUtc && so.CreatedAt < weekEndUtc),
+            "week"    => query.Where(so => so.CreatedAt.Month == now.Month && so.CreatedAt.Year == now.Year),
+            "month"   => query.Where(so => so.CreatedAt.Year == now.Year),
+            "quarter" => query.Where(so => so.CreatedAt.Year == now.Year),
+            _         => query.Where(so => so.CreatedAt >= weekStartUtc && so.CreatedAt < weekEndUtc),
+        };
+
+        var orders = await query
+            .Where(so => so.TotalPrice > 0)
+            .Select(so => new { so.CreatedAt, so.TotalPrice })
+            .ToListAsync();
+
+        var vietnamOrders = orders
+            .Select(o => new { CreatedAt = o.CreatedAt.AddHours(7), o.TotalPrice })
+            .ToList();
+
+        var groups = period switch
+        {
+            "day" => vietnamOrders
+                .GroupBy(so => so.CreatedAt.DayOfWeek)
+                .Select(g => new IncomeGroupDto
+                {
+                    Key   = g.Key == DayOfWeek.Sunday ? "7" : ((int)g.Key).ToString(),
+                    Total = g.Sum(o => o.TotalPrice),
+                })
+                .ToList(),
+
+            "week" => vietnamOrders
+                .GroupBy(so => GetWeekOfMonth(so.CreatedAt))
+                .Select(g => new IncomeGroupDto
+                {
+                    Key   = g.Key.ToString(),
+                    Total = g.Sum(o => o.TotalPrice),
+                })
+                .ToList(),
+
+            "month" => vietnamOrders
+                .GroupBy(so => so.CreatedAt.Month)
+                .Select(g => new IncomeGroupDto
+                {
+                    Key   = g.Key.ToString(),
+                    Total = g.Sum(o => o.TotalPrice),
+                })
+                .ToList(),
+
+            "quarter" => vietnamOrders
+                .GroupBy(so => (so.CreatedAt.Month - 1) / 3 + 1)
+                .Select(g => new IncomeGroupDto
+                {
+                    Key   = g.Key.ToString(),
+                    Total = g.Sum(o => o.TotalPrice),
+                })
+                .ToList(),
+
+            _ => []
+        };
+
+        return new IncomeStatsDto
+        {
+            Period = period,
+            Total  = vietnamOrders.Sum(o => o.TotalPrice),
+            Groups = groups,
+        };
+    }
+
+    private static int GetWeekOfMonth(DateTime date)
+    {
+        var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
+
+        var firstDayOffset = ((int)firstDayOfMonth.DayOfWeek + 6) % 7;
+
+        return (date.Day + firstDayOffset - 1) / 7 + 1;
+    }
 }

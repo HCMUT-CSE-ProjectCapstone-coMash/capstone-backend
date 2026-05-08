@@ -24,4 +24,6 @@ public interface ISaleOrdersService
     Task<Result<List<SaleOrderDto>>> GetAllSaleOrdersWithDebt(string customerId);
 
     Task<Result<List<SaleOrderDto>>> PayDebt(string customerId, double paymentAmount);
+
+    Task<Result<IncomeStatsDto>> GetIncomeStats(string period);
 }
