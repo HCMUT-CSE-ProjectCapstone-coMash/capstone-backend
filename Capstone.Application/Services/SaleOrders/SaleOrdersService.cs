@@ -448,6 +448,21 @@ public class SaleOrdersService : ISaleOrdersService
         });
     }
 
+    public async Task<Result<DashboardStatsDto>> GetEmployeeDashboardStats(string employeeId)
+    {
+        var result = await _saleOrdersRepository.GetEmployeeDashboardStats(Guid.Parse(employeeId));
+
+        return Result<DashboardStatsDto>.Success(new DashboardStatsDto
+        {
+            TotalOrderToday = result.TotalOrderToday,
+            TotalSaleToday = result.TotalSaleToday,
+            ProfitToday = result.ProfitToday,
+            TotalOrderYesterday = result.TotalOrderYesterday,
+            TotalSaleYesterday = result.TotalSaleYesterday,
+            ProfitYesterday = result.ProfitYesterday
+        });
+    }
+
     public async Task<Result<List<SaleOrderDto>>> FetchRecentCreatedByEmployee(string employeeId)
     {
         var saleOrders = await _saleOrdersRepository.FetchRecentCreatedByEmployee(Guid.Parse(employeeId));

@@ -17,6 +17,7 @@ public interface ISaleOrdersRepository
     Task<PersonalIncomeStatsDto> GetPersonalIncomeStats(Guid employeeId, string period);
     Task<TopCustomerStatsDto> GetTopCustomersSpendingStats(int limit);
     Task<DashboardStatsDto> GetDashboardStats();
+    Task<DashboardStatsDto> GetEmployeeDashboardStats(Guid employeeId);
     Task<List<SaleOrder>> FetchRecentCreatedByEmployee(Guid employeeId);
 }
 

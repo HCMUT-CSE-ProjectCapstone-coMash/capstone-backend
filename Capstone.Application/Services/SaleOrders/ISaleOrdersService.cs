@@ -33,5 +33,7 @@ public interface ISaleOrdersService
 
     Task<Result<DashboardStatsDto>> GetDashboardStats();
 
+    Task<Result<DashboardStatsDto>> GetEmployeeDashboardStats(string employeeId);
+
     Task<Result<List<SaleOrderDto>>> FetchRecentCreatedByEmployee(string employeeId);
 }

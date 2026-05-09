@@ -234,6 +234,23 @@ public class SaleOrdersController : ControllerBase
         return Ok(result.Value);
     }
 
+    [HttpGet("dashboard-stats/employee/{employeeId}")]
+    public async Task<IActionResult> FetchEmployeeDashboardStats([FromRoute] string employeeId)
+    {
+        var result = await _saleOrdersService.GetEmployeeDashboardStats(employeeId);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
+    }
+
     [HttpGet("fetch-recent-created-by-employee/{employeeId}")]
     public async Task<IActionResult> FetchRecentCreatedByEmployee([FromRoute] string employeeId)
     {

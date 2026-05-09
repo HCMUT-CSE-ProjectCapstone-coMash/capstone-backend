@@ -404,6 +404,36 @@ public class SaleOrdersRepository : ISaleOrdersRepository
         };
     }
 
+    public async Task<DashboardStatsDto> GetEmployeeDashboardStats(Guid employeeId)
+    {
+        var now = _dateTimeProvider.UtcNow.AddHours(7);
+
+        var todayStart = now.Date.AddHours(-7);
+        var todayEnd = todayStart.AddDays(1);
+        var yesterdayStart = todayStart.AddDays(-1);
+        var yesterdayEnd = todayStart;
+
+        var todayOrders = await _context.SaleOrders
+            .Where(so => so.CreatedBy == employeeId && so.CreatedAt >= todayStart && so.CreatedAt < todayEnd && so.TotalPrice > 0)
+            .Select(so => new { so.TotalPrice, so.TotalProfit })
+            .ToListAsync();
+
+        var yesterdayOrders = await _context.SaleOrders
+            .Where(so => so.CreatedBy == employeeId && so.CreatedAt >= yesterdayStart && so.CreatedAt < yesterdayEnd && so.TotalPrice > 0)
+            .Select(so => new { so.TotalPrice, so.TotalProfit })
+            .ToListAsync();
+
+        return new DashboardStatsDto
+        {
+            TotalSaleToday = todayOrders.Sum(o => o.TotalPrice),
+            ProfitToday = todayOrders.Sum(o => o.TotalProfit),
+            TotalOrderToday = todayOrders.Count,
+            TotalSaleYesterday = yesterdayOrders.Sum(o => o.TotalPrice),
+            ProfitYesterday = yesterdayOrders.Sum(o => o.TotalProfit),
+            TotalOrderYesterday = yesterdayOrders.Count,
+        };
+    }
+
     public async Task<List<SaleOrder>> FetchRecentCreatedByEmployee(Guid employeeId)
     {
         return await _context.SaleOrders
