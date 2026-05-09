@@ -73,4 +73,6 @@ public interface IProductsService
     );
 
     Task<Result<string>> DeleteProduct(string id);
+
+    Task<Result<List<ProductDto>>> FetchTop5LowStockProducts();
 }

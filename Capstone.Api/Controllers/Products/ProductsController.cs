@@ -531,4 +531,37 @@ public class ProductsController : ControllerBase
 
         return Ok(new { message = "Temporary product deleted successfully" });
     }
+
+    [HttpGet("fetch-top-5-low-stock")]
+    public async Task<IActionResult> FetchTop5LowStockProducts()
+    {
+        var result = await _productsSerivce.FetchTop5LowStockProducts();
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value.Select(p => new ProductResponse(
+            p.Id,
+            p.ProductId,
+            p.ProductName,
+            p.Category,
+            p.Color,
+            p.Pattern,
+            p.SizeType,
+            p.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+            p.CreatedBy,
+            p.CreatedAt,
+            p.Status,
+            p.ImageURL,
+            p.VectorId,
+            p.SalePrice,
+            p.ImportPrice
+        )).ToList());
+    }
 }

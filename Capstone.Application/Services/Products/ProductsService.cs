@@ -675,6 +675,43 @@ public class ProductsService : IProductsService
         return Result<string>.Success(product.ProductName);
     }
 
+    public async Task<Result<List<ProductDto>>> FetchTop5LowStockProducts()
+    {
+        var products = await _productsRepository.FetchTop5LowStockProducts();
+
+        var productDtos = new List<ProductDto>();
+
+        foreach (var product in products)
+        {
+            var imageUrl = "";
+            if (!string.IsNullOrEmpty(product.ImageKey))
+            {
+                var imageResult = await _fileStorageService.GetImageUrlAsync(product.ImageKey);
+                imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
+            }
+
+            productDtos.Add(new ProductDto(
+                product.Id,
+                product.ProductId,
+                product.ProductName,
+                product.Category,
+                product.Color,
+                product.Pattern,
+                product.SizeType,
+                product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+                product.CreatedBy,
+                product.CreatedAt,
+                product.Status,
+                imageUrl,
+                product.VectorId,
+                product.SalePrice,
+                product.ImportPrice
+            ));
+        }
+
+        return Result<List<ProductDto>>.Success(productDtos);
+    }
+
     private static string GetCategoryPrefix(string category) => category switch
     {
         "Váy" => "VAY",

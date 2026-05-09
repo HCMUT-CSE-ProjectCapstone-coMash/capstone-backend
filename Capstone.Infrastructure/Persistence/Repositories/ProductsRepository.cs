@@ -62,7 +62,7 @@ public class ProductsRepository : IProductsRepository
         if (lastDash > 0)
         {
             parsedProductId = productName[..lastDash];
-            parsedSize      = productName[(lastDash + 1)..];
+            parsedSize = productName[(lastDash + 1)..];
         }
 
         var searchPattern = $"%{productName}%";
@@ -96,7 +96,7 @@ public class ProductsRepository : IProductsRepository
             if (lastDash > 0)
             {
                 parsedProductId = search[..lastDash];
-                parsedSize      = search[(lastDash + 1)..];
+                parsedSize = search[(lastDash + 1)..];
             }
         }
 
@@ -138,5 +138,30 @@ public class ProductsRepository : IProductsRepository
             .ToListAsync();
 
         return (items, total);
+    }
+
+    public async Task<List<Product>> FetchTop5LowStockProducts()
+    {
+        var products = await _context.Products
+            .Include(p => p.ProductQuantities)
+            .Where(p => p.Status == ProductStatus.Approved
+                && p.ProductQuantities.Any(q => q.Quantities <= 3))
+            .OrderBy(p => p.ProductQuantities
+                .Where(q => q.Quantities <= 3)
+                .Min(q => q.Quantities))
+            .ToListAsync();
+
+        var result = new List<Product>();
+        var sizeCount = 0;
+
+        foreach (var product in products)
+        {
+            var lowSizes = product.ProductQuantities.Count(q => q.Quantities <= 3);
+            result.Add(product);
+            sizeCount += lowSizes;
+            if (sizeCount >= 5) break;
+        }
+
+        return result;
     }
 }
