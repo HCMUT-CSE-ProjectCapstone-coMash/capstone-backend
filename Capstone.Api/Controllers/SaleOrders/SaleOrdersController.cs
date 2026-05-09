@@ -221,7 +221,24 @@ public class SaleOrdersController : ControllerBase
     public async Task<IActionResult> GetDashboardStats()
     {
         var result = await _saleOrdersService.GetDashboardStats();
-        
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
+    }
+
+    [HttpGet("fetch-recent-created-by-employee/{employeeId}")]
+    public async Task<IActionResult> FetchRecentCreatedByEmployee([FromRoute] string employeeId)
+    {
+        var result = await _saleOrdersService.FetchRecentCreatedByEmployee(employeeId);
+
         if (result.IsFailure)
         {
             return BadRequest(new

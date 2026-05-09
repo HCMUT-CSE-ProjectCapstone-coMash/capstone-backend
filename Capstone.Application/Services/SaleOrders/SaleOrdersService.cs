@@ -447,4 +447,28 @@ public class SaleOrdersService : ISaleOrdersService
             ProfitYesterday = result.ProfitYesterday
         });
     }
+
+    public async Task<Result<List<SaleOrderDto>>> FetchRecentCreatedByEmployee(string employeeId)
+    {
+        var saleOrders = await _saleOrdersRepository.FetchRecentCreatedByEmployee(Guid.Parse(employeeId));
+
+        var saleOrderDtos = saleOrders.Select(so => new SaleOrderDto
+        {
+            Id = so.Id,
+            SaleOrderId = so.SaleOrderId,
+            CustomerId = so.CustomerId,
+            CustomerName = so.Customer?.CustomerName,
+            CustomerPhone = so.Customer?.CustomerPhoneNumber,
+            CreatedBy = so.CreatedBy,
+            CreatedByName = so.User.FullName,
+            PaymentMethod = so.PaymentMethod,
+            DebitMoney = so.DebitMoney,
+            CreatedAt = so.CreatedAt,
+            TotalPrice = so.TotalPrice,
+            TotalProfit = so.TotalProfit,
+            Details = new List<SaleOrderDetailDto>()
+        }).ToList();
+
+        return Result<List<SaleOrderDto>>.Success(saleOrderDtos);
+    }
 }

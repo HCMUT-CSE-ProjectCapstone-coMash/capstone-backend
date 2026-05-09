@@ -32,4 +32,6 @@ public interface ISaleOrdersService
     Task<Result<TopCustomerStatsDto>> GetTopCustomersSpendingStats(int limit);
 
     Task<Result<DashboardStatsDto>> GetDashboardStats();
+
+    Task<Result<List<SaleOrderDto>>> FetchRecentCreatedByEmployee(string employeeId);
 }

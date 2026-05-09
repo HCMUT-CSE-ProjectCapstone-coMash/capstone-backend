@@ -404,6 +404,16 @@ public class SaleOrdersRepository : ISaleOrdersRepository
         };
     }
 
+    public async Task<List<SaleOrder>> FetchRecentCreatedByEmployee(Guid employeeId)
+    {
+        return await _context.SaleOrders
+            .Include(so => so.Customer)
+            .Include(so => so.User)
+            .Where(so => so.CreatedBy == employeeId)
+            .OrderByDescending(so => so.CreatedAt)
+            .Take(5)
+            .ToListAsync();
+    }
 
     private static int GetWeekOfMonth(DateTime date)
     {
