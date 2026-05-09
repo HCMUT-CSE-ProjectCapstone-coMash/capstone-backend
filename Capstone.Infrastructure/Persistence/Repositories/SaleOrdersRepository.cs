@@ -202,11 +202,11 @@ public class SaleOrdersRepository : ISaleOrdersRepository
 
         var orders = await query
             .Where(so => so.TotalPrice > 0)
-            .Select(so => new { so.CreatedAt, so.TotalPrice })
+            .Select(so => new { so.CreatedAt, so.TotalPrice, so.TotalProfit })
             .ToListAsync();
 
         var vietnamOrders = orders
-            .Select(o => new { CreatedAt = o.CreatedAt.AddHours(7), o.TotalPrice })
+            .Select(o => new { CreatedAt = o.CreatedAt.AddHours(7), o.TotalPrice, o.TotalProfit})
             .ToList();
 
         var groups = period switch
@@ -215,8 +215,9 @@ public class SaleOrdersRepository : ISaleOrdersRepository
                 .GroupBy(so => so.CreatedAt.DayOfWeek)
                 .Select(g => new IncomeGroupDto
                 {
-                    Key   = g.Key == DayOfWeek.Sunday ? "7" : ((int)g.Key).ToString(),
+                    Key = g.Key == DayOfWeek.Sunday ? "7" : ((int)g.Key).ToString(),
                     Total = g.Sum(o => o.TotalPrice),
+                    Profit = g.Sum(o => o.TotalProfit),
                 })
                 .ToList(),
 
@@ -224,8 +225,9 @@ public class SaleOrdersRepository : ISaleOrdersRepository
                 .GroupBy(so => GetWeekOfMonth(so.CreatedAt))
                 .Select(g => new IncomeGroupDto
                 {
-                    Key   = g.Key.ToString(),
+                    Key = g.Key.ToString(),
                     Total = g.Sum(o => o.TotalPrice),
+                    Profit = g.Sum(o => o.TotalProfit),
                 })
                 .ToList(),
 
@@ -233,8 +235,9 @@ public class SaleOrdersRepository : ISaleOrdersRepository
                 .GroupBy(so => so.CreatedAt.Month)
                 .Select(g => new IncomeGroupDto
                 {
-                    Key   = g.Key.ToString(),
+                    Key = g.Key.ToString(),
                     Total = g.Sum(o => o.TotalPrice),
+                    Profit = g.Sum(o => o.TotalProfit),
                 })
                 .ToList(),
 
@@ -242,8 +245,9 @@ public class SaleOrdersRepository : ISaleOrdersRepository
                 .GroupBy(so => (so.CreatedAt.Month - 1) / 3 + 1)
                 .Select(g => new IncomeGroupDto
                 {
-                    Key   = g.Key.ToString(),
+                    Key = g.Key.ToString(),
                     Total = g.Sum(o => o.TotalPrice),
+                    Profit = g.Sum(o => o.TotalProfit),
                 })
                 .ToList(),
 
@@ -253,8 +257,9 @@ public class SaleOrdersRepository : ISaleOrdersRepository
         return new IncomeStatsDto
         {
             Period = period,
-            Total  = vietnamOrders.Sum(o => o.TotalPrice),
-            Groups = groups,
+            Total = vietnamOrders.Sum(o => o.TotalPrice),
+            TotalProfit = vietnamOrders.Sum(o => o.TotalProfit),
+            Groups = groups
         };
     }
 

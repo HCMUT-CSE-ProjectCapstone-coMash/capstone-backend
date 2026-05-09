@@ -380,10 +380,12 @@ public class SaleOrdersService : ISaleOrdersService
         {
             Period = period,
             Total = result.Total,
+            TotalProfit = result.TotalProfit,
             Groups = result.Groups.Select(g => new IncomeGroupDto
             {
                 Key = g.Key,
-                Total = g.Total
+                Total = g.Total,
+                Profit = g.Profit
             }).ToList()
         };
 
