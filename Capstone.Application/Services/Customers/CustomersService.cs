@@ -181,4 +181,37 @@ public class CustomersService : ICustomersService
             debitDays
         ));
     }
+
+    public async Task<Result<List<CustomerDto>>> FetchTop5DebtCustomers()
+    {
+        var customers = await _customers.FetchTop5DebtCustomers();
+
+        var customerDtos = customers.Select(c =>
+        {
+            var debitOrders = c.SaleOrders
+                .Where(so => so.PaymentMethod == PaymentMethodStatus.Debit && so.DebitMoney > 0)
+                .ToList();
+
+            var totalDebit = debitOrders.Sum(so => so.DebitMoney);
+            var debitDays = 0;
+
+            if (debitOrders.Any())
+            {
+                var earliestDebitAt = debitOrders.Min(so => so.CreatedAt);
+                debitDays = (int)Math.Max(0, (_dateTimeProvider.UtcNow - earliestDebitAt).TotalDays);
+            }
+
+            return new CustomerDto(
+                c.Id,
+                c.CustomerName,
+                c.CustomerPhoneNumber,
+                c.CustomerStatus,
+                c.CreatedAt,
+                totalDebit,
+                debitDays
+            );
+        }).ToList();
+
+        return Result<List<CustomerDto>>.Success(customerDtos);
+    }
 }

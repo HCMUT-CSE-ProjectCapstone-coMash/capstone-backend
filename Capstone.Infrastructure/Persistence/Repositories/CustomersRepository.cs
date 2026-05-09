@@ -1,4 +1,5 @@
 using Capstone.Application.Common.Interfaces.Persistence;
+using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -80,5 +81,15 @@ public class CustomersRepository : ICustomersRepository
         return await _context.Customers
             .Include(c => c.SaleOrders)
             .FirstOrDefaultAsync(c => c.Id == customerId);
+    }
+
+    public async Task<List<Customer>> FetchTop5DebtCustomers()
+    {
+        return await _context.Customers
+            .Include(c => c.SaleOrders)
+            .Where(c => c.SaleOrders.Any(so => so.PaymentMethod == PaymentMethodStatus.Debit && so.DebitMoney > 0))
+            .OrderByDescending(c => c.SaleOrders.Where(so => so.PaymentMethod == PaymentMethodStatus.Debit).Sum(so => so.DebitMoney))
+            .Take(5)
+            .ToListAsync();
     }
 }

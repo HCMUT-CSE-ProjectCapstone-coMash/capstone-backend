@@ -147,4 +147,31 @@ public class CustomersController : ControllerBase
             result.Value.DebitDays
         ));
     }
+
+    [HttpGet("fetch-top-5-debt-customers")]
+    public async Task<IActionResult> FetchTop5DebtCustomers()
+    {
+        var result = await _customersService.FetchTop5DebtCustomers();
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        var customersResponse = result.Value.Select(c => new CustomersResponse(
+            c.Id,
+            c.CustomerName,
+            c.CustomerPhone,
+            c.CustomerStatus,
+            c.CreatedAt,
+            c.DebitMoney,
+            c.DebitDays
+        )).ToList();
+
+        return Ok(customersResponse);
+    }
 }

@@ -65,9 +65,9 @@ public class SaleOrdersController : ControllerBase
     }
 
     [HttpGet("fetch-all")]
-    public async Task<IActionResult> FetchAllSaleOrders([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? timeRange = null, [FromQuery] string? search = null)
+    public async Task<IActionResult> FetchAllSaleOrders([FromQuery] int currentPage = 1, [FromQuery] int pageSize = 10, [FromQuery] string? timeRange = null, [FromQuery] string? search = null)
     {
-        var result = await _saleOrdersService.FetchAllSaleOrders(page, pageSize, timeRange, search);
+        var result = await _saleOrdersService.FetchAllSaleOrders(currentPage, pageSize, timeRange, search);
 
         if (result.IsFailure)
         {

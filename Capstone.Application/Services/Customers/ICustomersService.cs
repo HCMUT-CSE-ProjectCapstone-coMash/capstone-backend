@@ -9,4 +9,5 @@ public interface ICustomersService
     Task<Result<PaginatedResult<CustomerDto>>> FetchAllCustomers(int page, int pageSize, string? search = null);
     Task<Result<CustomerDto>> CreateCustomer(string customerName, string customerPhone, string userId);
     Task<Result<CustomerDto>> FetchCustomerById(string customerId);
+    Task<Result<List<CustomerDto>>> FetchTop5DebtCustomers();
 }

@@ -10,5 +10,6 @@ public interface ICustomersRepository
     Task<List<Customer>> FetchCustomerByPhone(string customerPhone);
     Task<(List<Customer> Items, int Total)> FetchCustomers(int page, int pageSize, string? search = null);
     Task<Customer?> GetCustomerById(Guid customerId);
+    Task<List<Customer>> FetchTop5DebtCustomers();
 }
 
