@@ -71,9 +71,9 @@ public class CustomersController : ControllerBase
     }
 
     [HttpGet("fetch-all")]
-    public async Task<IActionResult> FetchAllCustomers([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
+    public async Task<IActionResult> FetchAllCustomers([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null, [FromQuery] bool onlyDebt = false)
     {
-        var result = await _customersService.FetchAllCustomers(page, pageSize, search);
+        var result = await _customersService.FetchAllCustomers(page, pageSize, search, onlyDebt);
 
         if (result.IsFailure)
         {

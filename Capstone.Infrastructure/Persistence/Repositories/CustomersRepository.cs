@@ -50,8 +50,8 @@ public class CustomersRepository : ICustomersRepository
             .ToListAsync();
     }
 
-    public async Task<(List<Customer> Items, int Total)> FetchCustomers(int page, int pageSize, string? search = null)
-    {
+    public async Task<(List<Customer> Items, int Total)> FetchCustomers(int page, int pageSize, string? search = null, bool onlyDebt = false)
+    {   
         if (page <= 0)
             page = 1;
 
@@ -63,8 +63,14 @@ public class CustomersRepository : ICustomersRepository
         if (!string.IsNullOrWhiteSpace(search))
         {
             var searchPattern = $"%{search}%";
-            query = query.Where(c => EF.Functions.ILike(c.CustomerName, searchPattern)
+            query = query.Where(c => EF.Functions.ILike(EF.Functions.Unaccent(c.CustomerName), EF.Functions.Unaccent(searchPattern))
                 || EF.Functions.ILike(c.CustomerPhoneNumber, searchPattern));
+        }
+
+        if (onlyDebt)
+        {
+            query = query.Where(c =>
+                c.SaleOrders.Any(so => so.DebitMoney > 0));
         }
 
         var total = await query.CountAsync();

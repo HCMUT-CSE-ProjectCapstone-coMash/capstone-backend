@@ -83,9 +83,9 @@ public class CustomersService : ICustomersService
         return Result<List<CustomerDto>>.Success(customerDtos);
     }
 
-    public async Task<Result<PaginatedResult<CustomerDto>>> FetchAllCustomers(int page, int pageSize, string? search = null)
+    public async Task<Result<PaginatedResult<CustomerDto>>> FetchAllCustomers(int page, int pageSize, string? search = null, bool onlyDebt = false)
     {
-        var (customers, total) = await _customers.FetchCustomers(page, pageSize, search);
+        var (customers, total) = await _customers.FetchCustomers(page, pageSize, search, onlyDebt);
 
         var customerDtos = customers.Select(c =>
         {
@@ -112,9 +112,12 @@ public class CustomersService : ICustomersService
                 debitDays
             );
         }).ToList();
+        var sorted = onlyDebt
+        ? customerDtos.OrderByDescending(c => c.DebitDays).ToList()
+        : customerDtos;
 
         return Result<PaginatedResult<CustomerDto>>.Success(
-            new PaginatedResult<CustomerDto>(customerDtos, total));
+            new PaginatedResult<CustomerDto>(sorted, total));
     }
 
     public async Task<Result<CustomerDto>> CreateCustomer(string customerName, string customerPhone, string userId)
