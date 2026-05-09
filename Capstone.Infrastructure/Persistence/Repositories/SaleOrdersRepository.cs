@@ -287,6 +287,36 @@ public class SaleOrdersRepository : ISaleOrdersRepository
         };
     }
 
+    public async Task<DashboardStatsDto> GetDashboardStats()
+    {
+        var now = _dateTimeProvider.UtcNow.AddHours(7);
+
+        var todayStart = now.Date.AddHours(-7);
+        var todayEnd = todayStart.AddDays(1);
+        var yesterdayStart = todayStart.AddDays(-1);
+        var yesterdayEnd = todayStart;
+
+        var todayOrders = await _context.SaleOrders
+            .Where(so => so.CreatedAt >= todayStart && so.CreatedAt < todayEnd && so.TotalPrice > 0)
+            .Select(so => new { so.TotalPrice, so.TotalProfit })
+            .ToListAsync();
+
+        var yesterdayOrders = await _context.SaleOrders
+            .Where(so => so.CreatedAt >= yesterdayStart && so.CreatedAt < yesterdayEnd && so.TotalPrice > 0)
+            .Select(so => new { so.TotalPrice, so.TotalProfit })
+            .ToListAsync();
+
+        return new DashboardStatsDto
+        {
+            TotalSaleToday = todayOrders.Sum(o => o.TotalPrice),
+            ProfitToday = todayOrders.Sum(o => o.TotalProfit),
+            TotalOrderToday = todayOrders.Count,
+            TotalSaleYesterday = yesterdayOrders.Sum(o => o.TotalPrice),
+            ProfitYesterday = yesterdayOrders.Sum(o => o.TotalProfit),
+            TotalOrderYesterday = yesterdayOrders.Count,
+        };
+    }
+
 
     private static int GetWeekOfMonth(DateTime date)
     {

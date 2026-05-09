@@ -214,4 +214,17 @@ public class CustomersService : ICustomersService
 
         return Result<List<CustomerDto>>.Success(customerDtos);
     }
+
+    public async Task<Result<NewCustomerStatsDto>> GetNewCustomerStats()
+    {
+        var result = await _customers.GetNewCustomerStats();
+
+        var statsDto = new NewCustomerStatsDto
+        {
+            TodayCount = result.TodayCount,
+            YesterdayCount = result.YesterdayCount
+        };
+
+        return Result<NewCustomerStatsDto>.Success(statsDto);
+    }
 }

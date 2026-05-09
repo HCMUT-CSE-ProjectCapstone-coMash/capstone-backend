@@ -9,3 +9,9 @@ public record CustomerDto (
     double DebitMoney,
     int DebitDays
 );
+
+public class NewCustomerStatsDto
+{
+    public int TodayCount { get; set; }
+    public int YesterdayCount { get; set; }
+}

@@ -10,4 +10,5 @@ public interface ICustomersService
     Task<Result<CustomerDto>> CreateCustomer(string customerName, string customerPhone, string userId);
     Task<Result<CustomerDto>> FetchCustomerById(string customerId);
     Task<Result<List<CustomerDto>>> FetchTop5DebtCustomers();
+    Task<Result<NewCustomerStatsDto>> GetNewCustomerStats();
 }

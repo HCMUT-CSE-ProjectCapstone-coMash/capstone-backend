@@ -174,4 +174,21 @@ public class CustomersController : ControllerBase
 
         return Ok(customersResponse);
     }
+
+    [HttpGet("new-customer-stats")]
+    public async Task<IActionResult> GetNewCustomerStats()
+    {
+        var result = await _customersService.GetNewCustomerStats();
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
+    }
 }

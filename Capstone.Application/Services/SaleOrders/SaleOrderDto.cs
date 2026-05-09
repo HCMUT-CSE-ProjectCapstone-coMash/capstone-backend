@@ -53,3 +53,13 @@ public class TopCustomerStatsDto
     public double WalkInTotal { get; set; }
     public double GrandTotal { get; set; }
 }
+
+public class DashboardStatsDto
+{
+    public double TotalSaleToday { get; set; }
+    public double ProfitToday { get; set; }
+    public int TotalOrderToday { get; set; }
+    public double TotalSaleYesterday { get; set; }
+    public double ProfitYesterday { get; set; }
+    public int TotalOrderYesterday { get; set; }
+}

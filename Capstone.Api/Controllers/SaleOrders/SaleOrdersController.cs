@@ -199,4 +199,21 @@ public class SaleOrdersController : ControllerBase
 
         return Ok(result.Value);
     }
+
+    [HttpGet("dashboard-stats")]
+    public async Task<IActionResult> GetDashboardStats()
+    {
+        var result = await _saleOrdersService.GetDashboardStats();
+        
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
+    }
 }

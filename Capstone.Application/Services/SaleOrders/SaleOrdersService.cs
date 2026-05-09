@@ -408,4 +408,19 @@ public class SaleOrdersService : ISaleOrdersService
 
         return Result<TopCustomerStatsDto>.Success(topCustomerStatsDto);
     }
+
+    public async Task<Result<DashboardStatsDto>> GetDashboardStats()
+    {
+        var result = await _saleOrdersRepository.GetDashboardStats();
+
+        return Result<DashboardStatsDto>.Success(new DashboardStatsDto
+        {
+            TotalOrderToday = result.TotalOrderToday,
+            TotalSaleToday = result.TotalSaleToday,
+            ProfitToday = result.ProfitToday,
+            TotalOrderYesterday = result.TotalOrderYesterday,
+            TotalSaleYesterday = result.TotalSaleYesterday,
+            ProfitYesterday = result.ProfitYesterday
+        });
+    }
 }

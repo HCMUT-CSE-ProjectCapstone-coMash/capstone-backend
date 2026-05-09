@@ -11,5 +11,11 @@ public interface ICustomersRepository
     Task<(List<Customer> Items, int Total)> FetchCustomers(int page, int pageSize, string? search = null);
     Task<Customer?> GetCustomerById(Guid customerId);
     Task<List<Customer>> FetchTop5DebtCustomers();
+    Task<NewCustomerStatsDto> GetNewCustomerStats();
 }
 
+public class NewCustomerStatsDto
+{
+    public int TodayCount { get; set; }
+    public int YesterdayCount { get; set; }
+}

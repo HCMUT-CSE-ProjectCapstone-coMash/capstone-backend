@@ -15,6 +15,7 @@ public interface ISaleOrdersRepository
     Task<List<SaleOrder>> GetAllSaleOrdersWithDebt(Guid customerId);
     Task<IncomeStatsDto> GetIncomeStats(string period);
     Task<TopCustomerStatsDto> GetTopCustomersSpendingStats(int limit);
+    Task<DashboardStatsDto> GetDashboardStats();
 }
 
 // --
@@ -44,4 +45,14 @@ public class TopCustomerStatsDto
     public List<TopCustomerDto> Customers { get; set; } = [];
     public double WalkInTotal { get; set; }
     public double GrandTotal { get; set; }
+}
+
+public class DashboardStatsDto
+{
+    public double TotalSaleToday { get; set; }
+    public double ProfitToday { get; set; }
+    public int TotalOrderToday { get; set; }
+    public double TotalSaleYesterday { get; set; }
+    public double ProfitYesterday { get; set; }
+    public int TotalOrderYesterday { get; set; }
 }
