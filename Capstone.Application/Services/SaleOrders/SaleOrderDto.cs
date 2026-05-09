@@ -39,6 +39,20 @@ public class IncomeStatsDto
     public double Total { get; set; }
     public double TotalProfit { get; set; }
     public List<IncomeGroupDto> Groups { get; set; } = [];
+}
+
+// -- Personal income stats --
+public class PersonalIncomeGroupDto
+{
+    public string Key { get; set; } = "";
+    public double Total { get; set; }
+}
+
+public class PersonalIncomeStatsDto
+{
+    public string Period { get; set; } = "";
+    public double Total { get; set; }
+    public List<PersonalIncomeGroupDto> Groups { get; set; } = [];
 } 
 
 // -- Customer spending stats --

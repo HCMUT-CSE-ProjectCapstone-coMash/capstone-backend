@@ -263,6 +263,88 @@ public class SaleOrdersRepository : ISaleOrdersRepository
         };
     }
 
+    public async Task<PersonalIncomeStatsDto> GetPersonalIncomeStats(Guid employeeId, string period)
+    {
+        var now = _dateTimeProvider.UtcNow.AddHours(7);
+
+        var jsDay = (int)now.DayOfWeek;  
+        var daysToMonday = jsDay == 0 ? -6 : 1 - jsDay;
+        var weekStart = now.Date.AddDays(daysToMonday);      
+        var weekEnd   = weekStart.AddDays(7);                    
+
+        var weekStartUtc = weekStart.AddHours(-7);
+        var weekEndUtc   = weekEnd.AddHours(-7);
+
+        var query = _context.SaleOrders
+            .Where(so => so.CreatedBy == employeeId);
+
+        query = period switch
+        {
+            "day"     => query.Where(so => so.CreatedAt >= weekStartUtc && so.CreatedAt < weekEndUtc),
+            "week"    => query.Where(so => so.CreatedAt.Month == now.Month && so.CreatedAt.Year == now.Year),
+            "month"   => query.Where(so => so.CreatedAt.Year == now.Year),
+            "quarter" => query.Where(so => so.CreatedAt.Year == now.Year),
+            _         => query.Where(so => so.CreatedAt >= weekStartUtc && so.CreatedAt < weekEndUtc),
+        };
+
+        var orders = await query
+            .Where(so => so.TotalPrice > 0)
+            .Select(so => new { so.CreatedAt, so.TotalPrice })
+            .ToListAsync();
+
+        var vietnamOrders = orders
+            .Select(o => new { CreatedAt = o.CreatedAt.AddHours(7), o.TotalPrice})
+            .ToList();
+
+        var groups = period switch
+        {
+            "day" => vietnamOrders
+                .GroupBy(so => so.CreatedAt.DayOfWeek)
+                .Select(g => new PersonalIncomeGroupDto
+                {
+                    Key = g.Key == DayOfWeek.Sunday ? "7" : ((int)g.Key).ToString(),
+                    Total = g.Sum(o => o.TotalPrice),
+                })
+                .ToList(),
+
+            "week" => vietnamOrders
+                .GroupBy(so => GetWeekOfMonth(so.CreatedAt))
+                .Select(g => new PersonalIncomeGroupDto
+                {
+                    Key = g.Key.ToString(),
+                    Total = g.Sum(o => o.TotalPrice),
+                })
+                .ToList(),
+
+            "month" => vietnamOrders
+                .GroupBy(so => so.CreatedAt.Month)
+                .Select(g => new PersonalIncomeGroupDto
+                {
+                    Key = g.Key.ToString(),
+                    Total = g.Sum(o => o.TotalPrice),
+                })
+                .ToList(),
+
+            "quarter" => vietnamOrders
+                .GroupBy(so => (so.CreatedAt.Month - 1) / 3 + 1)
+                .Select(g => new PersonalIncomeGroupDto
+                {
+                    Key = g.Key.ToString(),
+                    Total = g.Sum(o => o.TotalPrice),
+                })
+                .ToList(),
+
+            _ => []
+        }; 
+        
+        return new PersonalIncomeStatsDto
+        {
+            Period = period,
+            Total = vietnamOrders.Sum(o => o.TotalPrice),
+            Groups = groups,
+        };
+    }
+
     public async Task<TopCustomerStatsDto> GetTopCustomersSpendingStats(int limit)
     {
         var grandTotal = await _context.SaleOrders.Where(so => so.TotalPrice > 0).SumAsync(so => so.TotalPrice);
@@ -283,10 +365,10 @@ public class SaleOrdersRepository : ISaleOrdersRepository
         var walkInTotal = await _context.SaleOrders
             .Where(so => so.TotalPrice > 0 && so.CustomerId == null)
             .SumAsync(so => so.TotalPrice);
-            
+
         return new TopCustomerStatsDto
         {
-            Customers  = topCustomers,
+            Customers = topCustomers,
             WalkInTotal = walkInTotal,
             GrandTotal = grandTotal,
         };

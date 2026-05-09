@@ -183,6 +183,23 @@ public class SaleOrdersController : ControllerBase
         return Ok(result.Value);
     }
 
+    [HttpGet("personal-income-stats/{userId}")]
+    public async Task<IActionResult> GetPersonalIncomeStats([FromRoute] string userId, [FromQuery] string period = "day")
+    {
+        var result = await _saleOrdersService.GetPersonalIncomeStats(userId, period);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
+    }
+
     [HttpGet("top-customers-spending-stats")]
     public async Task<IActionResult> GetTopCustomersSpendingStats()
     {

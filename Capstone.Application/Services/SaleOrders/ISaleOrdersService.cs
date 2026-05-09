@@ -27,6 +27,8 @@ public interface ISaleOrdersService
 
     Task<Result<IncomeStatsDto>> GetIncomeStats(string period);
 
+    Task<Result<PersonalIncomeStatsDto>> GetPersonalIncomeStats(string employeeId, string period);
+
     Task<Result<TopCustomerStatsDto>> GetTopCustomersSpendingStats(int limit);
 
     Task<Result<DashboardStatsDto>> GetDashboardStats();
