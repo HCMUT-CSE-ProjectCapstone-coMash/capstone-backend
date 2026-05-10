@@ -54,6 +54,14 @@ public class AuthenticationController : ControllerBase
 
             await _auth.UpdateUserImageKey(userResult.Value.Id.ToString(), ImageResult.Value);
         }
+        
+        // Response.Cookies.Append("accessToken", userResult.Value.Token, new CookieOptions
+        // {
+        //     HttpOnly = true,
+        //     Secure = true,
+        //     SameSite = SameSiteMode.Strict,
+        //     Expires = DateTime.UtcNow.AddMinutes(60)
+        // });
 
         var user = _auth.GetUserById(userResult.Value.Id.ToString()).Result.Value;
 
@@ -68,8 +76,7 @@ public class AuthenticationController : ControllerBase
             user.DateOfBirth,
             user.ImageURL,
             user.CreatedAt,
-            user.HasChangedPassword,
-            userResult.Value.Token
+            user.HasChangedPassword
         ));
     }
 
@@ -123,8 +130,7 @@ public class AuthenticationController : ControllerBase
             result.Value.DateOfBirth,
             result.Value.ImageURL,
             result.Value.CreatedAt,
-            result.Value.HasChangedPassword,
-            result.Value.Token
+            result.Value.HasChangedPassword
         ));
     }
 
@@ -149,8 +155,7 @@ public class AuthenticationController : ControllerBase
             result.Value.DateOfBirth,
             result.Value.ImageURL,
             result.Value.CreatedAt,
-            result.Value.HasChangedPassword,
-            ""
+            result.Value.HasChangedPassword
         ));
     }
 
@@ -320,8 +325,7 @@ public class AuthenticationController : ControllerBase
             result.Value.DateOfBirth,
             result.Value.ImageURL,
             result.Value.CreatedAt,
-            result.Value.HasChangedPassword,
-            result.Value.Token
+            result.Value.HasChangedPassword
         ));
     }
 }

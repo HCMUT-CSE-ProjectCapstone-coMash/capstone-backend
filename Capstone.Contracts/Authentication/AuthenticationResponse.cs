@@ -11,8 +11,7 @@ public record AuthenticationResponse(
     DateOnly DateOfBirth,
     string ImageURL,
     DateTime CreatedAt,
-    bool HasChangedPassword,
-    string AccessToken
+    bool HasChangedPassword
 );
 
 public record AuthenticationMobileResponse(
