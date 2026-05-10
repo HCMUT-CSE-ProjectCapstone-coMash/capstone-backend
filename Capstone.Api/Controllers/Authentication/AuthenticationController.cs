@@ -115,7 +115,7 @@ public class AuthenticationController : ControllerBase
         {
             HttpOnly = true,
             Secure = true,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.None,
             Expires = DateTime.UtcNow.AddMinutes(60)
         });
 
@@ -166,7 +166,7 @@ public class AuthenticationController : ControllerBase
         {
             HttpOnly = true,
             Secure = true,
-            SameSite = SameSiteMode.Strict
+            SameSite = SameSiteMode.None
         });
         
         return Ok();
@@ -310,7 +310,7 @@ public class AuthenticationController : ControllerBase
         {
             HttpOnly = true,
             Secure = true,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.None,
             Expires = DateTime.UtcNow.AddMinutes(60)
         });
 
