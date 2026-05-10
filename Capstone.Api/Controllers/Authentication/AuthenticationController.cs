@@ -149,13 +149,6 @@ public class AuthenticationController : ControllerBase
     [HttpPost("logout")]
     public IActionResult Logout()
     {
-        Response.Cookies.Delete("accessToken", new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.None
-        });
-        
         return Ok();
     }
 
@@ -292,14 +285,6 @@ public class AuthenticationController : ControllerBase
                 message = result.Error.Description
             });
         }
-
-        Response.Cookies.Append("accessToken", result.Value.Token, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.None,
-            Expires = DateTime.UtcNow.AddMinutes(60)
-        });
 
         return Ok(new AuthenticationResponse(
             result.Value.Id,
