@@ -104,14 +104,6 @@ public class AuthenticationController : ControllerBase
             });
         }
 
-        Response.Cookies.Append("accessToken", result.Value.Token, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.None,
-            Expires = DateTime.UtcNow.AddMinutes(60)
-        });
-
         return Ok(new AuthenticationResponse(
             result.Value.Id,
             result.Value.EmployeeId,
@@ -152,12 +144,6 @@ public class AuthenticationController : ControllerBase
             result.Value.HasChangedPassword,
             ""
         ));
-    }
-
-    [HttpPost("logout")]
-    public IActionResult Logout()
-    {
-        return Ok();
     }
 
     [HttpGet("employees")]
@@ -275,15 +261,10 @@ public class AuthenticationController : ControllerBase
         return Ok(new { message = "Password reset successfully" });
     }
 
-    [Authorize]
-    [HttpPost("change-password")]
-    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    [HttpPost("change-password/{userId}")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request, [FromRoute] string userId)
     {
-        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-        if (userIdClaim == null)
-            return Unauthorized();
-
-        var result = await _auth.ChangePassword(userIdClaim.Value, request.NewPassword);
+        var result = await _auth.ChangePassword(userId, request.NewPassword);
 
         if (result.IsFailure)
         {
