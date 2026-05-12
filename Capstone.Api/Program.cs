@@ -18,7 +18,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-            .WithOrigins("http://localhost:3000", "http://localhost:8081", "https://capstone-frontend-nu-five.vercel.app")
+            .WithOrigins("http://localhost:3000", "http://localhost:8081", "https://comash.io.vn")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
