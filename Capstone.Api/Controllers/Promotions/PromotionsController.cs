@@ -136,13 +136,13 @@ public class PromotionsController : ControllerBase
 
     [HttpGet("fetch-all")]
     public async Task<IActionResult> FetchPromotions(
-        [FromQuery] int currentPage = 1,
+        [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10,
         [FromQuery] string? category = null,
         [FromQuery] string? search = null
     )
     {
-        var result = await _promotionsService.FetchPromotions(currentPage, pageSize, category, search);
+        var result = await _promotionsService.FetchPromotions(page, pageSize, category, search);
 
         if (result.IsFailure)
         {
