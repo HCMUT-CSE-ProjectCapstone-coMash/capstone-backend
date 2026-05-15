@@ -129,6 +129,39 @@ public class ProductsService : IProductsService
         ));
     }
 
+    public async Task<Result<ProductDto>> FetchProductByProductId(string productId)
+    {
+        var product = await _productsRepository.GetProductByProductId(productId);
+
+        if (product == null)
+            return Result<ProductDto>.Failure(new Error("ProductNotFound", "Product not found."));
+
+        var imageUrl = "";
+        if (!string.IsNullOrEmpty(product.ImageKey))
+        {
+            var imageResult = await _fileStorageService.GetImageUrlAsync(product.ImageKey);
+            imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
+        }
+
+        return Result<ProductDto>.Success(new ProductDto(
+            product.Id,
+            product.ProductId,
+            product.ProductName,
+            product.Category,
+            product.Color,
+            product.Pattern,
+            product.SizeType,
+            product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+            product.CreatedBy,
+            product.CreatedAt,
+            product.Status,
+            imageUrl,
+            product.VectorId,
+            product.SalePrice,
+            product.ImportPrice
+        ));
+    }
+
     public async Task<Result<AnalyzeProductDto>> AnalyzeImage(string ImageBase64)
     {
         var analyzedProduct = await _promptProvider.AnalyzeImageWithClaude(ImageBase64);
