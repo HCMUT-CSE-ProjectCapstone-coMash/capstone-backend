@@ -21,7 +21,7 @@ public class PromptProvider : IPromptProvider
     {
         string[] AllowedCategories = ["Đầm", "Áo", "Quần", "Váy"];
         string[] AllowedColors = ["Đỏ", "Đen", "Trắng", "Cam", "Vàng", "Xanh Lá", "Xanh Dương", "Tím", "Hồng", "Nâu", "Xám"];
-        string[] AllowedPatterns = ["Trơn", "Sọc Dọc", "Sọc Ngang", "Caro", "Hoa Văn"];
+        string[] AllowedPatterns = ["Trơn", "Sọc Dọc", "Sọc Ngang", "Caro", "Hoa Văn", "Chấm Bi"];
 
         var prompt = $$"""
             Analyze this product image and return ONLY a JSON object with no markdown or preamble.
