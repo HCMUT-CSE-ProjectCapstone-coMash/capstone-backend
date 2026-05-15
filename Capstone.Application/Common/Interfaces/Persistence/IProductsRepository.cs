@@ -6,6 +6,7 @@ public interface IProductsRepository
 {
     Task AddProduct(Product product);
     Task<Product?> GetProductById(Guid productId);
+    Task<Product?> GetProductByProductId(string productId);
     Task DeleteProductAsync(Guid productId);
     Task UpdateProduct(Product product);
     Task<int> GetMaxIdNumberByCategoryAsync(string prefix);

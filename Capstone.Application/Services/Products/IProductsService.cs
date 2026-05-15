@@ -18,6 +18,8 @@ public interface IProductsService
 
     Task<Result<ProductDto>> FetchProductById(string id);
 
+    Task<Result<ProductDto>> FetchProductByProductId(string productId);
+
     Task<Result<AnalyzeProductDto>> AnalyzeImage(string ImageBase64);
 
     Task<Result<List<ProductWithOrderStatusDto>>> FetchApprovedProductByName(string productName);

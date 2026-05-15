@@ -31,6 +31,11 @@ public class ProductsRepository : IProductsRepository
         return await _context.Products.Include(p => p.ProductQuantities).FirstOrDefaultAsync(p => p.Id == productId);
     }
 
+    public async Task<Product?> GetProductByProductId(string productId)
+    {
+        return await _context.Products.Include(p => p.ProductQuantities).FirstOrDefaultAsync(p => p.ProductId == productId);
+    }
+
     public async Task DeleteProductAsync(Guid productId)
     {
         var product = await _context.Products.FindAsync(productId);

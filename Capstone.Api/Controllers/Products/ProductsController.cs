@@ -191,6 +191,39 @@ public class ProductsController : ControllerBase
         )).ToList());
     }
 
+    [HttpGet("fetch-by-productId/{productId}")]
+    public async Task<IActionResult> FetchProductByProductId([FromRoute] string productId)
+    {
+        var result = await _productsSerivce.FetchProductByProductId(productId);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new ProductResponse(
+            result.Value.Id,
+            result.Value.ProductId,
+            result.Value.ProductName,
+            result.Value.Category,
+            result.Value.Color,
+            result.Value.Pattern,
+            result.Value.SizeType,
+            result.Value.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+            result.Value.CreatedBy,
+            result.Value.CreatedAt,
+            result.Value.Status,
+            result.Value.ImageURL,
+            result.Value.VectorId,
+            result.Value.SalePrice,
+            result.Value.ImportPrice
+        ));
+    }
+
     [HttpGet("create-product-id-by-category/{category}")]
     public async Task<IActionResult> CreateProductIdByCategory([FromRoute] string category)
     {
