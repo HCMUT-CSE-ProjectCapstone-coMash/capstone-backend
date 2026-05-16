@@ -29,8 +29,13 @@ public class PromotionsService : IPromotionsService
         _promotionsRepository = promotionsRepository;
     }
 
-    private Result<string> GetPromotionPhase(DateOnly startDate, DateOnly endDate)
+    private Result<string> GetPromotionPhase(DateOnly startDate, DateOnly endDate, string promotionStatus)
     {
+        if (promotionStatus == PromotionStatus.Paused)
+        {
+            return Result<string>.Success(PromotionPhase.Paused);
+        }
+
         var today = DateOnly.FromDateTime(_dateTimeProvider.UtcNow);
 
         string phase;
@@ -108,7 +113,7 @@ public class PromotionsService : IPromotionsService
             PromotionType = p.PromotionType,
             Description = p.Description,
             PromotionStatus = p.PromotionStatus,
-            PromotionPhase = GetPromotionPhase(p.StartDate, p.EndDate).Value,
+            PromotionPhase = GetPromotionPhase(p.StartDate, p.EndDate, p.PromotionStatus).Value,
             StartDate = p.StartDate,
             EndDate = p.EndDate,
             CreatedAt = p.CreatedAt
@@ -135,7 +140,7 @@ public class PromotionsService : IPromotionsService
             PromotionType = promotion.PromotionType,
             Description = promotion.Description,
             PromotionStatus = promotion.PromotionStatus,
-            PromotionPhase = GetPromotionPhase(promotion.StartDate, promotion.EndDate).Value,
+            PromotionPhase = GetPromotionPhase(promotion.StartDate, promotion.EndDate, promotion.PromotionStatus).Value,
             StartDate = promotion.StartDate,
             EndDate = promotion.EndDate,
             CreatedAt = promotion.CreatedAt
@@ -172,7 +177,7 @@ public class PromotionsService : IPromotionsService
         var promotions = await _promotionsRepository.GetProductPromotionsByProductId(Guid.Parse(productId));
 
         var ongoingPromotions = promotions.Where(p =>
-            GetPromotionPhase(p.StartDate, p.EndDate).Value == PromotionPhase.Ongoing
+            GetPromotionPhase(p.StartDate, p.EndDate, p.PromotionStatus).Value == PromotionPhase.Ongoing
         ).ToList();
 
         var result = new List<PromotionDto>();
@@ -228,7 +233,7 @@ public class PromotionsService : IPromotionsService
                 PromotionType = promotion.PromotionType,
                 Description = promotion.Description,
                 PromotionStatus = promotion.PromotionStatus,
-                PromotionPhase = GetPromotionPhase(promotion.StartDate, promotion.EndDate).Value,
+                PromotionPhase = GetPromotionPhase(promotion.StartDate, promotion.EndDate, promotion.PromotionStatus).Value,
                 StartDate = promotion.StartDate,
                 EndDate = promotion.EndDate,
                 CreatedAt = promotion.CreatedAt,
@@ -244,7 +249,7 @@ public class PromotionsService : IPromotionsService
         var promotions = await _promotionsRepository.GetComboPromotionsByProductId(Guid.Parse(productId));
 
         var ongoingPromotions = promotions.Where(p =>
-            GetPromotionPhase(p.StartDate, p.EndDate).Value == PromotionPhase.Ongoing
+            GetPromotionPhase(p.StartDate, p.EndDate, p.PromotionStatus).Value == PromotionPhase.Ongoing
         ).ToList();
 
         var result = new List<PromotionDto>();
@@ -325,7 +330,7 @@ public class PromotionsService : IPromotionsService
                 PromotionType = promotion.PromotionType,
                 Description = promotion.Description,
                 PromotionStatus = promotion.PromotionStatus,
-                PromotionPhase = GetPromotionPhase(promotion.StartDate, promotion.EndDate).Value,
+                PromotionPhase = GetPromotionPhase(promotion.StartDate, promotion.EndDate, promotion.PromotionStatus).Value,
                 StartDate = promotion.StartDate,
                 EndDate = promotion.EndDate,
                 CreatedAt = promotion.CreatedAt,
@@ -341,7 +346,7 @@ public class PromotionsService : IPromotionsService
         var promotions = await _promotionsRepository.GetOrderPromotions();
 
         var ongoingPromotions = promotions.Where(p =>
-            GetPromotionPhase(p.StartDate, p.EndDate).Value == PromotionPhase.Ongoing
+            GetPromotionPhase(p.StartDate, p.EndDate, p.PromotionStatus).Value == PromotionPhase.Ongoing
         ).ToList();
 
         var result = new List<PromotionDto>();
@@ -365,7 +370,7 @@ public class PromotionsService : IPromotionsService
                 PromotionType = promotion.PromotionType,
                 Description = promotion.Description,
                 PromotionStatus = promotion.PromotionStatus,
-                PromotionPhase = GetPromotionPhase(promotion.StartDate, promotion.EndDate).Value,
+                PromotionPhase = GetPromotionPhase(promotion.StartDate, promotion.EndDate, promotion.PromotionStatus).Value,
                 StartDate = promotion.StartDate,
                 EndDate = promotion.EndDate,
                 CreatedAt = promotion.CreatedAt,
