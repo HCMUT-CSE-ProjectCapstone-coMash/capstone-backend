@@ -102,4 +102,14 @@ public class PromotionsRepository : IPromotionsRepository
     {
         return await _context.Promotions.Where(p => p.PromotionType == PromotionType.OrderPromotion).Include(p => p.OrderPromotions).ToListAsync();
     }
+
+    public async Task DeletePromotion(Guid promotionId)
+    {
+        var promotion = await _context.Promotions.FindAsync(promotionId);
+        if (promotion != null)
+        {
+            _context.Promotions.Remove(promotion);
+            await _context.SaveChangesAsync();
+        }
+    }
 }

@@ -375,4 +375,18 @@ public class PromotionsService : IPromotionsService
 
         return Result<List<PromotionDto>>.Success(result);
     }
+
+    public async Task<Result<string>> DeletePromotion(string promotionId)
+    {
+        var promotion = await _promotionsRepository.GetPromotionById(Guid.Parse(promotionId));
+
+        if (promotion == null)
+        {
+            return Result<string>.Failure(new Error("PromotionNotFound", "Promotion not found"));
+        }
+
+        await _promotionsRepository.DeletePromotion(promotion.Id);
+
+        return Result<string>.Success(promotion.Id.ToString());
+    }
 }

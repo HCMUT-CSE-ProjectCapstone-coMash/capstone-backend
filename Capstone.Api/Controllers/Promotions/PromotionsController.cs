@@ -365,4 +365,21 @@ public class PromotionsController : ControllerBase
 
         return Ok(orderPromotions.Value);
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeletePromotion([FromRoute] string id)
+    {
+        var result = await _promotionsService.DeletePromotion(id);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new { message = "Promotion deleted successfully", promotionId = result.Value });
+    }
 }

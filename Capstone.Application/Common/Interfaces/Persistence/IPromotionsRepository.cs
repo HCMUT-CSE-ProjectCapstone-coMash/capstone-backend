@@ -19,4 +19,6 @@ public interface IPromotionsRepository
     Task<List<Promotion>> GetComboPromotionsByProductId(Guid productId);
 
     Task<List<Promotion>> GetOrderPromotions();
+
+    Task DeletePromotion(Guid promotionId);
 }
