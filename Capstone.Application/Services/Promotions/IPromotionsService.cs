@@ -39,4 +39,6 @@ public interface IPromotionsService
     Task<Result<List<PromotionDto>>> GetActiveOrderPromotions();
 
     Task<Result<string>> DeletePromotion(string promotionId);
+
+    Task<Result<string>> PausePromotion(string promotionId);
 }

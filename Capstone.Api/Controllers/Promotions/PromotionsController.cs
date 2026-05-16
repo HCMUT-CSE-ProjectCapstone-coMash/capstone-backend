@@ -382,4 +382,21 @@ public class PromotionsController : ControllerBase
 
         return Ok(new { message = "Promotion deleted successfully", promotionId = result.Value });
     }
+
+    [HttpPatch("pause-promotion/{id}")]
+    public async Task<IActionResult> PausePromotion([FromRoute] string id)
+    {
+        var result = await _promotionsService.PausePromotion(id);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new { message = "Promotion paused successfully", promotionId = result.Value });
+    }
 }

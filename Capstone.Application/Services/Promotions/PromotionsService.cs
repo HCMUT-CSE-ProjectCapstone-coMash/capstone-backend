@@ -81,7 +81,7 @@ public class PromotionsService : IPromotionsService
             Description = description,
             StartDate = DateOnly.Parse(startDate),
             EndDate = DateOnly.Parse(endDate),
-            PromotionStatus = PromotionStatus.Active.ToString(),
+            PromotionStatus = PromotionStatus.Active,
             CreatedBy = Guid.Parse(createdBy),
             CreatedAt = _dateTimeProvider.UtcNow
         };
@@ -386,6 +386,22 @@ public class PromotionsService : IPromotionsService
         }
 
         await _promotionsRepository.DeletePromotion(promotion.Id);
+
+        return Result<string>.Success(promotion.Id.ToString());
+    }
+
+    public async Task<Result<string>> PausePromotion(string promotionId)
+    {
+        var promotion = await _promotionsRepository.GetPromotionById(Guid.Parse(promotionId));
+
+        if (promotion == null)
+        {
+            return Result<string>.Failure(new Error("PromotionNotFound", "Promotion not found"));
+        }
+
+        promotion.PromotionStatus = PromotionStatus.Paused;
+
+        await _promotionsRepository.UpdatePromotion(promotion);
 
         return Result<string>.Success(promotion.Id.ToString());
     }
