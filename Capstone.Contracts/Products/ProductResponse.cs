@@ -16,7 +16,8 @@ public record ProductResponse(
     string VectorId,
     double SalePrice,
     double ImportPrice,
-    List<ProductQuantityChange>? QuantityChanges = null
+    List<ProductQuantityChange>? QuantityChanges = null,
+    string ModelImageURL = ""
 );
 
 public record ProductQuantity(
@@ -47,5 +48,6 @@ public record ProductWithOrderStatusResponse(
     double SalePrice,
     double ImportPrice,
     bool IsInPendingOrder,
-    List<ProductQuantityChange>? QuantityChanges = null
+    List<ProductQuantityChange>? QuantityChanges = null,
+    string ModelImageURL = ""
 );

@@ -49,6 +49,7 @@ public static class DependencyInjection
         services.AddSingleton<IFileStorageProvider, FileStorageProvider>();
         services.AddSingleton<IVectorStoreProvider, VectorStoreProvider>();
         services.AddSingleton<IPromptProvider, PromptProvider>();
+        services.AddSingleton<IModelPromptProvider, ModelPromptProvider>();
 
         // Image Saving
         services.AddSingleton<IAmazonS3, AmazonS3Client>(sp =>

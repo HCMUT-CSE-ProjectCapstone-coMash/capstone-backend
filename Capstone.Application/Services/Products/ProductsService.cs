@@ -21,6 +21,7 @@ public class ProductsService : IProductsService
 
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IPromptProvider _promptProvider;
+    private readonly IModelPromptProvider _modelPromptProvider;
     private readonly IProductVectorService _productVectorService;
 
     public ProductsService(
@@ -33,6 +34,7 @@ public class ProductsService : IProductsService
         IDateTimeProvider dateTimeProvider,
         IFileStorageService fileStorageService,
         IPromptProvider promptProvider,
+        IModelPromptProvider modelPromptProvider,
         IProductVectorService productVectorService
     )
     {
@@ -45,6 +47,7 @@ public class ProductsService : IProductsService
         _dateTimeProvider = dateTimeProvider;
         _fileStorageService = fileStorageService;
         _promptProvider = promptProvider;
+        _modelPromptProvider = modelPromptProvider;
         _productVectorService = productVectorService;
     }
 
@@ -125,7 +128,8 @@ public class ProductsService : IProductsService
             imageUrl,
             product.VectorId,
             product.SalePrice,
-            product.ImportPrice
+            product.ImportPrice,
+            await GetModelImageUrlAsync(product.ModelImageKey)
         ));
     }
 
@@ -158,7 +162,8 @@ public class ProductsService : IProductsService
             imageUrl,
             product.VectorId,
             product.SalePrice,
-            product.ImportPrice
+            product.ImportPrice,
+            await GetModelImageUrlAsync(product.ModelImageKey)
         ));
     }
 
@@ -198,6 +203,8 @@ public class ProductsService : IProductsService
                 imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
             }
 
+            var modelImageUrl = await GetModelImageUrlAsync(product.ModelImageKey);
+
             productDtos.Add(new ProductWithOrderStatusDto(
                 product.Id,
                 product.ProductId,
@@ -214,7 +221,8 @@ public class ProductsService : IProductsService
                 product.VectorId,
                 product.SalePrice,
                 product.ImportPrice,
-                productIdsInPendingOrders.Contains(product.Id)
+                productIdsInPendingOrders.Contains(product.Id),
+                modelImageUrl
             ));
         }
 
@@ -344,6 +352,8 @@ public class ProductsService : IProductsService
             imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
         }
 
+        var modelImageUrl = await GetModelImageUrlAsync(product.ModelImageKey);
+
         return Result<ProductDto>.Success(new ProductDto(
             product.Id,
             product.ProductId,
@@ -359,7 +369,8 @@ public class ProductsService : IProductsService
             imageUrl,
             product.VectorId,
             product.SalePrice,
-            product.ImportPrice
+            product.ImportPrice,
+            modelImageUrl
         ));
     }
 
@@ -393,7 +404,8 @@ public class ProductsService : IProductsService
                 imageUrl,
                 product.VectorId,
                 product.SalePrice,
-                product.ImportPrice
+                product.ImportPrice,
+                await GetModelImageUrlAsync(product.ModelImageKey)
             ));
         }
 
@@ -738,11 +750,80 @@ public class ProductsService : IProductsService
                 imageUrl,
                 product.VectorId,
                 product.SalePrice,
-                product.ImportPrice
+                product.ImportPrice,
+                await GetModelImageUrlAsync(product.ModelImageKey)
             ));
         }
 
         return Result<List<ProductDto>>.Success(productDtos);
+    }
+
+    private async Task<string> GetModelImageUrlAsync(string modelImageKey)
+    {
+        if (string.IsNullOrWhiteSpace(modelImageKey))
+            return string.Empty;
+
+        var result = await _fileStorageService.GetImageUrlAsync(modelImageKey);
+        return result.IsSuccess ? result.Value : string.Empty;
+    }
+
+    public async Task<Result> UpdateProductModelImageKey(string productId, string modelImageKey)
+    {
+        var product = await _productsRepository.GetProductById(Guid.Parse(productId));
+
+        if (product == null)
+            return Result.Failure(new Error("ProductNotFound", "Product not found."));
+
+        product.ModelImageKey = modelImageKey;
+
+        await _productsRepository.UpdateProduct(product);
+
+        return Result.Success();
+    }
+
+    public async Task<Result<string>> GenerateModelImage(string productId)
+    {
+        var product = await _productsRepository.GetProductById(Guid.Parse(productId));
+
+        if (product == null)
+            return Result<string>.Failure(new Error("ProductNotFound", "Product not found."));
+
+        if (string.IsNullOrEmpty(product.ImageKey))
+            return Result<string>.Failure(new Error("NoProductImage", "Product does not have an image."));
+
+        var imageUrlResult = await _fileStorageService.GetImageUrlAsync(product.ImageKey);
+        if (imageUrlResult.IsFailure)
+            return Result<string>.Failure(new Error("ImageRetrievalFailed", "Failed to retrieve product image."));
+
+        using var client = new HttpClient();
+        var imageBytes = await client.GetByteArrayAsync(imageUrlResult.Value);
+        var imageBase64 = Convert.ToBase64String(imageBytes);
+        var imageDataUri = $"data:image/jpeg;base64,{imageBase64}";
+
+        try
+        {
+            var modelImageBase64 = await _modelPromptProvider.GenerateModelImageAsync(imageDataUri, product.ProductName);
+
+            var stream = new MemoryStream(Convert.FromBase64String(modelImageBase64.Split(',')[1]));
+            var uploadResult = await _fileStorageService.UploadImageAsync(
+                "product-models",
+                productId,
+                stream,
+                "image/jpeg",
+                ".jpg"
+            );
+
+            if (uploadResult.IsFailure)
+                return Result<string>.Failure(new Error("UploadFailed", "Failed to upload generated model image."));
+
+            await UpdateProductModelImageKey(productId, uploadResult.Value);
+
+            return Result<string>.Success(uploadResult.Value);
+        }
+        catch (Exception ex)
+        {
+            return Result<string>.Failure(new Error("GenerationFailed", $"Failed to generate model image: {ex.Message}"));
+        }
     }
 
     private static string GetCategoryPrefix(string category) => category switch

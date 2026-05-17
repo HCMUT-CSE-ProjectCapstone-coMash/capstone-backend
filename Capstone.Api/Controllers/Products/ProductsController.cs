@@ -105,7 +105,9 @@ public class ProductsController : ControllerBase
             result.Value.ImageURL,
             result.Value.VectorId,
             result.Value.SalePrice,
-            result.Value.ImportPrice
+            result.Value.ImportPrice,
+            null,
+            result.Value.ModelImageURL
         ));
     }
 
@@ -153,7 +155,9 @@ public class ProductsController : ControllerBase
             p.VectorId,
             p.SalePrice,
             p.ImportPrice,
-            p.IsInPendingOrder
+            p.IsInPendingOrder,
+            null,
+            p.ModelImageURL
         )).ToList());
     }
 
@@ -187,7 +191,9 @@ public class ProductsController : ControllerBase
             p.VectorId,
             p.SalePrice,
             p.ImportPrice,
-            p.IsInPendingOrder
+            p.IsInPendingOrder,
+            null,
+            p.ModelImageURL
         )).ToList());
     }
 
@@ -220,7 +226,9 @@ public class ProductsController : ControllerBase
             result.Value.ImageURL,
             result.Value.VectorId,
             result.Value.SalePrice,
-            result.Value.ImportPrice
+            result.Value.ImportPrice,
+            null,
+            result.Value.ModelImageURL
         ));
     }
 
@@ -308,7 +316,9 @@ public class ProductsController : ControllerBase
             result.Value.ImageURL,
             result.Value.VectorId,
             result.Value.SalePrice,
-            result.Value.ImportPrice
+            result.Value.ImportPrice,
+            null,
+            result.Value.ModelImageURL
         ));
     }
 
@@ -352,7 +362,9 @@ public class ProductsController : ControllerBase
             result.Value.ImageURL,
             result.Value.VectorId,
             result.Value.SalePrice,
-            result.Value.ImportPrice
+            result.Value.ImportPrice,
+            null,
+            result.Value.ModelImageURL
         ));
     }
 
@@ -386,7 +398,9 @@ public class ProductsController : ControllerBase
                 p.ImageURL,
                 p.VectorId,
                 p.SalePrice,
-                p.ImportPrice
+                p.ImportPrice,
+                null,
+                p.ModelImageURL
             )).ToList(),
             result.Value.Total
         ));
@@ -432,7 +446,8 @@ public class ProductsController : ControllerBase
             result.Value.Product.VectorId,
             result.Value.Product.SalePrice,
             result.Value.Product.ImportPrice,
-            result.Value.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
+            result.Value.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList(),
+            result.Value.Product.ModelImageURL
         ));
     }
 
@@ -474,7 +489,8 @@ public class ProductsController : ControllerBase
             result.Value.Product.VectorId,
             result.Value.Product.SalePrice,
             0,
-            result.Value.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
+            result.Value.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList(),
+            result.Value.Product.ModelImageURL
         ));
     }
 
@@ -594,7 +610,30 @@ public class ProductsController : ControllerBase
             p.ImageURL,
             p.VectorId,
             p.SalePrice,
-            p.ImportPrice
+            p.ImportPrice,
+            null,
+            p.ModelImageURL
         )).ToList());
+    }
+
+    [HttpPost("generate-model-image/{productId}")]
+    public async Task<IActionResult> GenerateModelImage([FromRoute] string productId)
+    {
+        var result = await _productsSerivce.GenerateModelImage(productId);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new
+        {
+            message = "Model image generated successfully",
+            modelImageKey = result.Value
+        });
     }
 }

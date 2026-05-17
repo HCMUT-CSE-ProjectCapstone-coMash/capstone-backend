@@ -16,6 +16,7 @@ public class Product
     public string VectorId { get; set; } = string.Empty;
     public double SalePrice { get; set; }
     public double ImportPrice { get; set; }
+    public string ModelImageKey { get; set; } = string.Empty;
 
     public ICollection<ProductQuantity> ProductQuantities { get; set; } = new List<ProductQuantity>();
 }

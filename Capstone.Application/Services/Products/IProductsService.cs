@@ -77,4 +77,8 @@ public interface IProductsService
     Task<Result<string>> DeleteProduct(string id);
 
     Task<Result<List<ProductDto>>> FetchTop5LowStockProducts();
+
+    Task<Result> UpdateProductModelImageKey(string productId, string modelImageKey);
+
+    Task<Result<string>> GenerateModelImage(string productId);
 }

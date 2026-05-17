@@ -15,7 +15,8 @@ public record ProductDto(
     string ImageURL,
     string VectorId,
     double SalePrice,
-    double ImportPrice
+    double ImportPrice,
+    string ModelImageURL = ""
 );
 
 public record ProductQuantityDto(
@@ -39,5 +40,6 @@ public record ProductWithOrderStatusDto(
     string VectorId,
     double SalePrice,
     double ImportPrice,
-    bool IsInPendingOrder
+    bool IsInPendingOrder,
+    string ModelImageURL = ""
 );
