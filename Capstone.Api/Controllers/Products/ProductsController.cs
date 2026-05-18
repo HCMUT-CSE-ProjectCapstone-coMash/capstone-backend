@@ -616,10 +616,10 @@ public class ProductsController : ControllerBase
         )).ToList());
     }
 
-    [HttpPost("generate-model-image/{productId}")]
-    public async Task<IActionResult> GenerateModelImage([FromRoute] string productId)
+    [HttpPost("generate-model-image/{id}")]
+    public async Task<IActionResult> GenerateModelImage([FromRoute] string id)
     {
-        var result = await _productsSerivce.GenerateModelImage(productId);
+        var result = await _productsSerivce.GenerateModelImage(id);
 
         if (result.IsFailure)
         {
@@ -635,5 +635,40 @@ public class ProductsController : ControllerBase
             message = "Model image generated successfully",
             modelImageKey = result.Value
         });
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> FetchProductById([FromRoute] string id)
+    {
+        var result = await _productsSerivce.FetchProductById(id);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(new ProductResponse(
+            result.Value.Id,
+            result.Value.ProductId,
+            result.Value.ProductName,
+            result.Value.Category,
+            result.Value.Color,
+            result.Value.Pattern,
+            result.Value.SizeType,
+            result.Value.Quantities.Select(q => new ProductQuantity(q.Size, q.Quantities)).ToList(),
+            result.Value.CreatedBy,
+            result.Value.CreatedAt,
+            result.Value.Status,
+            result.Value.ImageURL,
+            result.Value.VectorId,
+            result.Value.SalePrice,
+            result.Value.ImportPrice,
+            null,
+            result.Value.ModelImageURL
+        ));
     }
 }
