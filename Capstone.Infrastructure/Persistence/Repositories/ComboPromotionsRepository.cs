@@ -26,6 +26,15 @@ public class ComboPromotionsRepository : IComboPromotionsRepository
             .Include(co => co.ComboPromotionDetails)
                 .ThenInclude(cod => cod.Product)
                     .ThenInclude(p => p.ProductQuantities)
+            .Include(co => co.ComboPromotionDetails)
+                .ThenInclude(cod => cod.Product)
+                    .ThenInclude(p => p.Category)
+            .Include(co => co.ComboPromotionDetails)
+                .ThenInclude(cod => cod.Product)
+                    .ThenInclude(p => p.Color)
+            .Include(co => co.ComboPromotionDetails)
+                .ThenInclude(cod => cod.Product)
+                    .ThenInclude(p => p.Pattern)
             .Where(co => co.PromotionId == promotionId)
             .ToListAsync();
     }

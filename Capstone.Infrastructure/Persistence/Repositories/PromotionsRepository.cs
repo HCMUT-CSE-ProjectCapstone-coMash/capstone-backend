@@ -84,6 +84,15 @@ public class PromotionsRepository : IPromotionsRepository
             .Include(p => p.ProductPromotions)
                 .ThenInclude(pp => pp.Product)
                     .ThenInclude(p => p.ProductQuantities)
+            .Include(p => p.ProductPromotions)
+                .ThenInclude(pp => pp.Product)
+                    .ThenInclude(p => p.Category)
+            .Include(p => p.ProductPromotions)
+                .ThenInclude(pp => pp.Product)
+                    .ThenInclude(p => p.Color)
+            .Include(p => p.ProductPromotions)
+                .ThenInclude(pp => pp.Product)
+                    .ThenInclude(p => p.Pattern)
             .ToListAsync();
     }
 
@@ -95,6 +104,18 @@ public class PromotionsRepository : IPromotionsRepository
                 .ThenInclude(cp => cp.ComboPromotionDetails)
                     .ThenInclude(cpd => cpd.Product)
                         .ThenInclude(p => p.ProductQuantities)
+            .Include(p => p.ComboPromotions)
+                .ThenInclude(cp => cp.ComboPromotionDetails)
+                    .ThenInclude(cpd => cpd.Product)
+                        .ThenInclude(p => p.Category)
+            .Include(p => p.ComboPromotions)
+                .ThenInclude(cp => cp.ComboPromotionDetails)
+                    .ThenInclude(cpd => cpd.Product)
+                        .ThenInclude(p => p.Color)
+            .Include(p => p.ComboPromotions)
+                .ThenInclude(cp => cp.ComboPromotionDetails)
+                    .ThenInclude(cpd => cpd.Product)
+                        .ThenInclude(p => p.Pattern)
             .ToListAsync();
     }
 

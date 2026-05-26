@@ -7,9 +7,9 @@ public interface IProductsService
 {
     Task<Result<string>> CreateProduct(
         string ProductName,
-        string category,
-        string color,
-        string pattern,
+        string categoryId,
+        string colorId,
+        string patternId,
         string sizeType,
         string createdBy
     );
@@ -24,13 +24,13 @@ public interface IProductsService
 
     Task<Result<List<ProductWithOrderStatusDto>>> FetchApprovedProductByName(string productName);
 
-    Task<Result<string>> CreateProductIdByCategory(string category);
+    Task<Result<string>> CreateProductIdByCategoryId(string categoryId);
 
     Task<Result<string>> OwnerCreateProduct(
         string productName,
-        string category,
-        string color,
-        string pattern,
+        string categoryId,
+        string colorId,
+        string patternId,
         string sizeType,
         string createdBy,
         double salePrice,
@@ -41,9 +41,9 @@ public interface IProductsService
         string id,
         string? productId,
         string? productName,
-        string? category,
-        string? color,
-        string? pattern,
+        string? categoryId,
+        string? colorId,
+        string? patternId,
         string? sizeType,
         List<ProductQuantityDto>? quantities,
         double? salePrice,
@@ -56,8 +56,8 @@ public interface IProductsService
         string id,
         string productsOrderId,
         string? productName,
-        string? color,
-        string? pattern,
+        string? colorId,
+        string? patternId,
         string? sizeType,
         List<ProductQuantityDto>? newQuantities,
         double? salePrice,
@@ -68,8 +68,8 @@ public interface IProductsService
         string id,
         string productsOrderId,
         string? productName,
-        string? color,
-        string? pattern,
+        string? colorId,
+        string? patternId,
         string? sizeType,
         List<ProductQuantityDto>? newQuantities
     );
@@ -81,4 +81,10 @@ public interface IProductsService
     Task<Result> UpdateProductModelImageKey(string productId, string modelImageKey);
 
     Task<Result<string>> GenerateModelImage(string productId);
+
+    Task<Result<List<CategoryDto>>> FetchAllCategories();
+    
+     Task<Result<List<ColorDto>>> FetchAllColors();
+
+     Task<Result<List<PatternDto>>> FetchAllPatterns();
 }

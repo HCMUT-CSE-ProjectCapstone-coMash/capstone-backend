@@ -45,9 +45,9 @@ public class ProductsController : ControllerBase
     {
         var productResult = await _productsSerivce.CreateProduct(
             request.ProductName,
-            request.Category,
-            request.Color,
-            request.Pattern ?? string.Empty,
+            request.CategoryId,
+            request.ColorId,
+            request.PatternId ?? string.Empty,
             request.SizeType,
             request.CreatedBy
         );
@@ -232,10 +232,10 @@ public class ProductsController : ControllerBase
         ));
     }
 
-    [HttpGet("create-product-id-by-category/{category}")]
-    public async Task<IActionResult> CreateProductIdByCategory([FromRoute] string category)
+    [HttpGet("create-product-id-by-category-id/{categoryId}")]
+    public async Task<IActionResult> CreateProductIdByCategory([FromRoute] string categoryId)
     {
-        var result = await _productsSerivce.CreateProductIdByCategory(category);
+        var result = await _productsSerivce.CreateProductIdByCategoryId(categoryId);
 
         if (result.IsFailure)
         {
@@ -256,9 +256,9 @@ public class ProductsController : ControllerBase
     {
         var productResult = await _productsSerivce.OwnerCreateProduct(
             request.ProductName,
-            request.Category,
-            request.Color,
-            request.Pattern ?? string.Empty,
+            request.CategoryId,
+            request.ColorId,
+            request.PatternId ?? string.Empty,
             request.SizeType,
             request.CreatedBy,
             request.SalePrice,
@@ -329,9 +329,9 @@ public class ProductsController : ControllerBase
             productId,
             request.ProductId,
             request.ProductName,
-            request.Category,
-            request.Color,
-            request.Pattern,
+            request.CategoryId,
+            request.ColorId,
+            request.PatternId,
             request.SizeType,
             request.Quantities?.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
             request.SalePrice,
@@ -413,8 +413,8 @@ public class ProductsController : ControllerBase
             productId,
             productsOrderId,
             request.ProductName,
-            request.Color,
-            request.Pattern,
+            request.ColorId,
+            request.PatternId,
             request.SizeType,
             request.Quantities?.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
             request.SalePrice,
@@ -458,8 +458,8 @@ public class ProductsController : ControllerBase
             productId,
             productsOrderId,
             request.ProductName,
-            request.Color,
-            request.Pattern,
+            request.ColorId,
+            request.PatternId,
             request.SizeType,
             request.Quantities?.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList()
         );
@@ -670,5 +670,56 @@ public class ProductsController : ControllerBase
             null,
             result.Value.ModelImageURL
         ));
+    }
+
+    [HttpGet("fetch-all-categories")]
+    public async Task<IActionResult> FetchAllCategories()
+    {
+        var result = await _productsSerivce.FetchAllCategories();
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
+    }
+
+    [HttpGet("fetch-all-colors")]
+    public async Task<IActionResult> FetchAllColors()
+    {
+        var result = await _productsSerivce.FetchAllColors();
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
+    }
+
+    [HttpGet("fetch-all-patterns")]
+    public async Task<IActionResult> FetchAllPatterns()
+    {
+        var result = await _productsSerivce.FetchAllPatterns();
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
     }
 }

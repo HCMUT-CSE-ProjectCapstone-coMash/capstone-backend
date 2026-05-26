@@ -16,6 +16,9 @@ public class ProductsService : IProductsService
     private readonly IProductsOrdersDetailsRepository _productsOrdersDetailsRepository;
     private readonly IProductsOrdersDetailsQuantityChangesRepository _productsOrdersDetailsQuantityChangesRepository;
     private readonly ISaleOrderDetailsRepository _saleOrderDetailsRepository;
+    private readonly ICategoryRepository _categoryRepository;
+    private readonly IColorRepository _colorRepository;
+    private readonly IPatternRepository _patternRepository;
 
     private readonly IFileStorageService _fileStorageService;
 
@@ -31,6 +34,9 @@ public class ProductsService : IProductsService
         IProductsOrdersDetailsRepository productsOrdersDetailsRepository,
         IProductsOrdersDetailsQuantityChangesRepository productsOrdersDetailsQuantityChangesRepository,
         ISaleOrderDetailsRepository saleOrderDetailsRepository,
+        ICategoryRepository categoryRepository,
+        IColorRepository colorRepository,
+        IPatternRepository patternRepository,
         IDateTimeProvider dateTimeProvider,
         IFileStorageService fileStorageService,
         IPromptProvider promptProvider,
@@ -44,6 +50,9 @@ public class ProductsService : IProductsService
         _productsOrdersDetailsRepository = productsOrdersDetailsRepository;
         _productsOrdersDetailsQuantityChangesRepository = productsOrdersDetailsQuantityChangesRepository;
         _saleOrderDetailsRepository = saleOrderDetailsRepository;
+        _categoryRepository = categoryRepository;
+        _colorRepository = colorRepository;
+        _patternRepository = patternRepository;
         _dateTimeProvider = dateTimeProvider;
         _fileStorageService = fileStorageService;
         _promptProvider = promptProvider;
@@ -54,14 +63,21 @@ public class ProductsService : IProductsService
     // Tạo sản phẩm mới
     public async Task<Result<string>> CreateProduct(
         string productName,
-        string category,
-        string color,
-        string pattern,
+        string categoryId,
+        string colorId,
+        string patternId,
         string sizeType,
         string createdBy
     )
     {
-        var prefix = GetCategoryPrefix(category);
+        var category = await _categoryRepository.GetCategoryById(Guid.Parse(categoryId));
+
+        if (category == null)
+        {
+            return Result<string>.Failure(new Error("CategoryNotFound", "Category not found."));
+        }
+
+        var prefix = category.CategoryId;
         var maxNumber = await _productsRepository.GetMaxIdNumberByCategoryAsync(prefix);
         var productId = $"{prefix}-{maxNumber + 1}";
 
@@ -70,9 +86,9 @@ public class ProductsService : IProductsService
             Id = Guid.NewGuid(),
             ProductId = productId,
             ProductName = productName,
-            Category = category,
-            Color = color,
-            Pattern = pattern,
+            CategoryId = Guid.Parse(categoryId),
+            ColorId = Guid.Parse(colorId),
+            PatternId = Guid.Parse(patternId),
             SizeType = sizeType,
             CreatedAt = _dateTimeProvider.UtcNow,
             CreatedBy = Guid.Parse(createdBy),
@@ -117,9 +133,9 @@ public class ProductsService : IProductsService
             product.Id,
             product.ProductId,
             product.ProductName,
-            product.Category,
-            product.Color,
-            product.Pattern,
+            product.Category.CategoryName,
+            product.Color.ColorName,
+            product.Pattern.PatternName,
             product.SizeType,
             product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
             product.CreatedBy,
@@ -151,9 +167,9 @@ public class ProductsService : IProductsService
             product.Id,
             product.ProductId,
             product.ProductName,
-            product.Category,
-            product.Color,
-            product.Pattern,
+            product.Category.CategoryName,
+            product.Color.ColorName,
+            product.Pattern.PatternName,
             product.SizeType,
             product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
             product.CreatedBy,
@@ -169,9 +185,24 @@ public class ProductsService : IProductsService
 
     public async Task<Result<AnalyzeProductDto>> AnalyzeImage(string ImageBase64)
     {
-        var analyzedProduct = await _promptProvider.AnalyzeImageWithClaude(ImageBase64);
+        var category = await _categoryRepository.FetchCategories();
+        var color = await _colorRepository.FetchColors();
+        var pattern = await _patternRepository.FetchPatterns();
 
-        var prefix = GetCategoryPrefix(analyzedProduct.Category);
+        var categoryNames = category.Select(c => c.CategoryName).ToList();
+        var colorNames = color.Select(c => c.ColorName).ToList();
+        var patternNames = pattern.Select(p => p.PatternName).ToList();
+
+        var analyzedProduct = await _promptProvider.AnalyzeImageWithClaude(ImageBase64, categoryNames, colorNames, patternNames);
+
+        var categoryEntity = category.FirstOrDefault(c => c.CategoryName == analyzedProduct.Category);
+
+        if (categoryEntity == null)
+        {
+            return Result<AnalyzeProductDto>.Failure(new Error("CategoryNotFound", "Category not found."));
+        }
+
+        var prefix = categoryEntity.CategoryId;
         var maxNumber = await _productsRepository.GetMaxIdNumberByCategoryAsync(prefix);
         var productId = $"{prefix}-{maxNumber + 1}";
 
@@ -209,9 +240,9 @@ public class ProductsService : IProductsService
                 product.Id,
                 product.ProductId,
                 product.ProductName,
-                product.Category,
-                product.Color,
-                product.Pattern,
+                product.Category.CategoryName,
+                product.Color.ColorName,
+                product.Pattern.PatternName,
                 product.SizeType,
                 product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
                 product.CreatedBy,
@@ -229,9 +260,17 @@ public class ProductsService : IProductsService
         return Result<List<ProductWithOrderStatusDto>>.Success(productDtos);
     }
 
-    public async Task<Result<string>> CreateProductIdByCategory(string category)
+    public async Task<Result<string>> CreateProductIdByCategoryId(string categoryId)
     {
-        var prefix = GetCategoryPrefix(category);
+        var category = await _categoryRepository.GetCategoryById(Guid.Parse(categoryId));
+
+        if (category == null)
+        {
+            return Result<string>.Failure(new Error("CategoryNotFound", "Category not found."));
+        }
+
+        var prefix = category.CategoryId;
+
         var maxNumber = await _productsRepository.GetMaxIdNumberByCategoryAsync(prefix);
 
         var newProductId = $"{prefix}-{maxNumber + 1}";
@@ -241,16 +280,23 @@ public class ProductsService : IProductsService
 
     public async Task<Result<string>> OwnerCreateProduct(
         string productName,
-        string category,
-        string color,
-        string pattern,
+        string categoryId,
+        string colorId,
+        string patternId,
         string sizeType,
         string createdBy,
         double salePrice,
         double importPrice
     )
     {
-        var prefix = GetCategoryPrefix(category);
+        var category = await _categoryRepository.GetCategoryById(Guid.Parse(categoryId));
+
+        if (category == null)
+        {
+            return Result<string>.Failure(new Error("CategoryNotFound", "Category not found."));
+        }
+
+        var prefix = category.CategoryId;
         var maxNumber = await _productsRepository.GetMaxIdNumberByCategoryAsync(prefix);
         var productId = $"{prefix}-{maxNumber + 1}";
         
@@ -259,9 +305,9 @@ public class ProductsService : IProductsService
             Id = Guid.NewGuid(),
             ProductId = productId,
             ProductName = productName,
-            Category = category,
-            Color = color,
-            Pattern = pattern,
+            CategoryId = Guid.Parse(categoryId),
+            ColorId = Guid.Parse(colorId),
+            PatternId = Guid.Parse(patternId),
             SizeType = sizeType,
             CreatedBy = Guid.Parse(createdBy),
             CreatedAt = _dateTimeProvider.UtcNow,
@@ -279,9 +325,9 @@ public class ProductsService : IProductsService
         string id,
         string? productId,
         string? productName,
-        string? category,
-        string? color,
-        string? pattern,
+        string? categoryId,
+        string? colorId,
+        string? patternId,
         string? sizeType,
         List<ProductQuantityDto>? quantities,
         double? salePrice,
@@ -301,17 +347,17 @@ public class ProductsService : IProductsService
         if (!string.IsNullOrWhiteSpace(productName))
             product.ProductName = productName;
 
-        if (!string.IsNullOrWhiteSpace(category))
-            product.Category = category;
-
-        if (!string.IsNullOrWhiteSpace(color))
-            product.Color = color;
-
-        if (pattern is not null)
-            product.Pattern = pattern;
+        if (!string.IsNullOrWhiteSpace(categoryId))
+            product.CategoryId = Guid.Parse(categoryId);
+        
+        if (!string.IsNullOrWhiteSpace(colorId))
+            product.ColorId = Guid.Parse(colorId);
+            
+        if (!string.IsNullOrWhiteSpace(patternId))
+            product.PatternId = Guid.Parse(patternId);
 
         if (!string.IsNullOrWhiteSpace(sizeType))
-            product.SizeType = sizeType;
+                product.SizeType = sizeType;
 
         if (salePrice.HasValue)
             product.SalePrice = salePrice.Value;
@@ -321,11 +367,13 @@ public class ProductsService : IProductsService
 
         await _productsRepository.UpdateProduct(product);
 
-        var updatedQuantities = product.ProductQuantities.ToList();
+        var updatedProduct = await _productsRepository.GetProductById(product.Id);
+
+        var updatedQuantities = updatedProduct!.ProductQuantities.ToList();
 
         if (quantities is not null)
         {
-            await _productQuantitiesRepository.DeleteProductQuantitiesByProductId(product.Id);
+            await _productQuantitiesRepository.DeleteProductQuantitiesByProductId(updatedProduct.Id);
 
             updatedQuantities = new List<ProductQuantity>();
 
@@ -334,42 +382,41 @@ public class ProductsService : IProductsService
                 var productQuantity = new ProductQuantity
                 {
                     Id = Guid.NewGuid(),
-                    ProductId = product.Id,
+                    ProductId = updatedProduct.Id,
                     Size = quantity.Size,
                     Quantities = quantity.Quantities
                 };
 
                 await _productQuantitiesRepository.AddProductQuantities(productQuantity);
-
                 updatedQuantities.Add(productQuantity);
             }
         }
 
         var imageUrl = "";
-        if (!string.IsNullOrEmpty(product.ImageKey))
+        if (!string.IsNullOrEmpty(updatedProduct.ImageKey))
         {
-            var imageResult = await _fileStorageService.GetImageUrlAsync(product.ImageKey);
+            var imageResult = await _fileStorageService.GetImageUrlAsync(updatedProduct.ImageKey);
             imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
         }
 
-        var modelImageUrl = await GetModelImageUrlAsync(product.ModelImageKey);
+        var modelImageUrl = await GetModelImageUrlAsync(updatedProduct.ModelImageKey);
 
         return Result<ProductDto>.Success(new ProductDto(
-            product.Id,
-            product.ProductId,
-            product.ProductName,
-            product.Category,
-            product.Color,
-            product.Pattern,
-            product.SizeType,
+            updatedProduct.Id,
+            updatedProduct.ProductId,
+            updatedProduct.ProductName,
+            updatedProduct.Category.CategoryName,
+            updatedProduct.Color.ColorName,
+            updatedProduct.Pattern?.PatternName ?? "",
+            updatedProduct.SizeType,
             updatedQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
-            product.CreatedBy,
-            product.CreatedAt,
-            product.Status,
+            updatedProduct.CreatedBy,
+            updatedProduct.CreatedAt,
+            updatedProduct.Status,
             imageUrl,
-            product.VectorId,
-            product.SalePrice,
-            product.ImportPrice,
+            updatedProduct.VectorId,
+            updatedProduct.SalePrice,
+            updatedProduct.ImportPrice,
             modelImageUrl
         ));
     }
@@ -393,9 +440,9 @@ public class ProductsService : IProductsService
                 product.Id,
                 product.ProductId,
                 product.ProductName,
-                product.Category,
-                product.Color,
-                product.Pattern,
+                product.Category.CategoryName,
+                product.Color.ColorName,
+                product.Pattern.PatternName,
                 product.SizeType,
                 product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
                 product.CreatedBy,
@@ -417,8 +464,8 @@ public class ProductsService : IProductsService
         string id,
         string productsOrderId,
         string? productName,
-        string? color,
-        string? pattern,
+        string? colorId,
+        string? patternId,
         string? sizeType,
         List<ProductQuantityDto>? newQuantities,
         double? salePrice,
@@ -435,14 +482,14 @@ public class ProductsService : IProductsService
         if (!string.IsNullOrWhiteSpace(productName))
             product.ProductName = productName;
 
-        if (!string.IsNullOrWhiteSpace(color))
-            product.Color = color;
-
-        if (pattern is not null)
-            product.Pattern = pattern;
+        if (!string.IsNullOrWhiteSpace(colorId))
+            product.ColorId = Guid.Parse(colorId);
+        
+        if (!string.IsNullOrWhiteSpace(patternId))
+            product.PatternId = Guid.Parse(patternId);
 
         if (!string.IsNullOrWhiteSpace(sizeType))
-            product.SizeType = sizeType;
+                product.SizeType = sizeType;
 
         if (salePrice.HasValue)
             product.SalePrice = salePrice.Value;
@@ -452,10 +499,17 @@ public class ProductsService : IProductsService
 
         await _productsRepository.UpdateProduct(product);
 
+        var updatedProduct = await _productsRepository.GetProductById(product.Id);
+
+        if (updatedProduct == null)
+        {
+            return Result<ProductWithQuantityChangesDto>.Failure(new Error("NotFound", "Updated product not found."));
+        }
+
         List<ProductQuantity> newQuantity = new();
         List<ProductsOrdersDetailQuantityChange> newQuantityChange = new();
 
-        if (product.Status == ProductStatus.Approved && newQuantities != null)
+        if (updatedProduct.Status == ProductStatus.Approved && newQuantities != null)
         {
             var existingDetail = await _productsOrdersDetailsRepository.GetProductsOrdersDetailsByOrderIdAndProductId(Guid.Parse(productsOrderId), Guid.Parse(id));
 
@@ -472,18 +526,18 @@ public class ProductsService : IProductsService
                 detail = new ProductsOrdersDetail
                 {
                     Id = Guid.NewGuid(),
-                    ProductId = product.Id,
+                    ProductId = updatedProduct.Id,
                     ProductsOrderId = Guid.Parse(productsOrderId),
                 };
 
                 await _productsOrdersDetailsRepository.CreateProductsOrdersDetails(detail);
             }
 
-            var allSizes = product.ProductQuantities.Select(q => q.Size).Union(newQuantities.Select(q => q.Size));
+            var allSizes = updatedProduct.ProductQuantities.Select(q => q.Size).Union(newQuantities.Select(q => q.Size));
 
             foreach (var size in allSizes)
             {
-                var currentQuantity = product.ProductQuantities.FirstOrDefault(q => q.Size == size);
+                var currentQuantity = updatedProduct.ProductQuantities.FirstOrDefault(q => q.Size == size);
                 var requestedQuantity = newQuantities.FirstOrDefault(q => q.Size == size);
 
                 if (requestedQuantity is null) continue;
@@ -508,16 +562,16 @@ public class ProductsService : IProductsService
             }
         }
 
-        if (product.Status == ProductStatus.Pending && newQuantities != null)
+        if (updatedProduct.Status == ProductStatus.Pending && newQuantities != null)
         {
-            await _productQuantitiesRepository.DeleteProductQuantitiesByProductId(product.Id);
+            await _productQuantitiesRepository.DeleteProductQuantitiesByProductId(updatedProduct.Id);
 
             foreach (var quantity in newQuantities)
             {
                 var productQuantity = new ProductQuantity
                 {
                     Id = Guid.NewGuid(),
-                    ProductId = product.Id,
+                    ProductId = updatedProduct.Id,
                     Size = quantity.Size,
                     Quantities = quantity.Quantities
                 };
@@ -529,28 +583,28 @@ public class ProductsService : IProductsService
         }
 
         var imageUrl = "";
-        if (!string.IsNullOrEmpty(product.ImageKey))
+        if (!string.IsNullOrEmpty(updatedProduct.ImageKey))
         {
-            var imageResult = await _fileStorageService.GetImageUrlAsync(product.ImageKey);
+            var imageResult = await _fileStorageService.GetImageUrlAsync(updatedProduct.ImageKey);
             imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
         }
 
         var productDto = new ProductDto(
-            product.Id,
-            product.ProductId,
-            product.ProductName,
-            product.Category,
-            product.Color,
-            product.Pattern,
-            product.SizeType,
-            newQuantity.Count > 0 ? newQuantity.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList() : product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
-            product.CreatedBy,
-            product.CreatedAt,
-            product.Status,
+            updatedProduct.Id,
+            updatedProduct.ProductId,
+            updatedProduct.ProductName,
+            updatedProduct.Category.CategoryName,
+            updatedProduct.Color.ColorName,
+            updatedProduct.Pattern.PatternName,
+            updatedProduct.SizeType,
+            newQuantity.Count > 0 ? newQuantity.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList() : updatedProduct.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+            updatedProduct.CreatedBy,
+            updatedProduct.CreatedAt,
+            updatedProduct.Status,
             imageUrl,
-            product.VectorId,
-            product.SalePrice,
-            product.ImportPrice
+            updatedProduct.VectorId,
+            updatedProduct.SalePrice,
+            updatedProduct.ImportPrice
         );
 
         var quantityChanges = newQuantityChange.Select(c => new ProductQuantityChangeDto(c.Size, c.OldQuantity, c.NewQuantity)).ToList();
@@ -562,8 +616,8 @@ public class ProductsService : IProductsService
         string id,
         string productsOrderId,
         string? productName,
-        string? color,
-        string? pattern,
+        string? colorId,
+        string? patternId,
         string? sizeType,
         List<ProductQuantityDto>? newQuantities
     )
@@ -578,21 +632,28 @@ public class ProductsService : IProductsService
         if (!string.IsNullOrWhiteSpace(productName))
             product.ProductName = productName;
 
-        if (!string.IsNullOrWhiteSpace(color))
-            product.Color = color;
-
-        if (pattern is not null)
-            product.Pattern = pattern;
+        if (!string.IsNullOrWhiteSpace(colorId))
+            product.ColorId = Guid.Parse(colorId);
+            
+        if (!string.IsNullOrWhiteSpace(patternId))
+            product.PatternId = Guid.Parse(patternId);
 
         if (!string.IsNullOrWhiteSpace(sizeType))
-            product.SizeType = sizeType;
+                product.SizeType = sizeType;
 
         await _productsRepository.UpdateProduct(product);
+
+        var updatedProduct = await _productsRepository.GetProductById(product.Id);
+
+        if (updatedProduct == null)
+        {
+            return Result<ProductWithQuantityChangesDto>.Failure(new Error("NotFound", "Updated product not found."));
+        }
 
         List<ProductQuantity> newQuantity = new();
         List<ProductsOrdersDetailQuantityChange> newQuantityChange = new();
 
-        if (product.Status == ProductStatus.Approved && newQuantities != null)
+        if (updatedProduct.Status == ProductStatus.Approved && newQuantities != null)
         {
             var existingDetail = await _productsOrdersDetailsRepository.GetProductsOrdersDetailsByOrderIdAndProductId(Guid.Parse(productsOrderId), Guid.Parse(id));
 
@@ -609,18 +670,18 @@ public class ProductsService : IProductsService
                 detail = new ProductsOrdersDetail
                 {
                     Id = Guid.NewGuid(),
-                    ProductId = product.Id,
+                    ProductId = updatedProduct.Id,
                     ProductsOrderId = Guid.Parse(productsOrderId),
                 };
 
                 await _productsOrdersDetailsRepository.CreateProductsOrdersDetails(detail);
             }
 
-            var allSizes = product.ProductQuantities.Select(q => q.Size).Union(newQuantities.Select(q => q.Size));
+            var allSizes = updatedProduct.ProductQuantities.Select(q => q.Size).Union(newQuantities.Select(q => q.Size));
 
             foreach (var size in allSizes)
             {
-                var currentQuantity = product.ProductQuantities.FirstOrDefault(q => q.Size == size);
+                var currentQuantity = updatedProduct.ProductQuantities.FirstOrDefault(q => q.Size == size);
                 var requestedQuantity = newQuantities.FirstOrDefault(q => q.Size == size);
 
                 if (requestedQuantity is null) continue;
@@ -645,16 +706,16 @@ public class ProductsService : IProductsService
             }
         }
 
-        if (product.Status == ProductStatus.Pending && newQuantities != null)
+        if (updatedProduct.Status == ProductStatus.Pending && newQuantities != null)
         {
-            await _productQuantitiesRepository.DeleteProductQuantitiesByProductId(product.Id);
+            await _productQuantitiesRepository.DeleteProductQuantitiesByProductId(updatedProduct.Id);
 
             foreach (var quantity in newQuantities)
             {
                 var productQuantity = new ProductQuantity
                 {
                     Id = Guid.NewGuid(),
-                    ProductId = product.Id,
+                    ProductId = updatedProduct.Id,
                     Size = quantity.Size,
                     Quantities = quantity.Quantities
                 };
@@ -666,28 +727,28 @@ public class ProductsService : IProductsService
         }
 
         var imageUrl = "";
-        if (!string.IsNullOrEmpty(product.ImageKey))
+        if (!string.IsNullOrEmpty(updatedProduct.ImageKey))
         {
-            var imageResult = await _fileStorageService.GetImageUrlAsync(product.ImageKey);
+            var imageResult = await _fileStorageService.GetImageUrlAsync(updatedProduct.ImageKey);
             imageUrl = imageResult.IsSuccess ? imageResult.Value : "";
         }
 
         var productDto = new ProductDto(
-            product.Id,
-            product.ProductId,
-            product.ProductName,
-            product.Category,
-            product.Color,
-            product.Pattern,
-            product.SizeType,
-            newQuantity.Count > 0 ? newQuantity.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList() : product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
-            product.CreatedBy,
-            product.CreatedAt,
-            product.Status,
+            updatedProduct.Id,
+            updatedProduct.ProductId,
+            updatedProduct.ProductName,
+            updatedProduct.Category.CategoryName,
+            updatedProduct.Color.ColorName,
+            updatedProduct.Pattern.PatternName,
+            updatedProduct.SizeType,
+            newQuantity.Count > 0 ? newQuantity.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList() : updatedProduct.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
+            updatedProduct.CreatedBy,
+            updatedProduct.CreatedAt,
+            updatedProduct.Status,
             imageUrl,
-            product.VectorId,
-            product.SalePrice,
-            product.ImportPrice
+            updatedProduct.VectorId,
+            updatedProduct.SalePrice,
+            updatedProduct.ImportPrice
         );
 
         var quantityChanges = newQuantityChange.Select(c => new ProductQuantityChangeDto(c.Size, c.OldQuantity, c.NewQuantity)).ToList();
@@ -739,9 +800,9 @@ public class ProductsService : IProductsService
                 product.Id,
                 product.ProductId,
                 product.ProductName,
-                product.Category,
-                product.Color,
-                product.Pattern,
+                product.Category.CategoryName,
+                product.Color.ColorName,
+                product.Pattern.PatternName,
                 product.SizeType,
                 product.ProductQuantities.Select(q => new ProductQuantityDto(q.Size, q.Quantities)).ToList(),
                 product.CreatedBy,
@@ -824,6 +885,33 @@ public class ProductsService : IProductsService
         {
             return Result<string>.Failure(new Error("GenerationFailed", $"Failed to generate model image: {ex.Message}"));
         }
+    }
+
+    public async Task<Result<List<CategoryDto>>> FetchAllCategories()
+    {
+        var categories = await _categoryRepository.FetchCategories();
+
+        var categoryDtos = categories.Select(c => new CategoryDto(c.Id, c.CategoryName)).ToList();
+
+        return Result<List<CategoryDto>>.Success(categoryDtos);
+    }
+
+    public async Task<Result<List<ColorDto>>> FetchAllColors()
+    {
+        var colors = await _colorRepository.FetchColors();
+
+        var colorDtos = colors.Select(c => new ColorDto(c.Id, c.ColorName)).ToList();
+
+        return Result<List<ColorDto>>.Success(colorDtos);
+    }
+
+    public async Task<Result<List<PatternDto>>> FetchAllPatterns()
+    {
+        var patterns = await _patternRepository.FetchPatterns();
+
+        var patternDtos = patterns.Select(p => new PatternDto(p.Id, p.PatternName)).ToList();
+
+        return Result<List<PatternDto>>.Success(patternDtos);
     }
 
     private static string GetCategoryPrefix(string category) => category switch

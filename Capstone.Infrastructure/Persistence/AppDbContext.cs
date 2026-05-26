@@ -23,9 +23,21 @@ public class AppDbContext : DbContext
     public DbSet<ComboPromotion> ComboPromotions => Set<ComboPromotion>();
     public DbSet<ComboPromotionDetail> ComboPromotionDetails => Set<ComboPromotionDetail>();
     public DbSet<TemporaryProduct> TemporaryProducts => Set<TemporaryProduct>();
+    public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Color> Colors => Set<Color>();
+    public DbSet<Pattern> Patterns => Set<Pattern>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Category Table
+        modelBuilder.Entity<Category>().ToTable("categories");
+
+        // Color Table
+        modelBuilder.Entity<Color>().ToTable("colors");
+
+        // Pattern Table
+        modelBuilder.Entity<Pattern>().ToTable("patterns");
+
         // User Table
         modelBuilder.Entity<User>().ToTable("users");
 
@@ -35,7 +47,16 @@ public class AppDbContext : DbContext
             enity.ToTable("products");
 
             // Product has one User (CreatedBy) and User has many Products
-            enity.HasOne<User>().WithMany().HasForeignKey(p => p.CreatedBy).OnDelete(DeleteBehavior.Restrict); ;
+            enity.HasOne<User>().WithMany().HasForeignKey(p => p.CreatedBy).OnDelete(DeleteBehavior.Restrict);
+
+            // Product has one Category and Category has many Products
+            enity.HasOne(p => p.Category).WithMany().HasForeignKey(p => p.CategoryId).OnDelete(DeleteBehavior.Restrict);
+
+            // Product has one Color and Color has many Products
+            enity.HasOne(p => p.Color).WithMany().HasForeignKey(p => p.ColorId).OnDelete(DeleteBehavior.Restrict);
+
+            // Product has one Pattern and Pattern has many Products
+            enity.HasOne(p => p.Pattern).WithMany().HasForeignKey(p => p.PatternId).OnDelete(DeleteBehavior.Restrict);
         });
 
         // ProductQuantities Table

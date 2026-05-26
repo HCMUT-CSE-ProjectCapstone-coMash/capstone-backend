@@ -10,22 +10,40 @@ public class TemporaryProductsService : ITemporaryProductsService
 {
     private readonly IPromptProvider _promptProvider;
     private readonly ITemporaryProductsRepository _temporaryProductRepository;
+    private readonly ICategoryRepository _categoryRepository;
+    private readonly IColorRepository _colorRepository;
+    private readonly IPatternRepository _patternRepository;
+
     private readonly IFileStorageService _fileStorageService;
 
     public TemporaryProductsService(
         IPromptProvider promptProvider,
         ITemporaryProductsRepository temporaryProductRepository,
+        ICategoryRepository categoryRepository,
+        IColorRepository colorRepository,
+        IPatternRepository patternRepository,
         IFileStorageService fileStorageService
     )
     {
         _promptProvider = promptProvider;
         _temporaryProductRepository = temporaryProductRepository;
+        _categoryRepository = categoryRepository;
+        _colorRepository = colorRepository;
+        _patternRepository = patternRepository;
         _fileStorageService = fileStorageService;
     }
 
     public async Task<Result> CreateTemporaryProduct(string ImageBase64, string ImageKey, string UserId)
     {
-        var analyzeResult = await _promptProvider.AnalyzeImageWithClaude(ImageBase64);
+        var category = await _categoryRepository.FetchCategories();
+        var color = await _colorRepository.FetchColors();
+        var pattern = await _patternRepository.FetchPatterns();
+
+        var categoryNames = category.Select(c => c.CategoryName).ToList();
+        var colorNames = color.Select(c => c.ColorName).ToList();
+        var patternNames = pattern.Select(p => p.PatternName).ToList();
+
+        var analyzeResult = await _promptProvider.AnalyzeImageWithClaude(ImageBase64, categoryNames, colorNames, patternNames);
 
         var productName = analyzeResult.Category + " " + analyzeResult.Color + " " + analyzeResult.Pattern;
 
@@ -33,9 +51,6 @@ public class TemporaryProductsService : ITemporaryProductsService
         {
             Id = Guid.NewGuid(),
             ProductName = productName,
-            Category = analyzeResult.Category,
-            Color = analyzeResult.Color,
-            Pattern = analyzeResult.Pattern,
             ImageKey = ImageKey,
             CreatedBy = Guid.Parse(UserId),
         };

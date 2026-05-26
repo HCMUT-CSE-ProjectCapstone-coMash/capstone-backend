@@ -3,6 +3,7 @@ using System;
 using Capstone.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Capstone.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260525162531_AddCategoryTable")]
+    partial class AddCategoryTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,21 +42,6 @@ namespace Capstone.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("categories", (string)null);
-                });
-
-            modelBuilder.Entity("Capstone.Domain.Entities.Color", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ColorName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("colors", (string)null);
                 });
 
             modelBuilder.Entity("Capstone.Domain.Entities.ComboPromotion", b =>
@@ -161,32 +149,19 @@ namespace Capstone.Infrastructure.Migrations
                     b.ToTable("order_promotions", (string)null);
                 });
 
-            modelBuilder.Entity("Capstone.Domain.Entities.Pattern", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("PatternName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("patterns", (string)null);
-                });
-
             modelBuilder.Entity("Capstone.Domain.Entities.Product", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.Property<Guid>("ColorId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -205,8 +180,9 @@ namespace Capstone.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("PatternId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Pattern")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("ProductId")
                         .IsRequired()
@@ -233,13 +209,7 @@ namespace Capstone.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("ColorId");
-
                     b.HasIndex("CreatedBy");
-
-                    b.HasIndex("PatternId");
 
                     b.ToTable("products", (string)null);
                 });
@@ -650,35 +620,11 @@ namespace Capstone.Infrastructure.Migrations
 
             modelBuilder.Entity("Capstone.Domain.Entities.Product", b =>
                 {
-                    b.HasOne("Capstone.Domain.Entities.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Capstone.Domain.Entities.Color", "Color")
-                        .WithMany()
-                        .HasForeignKey("ColorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Capstone.Domain.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("Capstone.Domain.Entities.Pattern", "Pattern")
-                        .WithMany()
-                        .HasForeignKey("PatternId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-
-                    b.Navigation("Color");
-
-                    b.Navigation("Pattern");
                 });
 
             modelBuilder.Entity("Capstone.Domain.Entities.ProductPromotion", b =>

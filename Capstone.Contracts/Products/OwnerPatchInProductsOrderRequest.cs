@@ -2,8 +2,8 @@ namespace Capstone.Contracts.Products;
 
 public record OwnerPatchInProductsOrderRequest(
     string? ProductName,
-    string? Color,
-    string? Pattern,
+    string? ColorId,
+    string? PatternId,
     string? SizeType,
     List<ProductQuantity>? Quantities,
     double? SalePrice,

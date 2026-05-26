@@ -24,6 +24,12 @@ public class ProductPromotionsRepository : IProductPromotionsRepository
         return await _context.ProductPromotions
             .AsNoTracking()
             .Include(pp => pp.Product)
+                .ThenInclude(p => p.Category)
+            .Include(pp => pp.Product)
+                .ThenInclude(p => p.Color)
+            .Include(pp => pp.Product)
+                .ThenInclude(p => p.Pattern)
+            .Include(pp => pp.Product)
                 .ThenInclude(p => p.ProductQuantities)
             .Where(pp => pp.PromotionId == promotionId)
             .ToListAsync();

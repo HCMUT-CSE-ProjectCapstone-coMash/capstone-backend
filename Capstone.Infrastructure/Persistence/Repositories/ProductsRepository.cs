@@ -28,12 +28,22 @@ public class ProductsRepository : IProductsRepository
 
     public async Task<Product?> GetProductById(Guid productId)
     {
-        return await _context.Products.Include(p => p.ProductQuantities).FirstOrDefaultAsync(p => p.Id == productId);
+        return await _context.Products
+            .Include(p => p.ProductQuantities)
+            .Include(p => p.Category)
+            .Include(p => p.Color)
+            .Include(p => p.Pattern)
+            .FirstOrDefaultAsync(p => p.Id == productId);
     }
 
     public async Task<Product?> GetProductByProductId(string productId)
     {
-        return await _context.Products.Include(p => p.ProductQuantities).FirstOrDefaultAsync(p => p.ProductId == productId);
+        return await _context.Products
+            .Include(p => p.ProductQuantities)
+            .Include(p => p.Category)
+            .Include(p => p.Color)
+            .Include(p => p.Pattern)
+            .FirstOrDefaultAsync(p => p.ProductId == productId);
     }
 
     public async Task DeleteProductAsync(Guid productId)
@@ -74,6 +84,9 @@ public class ProductsRepository : IProductsRepository
 
         return _context.Products
             .Include(p => p.ProductQuantities)
+            .Include(p => p.Category)
+            .Include(p => p.Color)
+            .Include(p => p.Pattern)
             .Where(p => p.Status == ProductStatus.Approved &&
                 (
                     EF.Functions.ILike(
@@ -107,12 +120,15 @@ public class ProductsRepository : IProductsRepository
 
         var query = _context.Products
             .Include(p => p.ProductQuantities)
+            .Include(p => p.Category)
+            .Include(p => p.Color)
+            .Include(p => p.Pattern)
             .Where(p => p.Status == ProductStatus.Approved)
             .AsQueryable();
 
         if (!string.IsNullOrEmpty(category))
         {
-            query = query.Where(p => p.Category == category);
+            query = query.Where(p => p.Category.CategoryName == category);
         }
 
         if (!string.IsNullOrEmpty(search))
@@ -149,6 +165,9 @@ public class ProductsRepository : IProductsRepository
     {
         var products = await _context.Products
             .Include(p => p.ProductQuantities)
+            .Include(p => p.Category)
+            .Include(p => p.Color)
+            .Include(p => p.Pattern)
             .Where(p => p.Status == ProductStatus.Approved
                 && p.ProductQuantities.Any(q => q.Quantities <= 3))
             .OrderBy(p => p.ProductQuantities

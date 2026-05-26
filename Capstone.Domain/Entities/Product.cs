@@ -5,9 +5,16 @@ public class Product
     public Guid Id { get; set; }
     public string ProductId { get; set; } = string.Empty;
     public string ProductName { get; set; } = string.Empty;
-    public string Category { get; set; } = string.Empty;
-    public string Color { get; set; } = string.Empty;
-    public string Pattern { get; set; } = string.Empty;
+
+    public Guid CategoryId { get; set; }
+    public Category Category { get; set; } = null!;
+
+    public Guid ColorId { get; set; }
+    public Color Color { get; set; } = null!;
+    
+    public Guid PatternId { get; set; }
+    public Pattern Pattern { get; set; } = null!;
+
     public string SizeType { get; set; } = string.Empty;
     public Guid CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
