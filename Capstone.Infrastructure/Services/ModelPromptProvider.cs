@@ -91,4 +91,15 @@ public class ModelPromptProvider : IModelPromptProvider
 
         throw new InvalidOperationException("No image was returned by the Gemini model.");
     }
+    public async Task WarmupAsync()
+    {
+        await _client.Models.GenerateContentAsync(
+            model: _geminiSettings.Model,
+            contents: "hi",
+            config: new GenerateContentConfig
+            {
+                HttpOptions = new HttpOptions { Timeout = 30000 }
+            }
+        );
+    }
 }

@@ -121,7 +121,7 @@ public static class DependencyInjection
                         }
                     };
                 });
-
+        services.AddHostedService<WarmupService>();
         return services;
     }
 }
