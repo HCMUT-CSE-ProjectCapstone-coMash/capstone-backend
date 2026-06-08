@@ -1,5 +1,7 @@
 namespace Capstone.Domain.Entities;
 
+using Pgvector;
+
 public class Product
 {
     public Guid Id { get; set; }
@@ -11,7 +13,7 @@ public class Product
 
     public Guid ColorId { get; set; }
     public Color Color { get; set; } = null!;
-    
+
     public Guid PatternId { get; set; }
     public Pattern Pattern { get; set; } = null!;
 
@@ -21,6 +23,7 @@ public class Product
     public string Status { get; set; } = string.Empty;
     public string ImageKey { get; set; } = string.Empty;
     public string VectorId { get; set; } = string.Empty;
+    public Vector? Embedding { get; set; } 
     public double SalePrice { get; set; }
     public double ImportPrice { get; set; }
     public string ModelImageKey { get; set; } = string.Empty;

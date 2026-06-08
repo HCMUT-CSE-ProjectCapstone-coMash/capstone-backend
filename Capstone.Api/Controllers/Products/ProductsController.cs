@@ -4,6 +4,7 @@ using Capstone.Application.Services.Products;
 using Capstone.Application.Services.ProductsOrdersDetailService;
 using Capstone.Application.Services.ProductVectorService;
 using Capstone.Application.Services.TemporaryProducts;
+using Capstone.Application.Services.Vectorize;
 using Capstone.Contracts.Products;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,12 +22,14 @@ public class ProductsController : ControllerBase
     private readonly ITemporaryProductsService _temporaryProductsService;
 
     private readonly IFileStorageService _fileStorageService;
+    private readonly IVectorizeService _vectorizeService;
 
     public ProductsController(
         IProductsService productsSerivce,
         IProductQuantitiesService productQuantitiesService,
         IProductsOrdersDetailService productsOrdersDetailService,
         IFileStorageService fileStorageService,
+        IVectorizeService vectorizeService,
         IProductVectorService vectorStoreService,
         ITemporaryProductsService temporaryProductsService
     )
@@ -35,6 +38,7 @@ public class ProductsController : ControllerBase
         _productQuantitiesService = productQuantitiesService;
         _productsOrdersDetailService = productsOrdersDetailService;
         _fileStorageService = fileStorageService;
+        _vectorizeService = vectorizeService;
         _productVectorService = vectorStoreService;
         _temporaryProductsService = temporaryProductsService;
     }
@@ -74,9 +78,9 @@ public class ProductsController : ControllerBase
 
             var imageUrl = await _fileStorageService.GetImageUrlAsync(ImageResult.Value);
 
-            var vectorResult = await _productVectorService.InsertImageAsync(imageUrl.Value, productResult.Value);
+            var embedding = await _vectorizeService.VectorizeImageAsync(imageUrl.Value);
 
-            await _productsSerivce.UpdateProductImageKey(productResult.Value, ImageResult.Value, vectorResult.Value);
+            await _productsSerivce.UpdateProductImageKey(productResult.Value, ImageResult.Value, embedding);
         }
 
         var result = await _productsSerivce.FetchProductById(productResult.Value);
@@ -285,9 +289,9 @@ public class ProductsController : ControllerBase
 
             var imageUrl = await _fileStorageService.GetImageUrlAsync(ImageResult.Value);
 
-            var vectorResult = await _productVectorService.InsertImageAsync(imageUrl.Value, productResult.Value);
+            var embedding = await _vectorizeService.VectorizeImageAsync(imageUrl.Value);
 
-            await _productsSerivce.UpdateProductImageKey(productResult.Value, ImageResult.Value, vectorResult.Value);
+            await _productsSerivce.UpdateProductImageKey(productResult.Value, ImageResult.Value, embedding);
         }
 
         var result = await _productsSerivce.FetchProductById(productResult.Value);

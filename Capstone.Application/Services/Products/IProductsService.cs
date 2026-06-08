@@ -14,7 +14,7 @@ public interface IProductsService
         string createdBy
     );
 
-    Task<Result> UpdateProductImageKey(string productId, string imageKey, string vectorId);
+    Task<Result> UpdateProductImageKey(string productId, string imageKey, float[] vector);
 
     Task<Result<ProductDto>> FetchProductById(string id);
 

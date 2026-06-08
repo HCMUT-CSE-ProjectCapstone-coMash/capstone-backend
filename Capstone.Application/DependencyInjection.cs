@@ -13,6 +13,7 @@ using Capstone.Application.Services.Promotions;
 using Capstone.Application.Services.SaleOrderDetails;
 using Capstone.Application.Services.SaleOrders;
 using Capstone.Application.Services.TemporaryProducts;
+using Capstone.Application.Services.Vectorize;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Capstone.Application;
@@ -36,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<IComboPromotionsService, ComboPromotionsService>();
         services.AddScoped<IProductVectorService, ProductVectorService>();
         services.AddScoped<ITemporaryProductsService, TemporaryProductsService>();
+        services.AddScoped<IVectorizeService, VectorizeService>();
 
         return services;
     }

@@ -25,7 +25,6 @@ public class ProductsService : IProductsService
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IPromptProvider _promptProvider;
     private readonly IModelPromptProvider _modelPromptProvider;
-    private readonly IProductVectorService _productVectorService;
 
     public ProductsService(
         IProductsRepository productsRepository,
@@ -40,8 +39,7 @@ public class ProductsService : IProductsService
         IDateTimeProvider dateTimeProvider,
         IFileStorageService fileStorageService,
         IPromptProvider promptProvider,
-        IModelPromptProvider modelPromptProvider,
-        IProductVectorService productVectorService
+        IModelPromptProvider modelPromptProvider
     )
     {
         _productsRepository = productsRepository;
@@ -57,7 +55,6 @@ public class ProductsService : IProductsService
         _fileStorageService = fileStorageService;
         _promptProvider = promptProvider;
         _modelPromptProvider = modelPromptProvider;
-        _productVectorService = productVectorService;
     }
 
     // Tạo sản phẩm mới
@@ -100,7 +97,7 @@ public class ProductsService : IProductsService
         return Result<string>.Success(newProduct.Id.ToString());
     }
 
-    public async Task<Result> UpdateProductImageKey(string productId, string imageKey, string vectorId)
+    public async Task<Result> UpdateProductImageKey(string productId, string imageKey, float[] vector)
     {
         var product = await _productsRepository.GetProductById(Guid.Parse(productId));
 
@@ -108,7 +105,7 @@ public class ProductsService : IProductsService
             return Result.Failure(new Error("ProductNotFound", "Product not found."));
 
         product.ImageKey = imageKey;
-        product.VectorId = vectorId;
+        product.Embedding = new Pgvector.Vector(vector);
 
         await _productsRepository.UpdateProduct(product);
 
@@ -774,7 +771,6 @@ public class ProductsService : IProductsService
         }
         else
         {
-            await _productVectorService.DeleteImageAsync(product.VectorId);
             await _productsRepository.DeleteProductAsync(product.Id);
         }
 

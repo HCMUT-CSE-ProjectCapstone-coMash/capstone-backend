@@ -20,10 +20,16 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
     {
-        services.AddDbContext<AppDbContext>(options => options.UseNpgsql(config.GetConnectionString("DefaultConnection")));
+        services.AddDbContext<AppDbContext>(options => 
+            options.UseNpgsql(
+                config.GetConnectionString("DefaultConnection"), 
+                o => o.UseVector()
+            ));
+
         services.Configure<JwtSettings>(config.GetSection("JwtSettings"));
         services.Configure<BucketSettings>(config.GetSection("BucketSettings"));
         services.Configure<VectorStoreSettings>(config.GetSection("VectorStoreSettings"));
+        services.Configure<VectorizeSettings>(config.GetSection("VectorizeSettings"));
         services.Configure<GeminiSettings>(config.GetSection("GeminiSettings"));
         services.Configure<ClaudeSettings>(config.GetSection("ClaudeSettings"));
 
@@ -53,6 +59,7 @@ public static class DependencyInjection
         services.AddSingleton<IVectorStoreProvider, VectorStoreProvider>();
         services.AddSingleton<IPromptProvider, PromptProvider>();
         services.AddSingleton<IModelPromptProvider, ModelPromptProvider>();
+        services.AddSingleton<IVectorizeProvider, VectorizeProvider>();
 
         // Image Saving
         services.AddSingleton<IAmazonS3, AmazonS3Client>(sp =>
@@ -74,6 +81,13 @@ public static class DependencyInjection
             var settings = sp.GetRequiredService<IOptions<VectorStoreSettings>>().Value;
             client.BaseAddress = new Uri(settings.DatabaseURL);
             client.DefaultRequestHeaders.Add("X-API-Key", settings.APIKey);
+        });
+
+        services.AddHttpClient<IVectorizeProvider, VectorizeProvider>((sp, client) =>
+        {
+            var settings = sp.GetRequiredService<IOptions<VectorizeSettings>>().Value;
+            client.BaseAddress = new Uri(settings.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(30);
         });
 
         services.AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)
