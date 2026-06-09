@@ -2,7 +2,6 @@ using Capstone.Application.Services.FileStorageService;
 using Capstone.Application.Services.ProductQuantitesService;
 using Capstone.Application.Services.Products;
 using Capstone.Application.Services.ProductsOrdersDetailService;
-using Capstone.Application.Services.ProductVectorService;
 using Capstone.Application.Services.TemporaryProducts;
 using Capstone.Application.Services.Vectorize;
 using Capstone.Contracts.Products;
@@ -18,7 +17,6 @@ public class ProductsController : ControllerBase
     private readonly IProductsService _productsSerivce;
     private readonly IProductQuantitiesService _productQuantitiesService;
     private readonly IProductsOrdersDetailService _productsOrdersDetailService;
-    private readonly IProductVectorService _productVectorService;
     private readonly ITemporaryProductsService _temporaryProductsService;
 
     private readonly IFileStorageService _fileStorageService;
@@ -30,7 +28,6 @@ public class ProductsController : ControllerBase
         IProductsOrdersDetailService productsOrdersDetailService,
         IFileStorageService fileStorageService,
         IVectorizeService vectorizeService,
-        IProductVectorService vectorStoreService,
         ITemporaryProductsService temporaryProductsService
     )
     {
@@ -39,7 +36,6 @@ public class ProductsController : ControllerBase
         _productsOrdersDetailService = productsOrdersDetailService;
         _fileStorageService = fileStorageService;
         _vectorizeService = vectorizeService;
-        _productVectorService = vectorStoreService;
         _temporaryProductsService = temporaryProductsService;
     }
 
@@ -80,7 +76,7 @@ public class ProductsController : ControllerBase
 
             var embedding = await _vectorizeService.VectorizeImageAsync(imageUrl.Value);
 
-            await _productsSerivce.UpdateProductImageKey(productResult.Value, ImageResult.Value, embedding);
+            await _productsSerivce.UpdateProductImageKey(productResult.Value, ImageResult.Value, embedding.Value);
         }
 
         var result = await _productsSerivce.FetchProductById(productResult.Value);
@@ -107,7 +103,6 @@ public class ProductsController : ControllerBase
             result.Value.CreatedAt,
             result.Value.Status,
             result.Value.ImageURL,
-            result.Value.VectorId,
             result.Value.SalePrice,
             result.Value.ImportPrice,
             null,
@@ -141,7 +136,7 @@ public class ProductsController : ControllerBase
     [HttpPost("fetch-similar")]
     public async Task<IActionResult> FetchSimilarProducts([FromBody] FetchSimilarProductsRequest request)
     {
-        var result = await _productVectorService.FetchSimilarProducts(request.ImageBase64);
+        var result = await _vectorizeService.FetchSimilarProducts(request.ImageBase64);
 
         return Ok(result.Value.Select(p => new ProductWithOrderStatusResponse(
             p.Id,
@@ -156,7 +151,6 @@ public class ProductsController : ControllerBase
             p.CreatedAt,
             p.Status,
             p.ImageURL,
-            p.VectorId,
             p.SalePrice,
             p.ImportPrice,
             p.IsInPendingOrder,
@@ -192,7 +186,6 @@ public class ProductsController : ControllerBase
             p.CreatedAt,
             p.Status,
             p.ImageURL,
-            p.VectorId,
             p.SalePrice,
             p.ImportPrice,
             p.IsInPendingOrder,
@@ -228,7 +221,6 @@ public class ProductsController : ControllerBase
             result.Value.CreatedAt,
             result.Value.Status,
             result.Value.ImageURL,
-            result.Value.VectorId,
             result.Value.SalePrice,
             result.Value.ImportPrice,
             null,
@@ -291,7 +283,7 @@ public class ProductsController : ControllerBase
 
             var embedding = await _vectorizeService.VectorizeImageAsync(imageUrl.Value);
 
-            await _productsSerivce.UpdateProductImageKey(productResult.Value, ImageResult.Value, embedding);
+            await _productsSerivce.UpdateProductImageKey(productResult.Value, ImageResult.Value, embedding.Value);
         }
 
         var result = await _productsSerivce.FetchProductById(productResult.Value);
@@ -318,7 +310,6 @@ public class ProductsController : ControllerBase
             result.Value.CreatedAt,
             result.Value.Status,
             result.Value.ImageURL,
-            result.Value.VectorId,
             result.Value.SalePrice,
             result.Value.ImportPrice,
             null,
@@ -364,7 +355,6 @@ public class ProductsController : ControllerBase
             result.Value.CreatedAt,
             result.Value.Status,
             result.Value.ImageURL,
-            result.Value.VectorId,
             result.Value.SalePrice,
             result.Value.ImportPrice,
             null,
@@ -400,7 +390,6 @@ public class ProductsController : ControllerBase
                 p.CreatedAt,
                 p.Status,
                 p.ImageURL,
-                p.VectorId,
                 p.SalePrice,
                 p.ImportPrice,
                 null,
@@ -447,7 +436,6 @@ public class ProductsController : ControllerBase
             result.Value.Product.CreatedAt,
             result.Value.Product.Status,
             result.Value.Product.ImageURL,
-            result.Value.Product.VectorId,
             result.Value.Product.SalePrice,
             result.Value.Product.ImportPrice,
             result.Value.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList(),
@@ -490,7 +478,6 @@ public class ProductsController : ControllerBase
             result.Value.Product.CreatedAt,
             result.Value.Product.Status,
             result.Value.Product.ImageURL,
-            result.Value.Product.VectorId,
             result.Value.Product.SalePrice,
             0,
             result.Value.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList(),
@@ -612,7 +599,6 @@ public class ProductsController : ControllerBase
             p.CreatedAt,
             p.Status,
             p.ImageURL,
-            p.VectorId,
             p.SalePrice,
             p.ImportPrice,
             null,
@@ -668,7 +654,6 @@ public class ProductsController : ControllerBase
             result.Value.CreatedAt,
             result.Value.Status,
             result.Value.ImageURL,
-            result.Value.VectorId,
             result.Value.SalePrice,
             result.Value.ImportPrice,
             null,

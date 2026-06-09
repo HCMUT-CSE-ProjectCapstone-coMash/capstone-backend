@@ -28,7 +28,6 @@ public static class DependencyInjection
 
         services.Configure<JwtSettings>(config.GetSection("JwtSettings"));
         services.Configure<BucketSettings>(config.GetSection("BucketSettings"));
-        services.Configure<VectorStoreSettings>(config.GetSection("VectorStoreSettings"));
         services.Configure<VectorizeSettings>(config.GetSection("VectorizeSettings"));
         services.Configure<GeminiSettings>(config.GetSection("GeminiSettings"));
         services.Configure<ClaudeSettings>(config.GetSection("ClaudeSettings"));
@@ -56,7 +55,6 @@ public static class DependencyInjection
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddSingleton<IFileStorageProvider, FileStorageProvider>();
-        services.AddSingleton<IVectorStoreProvider, VectorStoreProvider>();
         services.AddSingleton<IPromptProvider, PromptProvider>();
         services.AddSingleton<IModelPromptProvider, ModelPromptProvider>();
         services.AddSingleton<IVectorizeProvider, VectorizeProvider>();
@@ -73,14 +71,6 @@ public static class DependencyInjection
             };
 
             return new AmazonS3Client(settings.AccessKey, settings.SecretKey, config);
-        });
-
-        // Vector Store Provider
-        services.AddHttpClient<IVectorStoreProvider, VectorStoreProvider>((sp, client) =>
-        {
-            var settings = sp.GetRequiredService<IOptions<VectorStoreSettings>>().Value;
-            client.BaseAddress = new Uri(settings.DatabaseURL);
-            client.DefaultRequestHeaders.Add("X-API-Key", settings.APIKey);
         });
 
         services.AddHttpClient<IVectorizeProvider, VectorizeProvider>((sp, client) =>

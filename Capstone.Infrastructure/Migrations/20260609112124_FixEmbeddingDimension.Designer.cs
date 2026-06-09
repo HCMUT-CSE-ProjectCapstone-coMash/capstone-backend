@@ -13,8 +13,8 @@ using Pgvector;
 namespace Capstone.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260608074502_AddProductEmbedding")]
-    partial class AddProductEmbedding
+    [Migration("20260609112124_FixEmbeddingDimension")]
+    partial class FixEmbeddingDimension
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -200,7 +200,8 @@ namespace Capstone.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Vector>("Embedding")
-                        .HasColumnType("vector(512)");
+                        .IsRequired()
+                        .HasColumnType("vector");
 
                     b.Property<string>("ImageKey")
                         .IsRequired()
@@ -232,10 +233,6 @@ namespace Capstone.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("VectorId")
                         .IsRequired()
                         .HasColumnType("text");
 

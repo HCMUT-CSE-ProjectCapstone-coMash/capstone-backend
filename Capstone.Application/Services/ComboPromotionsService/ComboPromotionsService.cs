@@ -94,7 +94,6 @@ public class ComboPromotionsService : IComboPromotionsService
                     product.CreatedAt,
                     product.Status,
                     imageUrl,
-                    product.VectorId,
                     product.SalePrice,
                     product.ImportPrice
                 );

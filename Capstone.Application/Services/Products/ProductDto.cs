@@ -13,7 +13,6 @@ public record ProductDto(
     DateTime CreatedAt,
     string Status,
     string ImageURL,
-    string VectorId,
     double SalePrice,
     double ImportPrice,
     string ModelImageURL = ""
@@ -37,7 +36,6 @@ public record ProductWithOrderStatusDto(
     DateTime CreatedAt,
     string Status,
     string ImageURL,
-    string VectorId,
     double SalePrice,
     double ImportPrice,
     bool IsInPendingOrder,

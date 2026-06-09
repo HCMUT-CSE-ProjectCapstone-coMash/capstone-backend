@@ -70,7 +70,6 @@ public class ProductsOrdersController : ControllerBase
                 p.Product.CreatedAt,
                 p.Product.Status,
                 p.Product.ImageURL,
-                p.Product.VectorId,
                 p.Product.SalePrice,
                 0,
                 p.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()
@@ -147,7 +146,6 @@ public class ProductsOrdersController : ControllerBase
                 p.Product.CreatedAt,
                 p.Product.Status,
                 p.Product.ImageURL,
-                p.Product.VectorId,
                 p.Product.SalePrice,
                 p.Product.ImportPrice,
                 p.QuantityChanges.Select(qc => new ProductQuantityChange(qc.Size, qc.OldQuantity, qc.NewQuantity)).ToList()

@@ -71,7 +71,6 @@ public class ProductPromotionsService : IProductPromotionsService
                 product.CreatedAt,
                 product.Status,
                 imageUrl,
-                product.VectorId,
                 product.SalePrice,
                 product.ImportPrice
             );

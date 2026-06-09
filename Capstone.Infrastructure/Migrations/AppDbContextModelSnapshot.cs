@@ -197,6 +197,7 @@ namespace Capstone.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Vector>("Embedding")
+                        .IsRequired()
                         .HasColumnType("vector");
 
                     b.Property<string>("ImageKey")
@@ -229,10 +230,6 @@ namespace Capstone.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("VectorId")
                         .IsRequired()
                         .HasColumnType("text");
 

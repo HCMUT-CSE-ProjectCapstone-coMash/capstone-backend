@@ -2,6 +2,8 @@ using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Pgvector;
+using Pgvector.EntityFrameworkCore;
 
 namespace Capstone.Infrastructure.Persistence.Repositories;
 
@@ -187,5 +189,36 @@ public class ProductsRepository : IProductsRepository
         }
 
         return result;
+    }
+
+    public async Task<List<Product>> FetchSimilarProductsByVector(float[] vector, int topK)
+    {
+        var queryVector = new Vector(vector);
+
+        var similarIds = await _context.Products
+            .OrderBy(p => p.Embedding.CosineDistance(queryVector))
+            .Take(topK)
+            .Select(p => new
+            {
+                ProductId = p.Id,
+                Similarity = 1f - p.Embedding.CosineDistance(queryVector)
+            })
+            .Where(x => x.Similarity > 0.9f)
+            .ToListAsync();
+
+        if (similarIds.Count == 0)
+            return new List<Product>();
+
+        var ids = similarIds.Select(x => x.ProductId).ToList();
+
+        var products = await _context.Products
+            .Include(p => p.ProductQuantities)
+            .Include(p => p.Category)
+            .Include(p => p.Color)
+            .Include(p => p.Pattern)
+            .Where(p => ids.Contains(p.Id))
+            .ToListAsync();
+
+        return products;
     }
 }

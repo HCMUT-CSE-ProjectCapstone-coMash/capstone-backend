@@ -3,7 +3,6 @@ using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Application.Common.Interfaces.Services;
 using Capstone.Application.Services.FileStorageService;
 using Capstone.Application.Services.Products;
-using Capstone.Application.Services.ProductVectorService;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
 
@@ -13,7 +12,6 @@ public class ProductsOrdersService : IProductsOrdersService
 {
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IFileStorageService _fileStorageService;
-    private readonly IProductVectorService _productVectorService;
     private readonly IProductsOrdersRepository _productsOrdersRepository;
     private readonly IProductsOrdersDetailsRepository _productsOrdersDetailsRepository;
     private readonly IProductQuantitiesRepository _productQuantitiesRepository;
@@ -23,7 +21,6 @@ public class ProductsOrdersService : IProductsOrdersService
     public ProductsOrdersService(
         IDateTimeProvider dateTimeProvider,
         IFileStorageService fileStorageService,
-        IProductVectorService productVectorService,
         IProductsOrdersRepository productsOrdersRepository,
         IProductsOrdersDetailsRepository productsOrdersDetailsRepository,
         IProductQuantitiesRepository productQuantitiesRepository,
@@ -33,7 +30,6 @@ public class ProductsOrdersService : IProductsOrdersService
     {
         _dateTimeProvider = dateTimeProvider;
         _fileStorageService = fileStorageService;
-        _productVectorService = productVectorService;
         _productsOrdersRepository = productsOrdersRepository;
         _productsOrdersDetailsRepository = productsOrdersDetailsRepository;
         _productQuantitiesRepository = productQuantitiesRepository;
@@ -71,7 +67,6 @@ public class ProductsOrdersService : IProductsOrdersService
                     CreatedAt: detail.Product.CreatedAt,
                     Status: detail.Product.Status,
                     ImageURL: imageUrl,
-                    VectorId: detail.Product.VectorId,
                     SalePrice: detail.Product.SalePrice,
                     ImportPrice: detail.Product.ImportPrice
                 );
@@ -229,7 +224,6 @@ public class ProductsOrdersService : IProductsOrdersService
                 CreatedAt: detail.Product.CreatedAt,
                 Status: detail.Product.Status,
                 ImageURL: imageUrl,
-                VectorId: detail.Product.VectorId,
                 SalePrice: detail.Product.SalePrice,
                 ImportPrice: detail.Product.ImportPrice
             );

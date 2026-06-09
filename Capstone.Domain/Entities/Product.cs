@@ -22,8 +22,7 @@ public class Product
     public DateTime CreatedAt { get; set; }
     public string Status { get; set; } = string.Empty;
     public string ImageKey { get; set; } = string.Empty;
-    public string VectorId { get; set; } = string.Empty;
-    public Vector? Embedding { get; set; } 
+    public Vector Embedding { get; set; } = new Vector(Array.Empty<float>());
     public double SalePrice { get; set; }
     public double ImportPrice { get; set; }
     public string ModelImageKey { get; set; } = string.Empty;

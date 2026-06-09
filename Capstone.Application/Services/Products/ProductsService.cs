@@ -2,7 +2,6 @@ using Capstone.Application.Common;
 using Capstone.Application.Common.Interfaces.Persistence;
 using Capstone.Application.Common.Interfaces.Services;
 using Capstone.Application.Services.FileStorageService;
-using Capstone.Application.Services.ProductVectorService;
 using Capstone.Domain.Common;
 using Capstone.Domain.Entities;
 
@@ -139,7 +138,6 @@ public class ProductsService : IProductsService
             product.CreatedAt,
             product.Status,
             imageUrl,
-            product.VectorId,
             product.SalePrice,
             product.ImportPrice,
             await GetModelImageUrlAsync(product.ModelImageKey)
@@ -173,7 +171,6 @@ public class ProductsService : IProductsService
             product.CreatedAt,
             product.Status,
             imageUrl,
-            product.VectorId,
             product.SalePrice,
             product.ImportPrice,
             await GetModelImageUrlAsync(product.ModelImageKey)
@@ -246,7 +243,6 @@ public class ProductsService : IProductsService
                 product.CreatedAt,
                 product.Status,
                 imageUrl,
-                product.VectorId,
                 product.SalePrice,
                 product.ImportPrice,
                 productIdsInPendingOrders.Contains(product.Id),
@@ -411,7 +407,6 @@ public class ProductsService : IProductsService
             updatedProduct.CreatedAt,
             updatedProduct.Status,
             imageUrl,
-            updatedProduct.VectorId,
             updatedProduct.SalePrice,
             updatedProduct.ImportPrice,
             modelImageUrl
@@ -446,7 +441,6 @@ public class ProductsService : IProductsService
                 product.CreatedAt,
                 product.Status,
                 imageUrl,
-                product.VectorId,
                 product.SalePrice,
                 product.ImportPrice,
                 await GetModelImageUrlAsync(product.ModelImageKey)
@@ -599,7 +593,6 @@ public class ProductsService : IProductsService
             updatedProduct.CreatedAt,
             updatedProduct.Status,
             imageUrl,
-            updatedProduct.VectorId,
             updatedProduct.SalePrice,
             updatedProduct.ImportPrice
         );
@@ -743,7 +736,6 @@ public class ProductsService : IProductsService
             updatedProduct.CreatedAt,
             updatedProduct.Status,
             imageUrl,
-            updatedProduct.VectorId,
             updatedProduct.SalePrice,
             updatedProduct.ImportPrice
         );
@@ -805,7 +797,6 @@ public class ProductsService : IProductsService
                 product.CreatedAt,
                 product.Status,
                 imageUrl,
-                product.VectorId,
                 product.SalePrice,
                 product.ImportPrice,
                 await GetModelImageUrlAsync(product.ModelImageKey)

@@ -8,7 +8,6 @@ using Capstone.Application.Services.ProductQuantitesService;
 using Capstone.Application.Services.Products;
 using Capstone.Application.Services.ProductsOrders;
 using Capstone.Application.Services.ProductsOrdersDetailService;
-using Capstone.Application.Services.ProductVectorService;
 using Capstone.Application.Services.Promotions;
 using Capstone.Application.Services.SaleOrderDetails;
 using Capstone.Application.Services.SaleOrders;
@@ -35,7 +34,6 @@ public static class DependencyInjection
         services.AddScoped<IProductPromotionsService, ProductPromotionsService>();
         services.AddScoped<IOrderPromotionsService, OrderPromotionsService>();
         services.AddScoped<IComboPromotionsService, ComboPromotionsService>();
-        services.AddScoped<IProductVectorService, ProductVectorService>();
         services.AddScoped<ITemporaryProductsService, TemporaryProductsService>();
         services.AddScoped<IVectorizeService, VectorizeService>();
 

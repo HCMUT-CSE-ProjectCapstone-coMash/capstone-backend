@@ -211,7 +211,6 @@ public class PromotionsService : IPromotionsService
                     product.CreatedAt,
                     product.Status,
                     imageUrl,
-                    product.VectorId,
                     product.SalePrice,
                     product.ImportPrice
                 );
@@ -295,7 +294,6 @@ public class PromotionsService : IPromotionsService
                         product.CreatedAt,
                         product.Status,
                         imageUrl,
-                        product.VectorId,
                         product.SalePrice,
                         product.ImportPrice
                     );
