@@ -21,7 +21,12 @@ public class TemporaryProductsRepository : ITemporaryProductsRepository
 
     public async Task<List<TemporaryProduct>> GetTemporaryProductsByUserId(Guid UserId)
     {
-        return await _context.TemporaryProducts.Where(tp => tp.CreatedBy == UserId).ToListAsync();
+        return await _context.TemporaryProducts
+            .Include(tp => tp.Category)
+            .Include(tp => tp.Color)
+            .Include(tp => tp.Pattern)
+            .Where(tp => tp.CreatedBy == UserId)
+            .ToListAsync();
     }
 
     public async Task DeleteTemporaryProduct(Guid TemporaryProductId)
