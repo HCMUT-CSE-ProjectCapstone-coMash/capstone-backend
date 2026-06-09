@@ -45,7 +45,16 @@ public class TemporaryProductsService : ITemporaryProductsService
 
         var analyzeResult = await _promptProvider.AnalyzeImageWithClaude(ImageBase64, categoryNames, colorNames, patternNames);
 
-        var productName = analyzeResult.Category + " " + analyzeResult.Color + " " + analyzeResult.Pattern;
+        var matchedCategory = category.FirstOrDefault(c => c.CategoryName.Equals(analyzeResult.Category, StringComparison.OrdinalIgnoreCase));
+        var matchedColor = color.FirstOrDefault(c => c.ColorName.Equals(analyzeResult.Color, StringComparison.OrdinalIgnoreCase));
+        var matchedPattern = pattern.FirstOrDefault(p => p.PatternName.Equals(analyzeResult.Pattern, StringComparison.OrdinalIgnoreCase));
+
+        if (matchedCategory == null || matchedColor == null || matchedPattern == null)
+        {
+            return Result.Failure(new Error("AnalysisFailed", "Failed to analyze the image and match category, color, or pattern."));
+        }
+
+        var productName = $"{matchedCategory.CategoryName} {matchedColor.ColorName} {matchedPattern.PatternName}";
 
         var temporaryProduct = new TemporaryProduct
         {
@@ -53,6 +62,9 @@ public class TemporaryProductsService : ITemporaryProductsService
             ProductName = productName,
             ImageKey = ImageKey,
             CreatedBy = Guid.Parse(UserId),
+            CategoryId = matchedCategory.Id,
+            ColorId = matchedColor.Id,
+            PatternId = matchedPattern.Id
         };
 
         await _temporaryProductRepository.CreateTemporaryProduct(temporaryProduct);
@@ -79,9 +91,9 @@ public class TemporaryProductsService : ITemporaryProductsService
             {
                 Id = item.Id,
                 ProductName = item.ProductName,
-                Category = item.Category,
-                Color = item.Color,
-                Pattern = item.Pattern,
+                Category = item.Category.CategoryName,
+                Color = item.Color.ColorName,
+                Pattern = item.Pattern.PatternName,
                 ImageUrl = imageUrl
             });
         }

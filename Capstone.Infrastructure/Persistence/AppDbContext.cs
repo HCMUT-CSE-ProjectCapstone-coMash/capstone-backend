@@ -44,21 +44,21 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>().ToTable("users");
 
         // Product Table
-        modelBuilder.Entity<Product>(enity =>
+        modelBuilder.Entity<Product>(entity =>
         {
-            enity.ToTable("products");
+            entity.ToTable("products");
 
             // Product has one User (CreatedBy) and User has many Products
-            enity.HasOne<User>().WithMany().HasForeignKey(p => p.CreatedBy).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<User>().WithMany().HasForeignKey(p => p.CreatedBy).OnDelete(DeleteBehavior.Restrict);
 
             // Product has one Category and Category has many Products
-            enity.HasOne(p => p.Category).WithMany().HasForeignKey(p => p.CategoryId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(p => p.Category).WithMany().HasForeignKey(p => p.CategoryId).OnDelete(DeleteBehavior.Restrict);
 
             // Product has one Color and Color has many Products
-            enity.HasOne(p => p.Color).WithMany().HasForeignKey(p => p.ColorId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(p => p.Color).WithMany().HasForeignKey(p => p.ColorId).OnDelete(DeleteBehavior.Restrict);
 
             // Product has one Pattern and Pattern has many Products
-            enity.HasOne(p => p.Pattern).WithMany().HasForeignKey(p => p.PatternId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(p => p.Pattern).WithMany().HasForeignKey(p => p.PatternId).OnDelete(DeleteBehavior.Restrict);
         });
 
         // ProductQuantities Table
@@ -197,6 +197,15 @@ public class AppDbContext : DbContext
 
             // TemporaryProduct has one User (CreatedBy) and User has many TemporaryProducts
             entity.HasOne(tp => tp.User).WithMany().HasForeignKey(tp => tp.CreatedBy).OnDelete(DeleteBehavior.Restrict);
+
+            // Product has one Category and Category has many Products
+            entity.HasOne(p => p.Category).WithMany().HasForeignKey(p => p.CategoryId).OnDelete(DeleteBehavior.Restrict);
+
+            // Product has one Color and Color has many Products
+            entity.HasOne(p => p.Color).WithMany().HasForeignKey(p => p.ColorId).OnDelete(DeleteBehavior.Restrict);
+
+            // Product has one Pattern and Pattern has many Products
+            entity.HasOne(p => p.Pattern).WithMany().HasForeignKey(p => p.PatternId).OnDelete(DeleteBehavior.Restrict);
         });
     }
 }
