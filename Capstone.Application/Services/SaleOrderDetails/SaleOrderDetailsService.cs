@@ -65,7 +65,7 @@ public class SaleOrderDetailsService : ISaleOrderDetailsService
             }
         }
 
-        UnitPrice = UnitPrice * (1 - Discount / 100);
+        UnitPrice = Math.Round(UnitPrice * (1 - Discount / 100), 0);
         var SubTotal = Quantity * UnitPrice;
         var profit = SubTotal - (Quantity * product.ImportPrice);
 
@@ -118,7 +118,7 @@ public class SaleOrderDetailsService : ISaleOrderDetailsService
         var grossComboValue = comboPromotion.ComboPromotionDetails.Sum(d => d.Product.SalePrice * d.Quantity);
 
         var discountRatio = comboPromotion.ComboPrice / grossComboValue;
-        var unitPrice = Math.Round(product.SalePrice * discountRatio, 2);
+        var unitPrice = Math.Round(product.SalePrice * discountRatio, 0);
         var subTotal = unitPrice * TotalProductQuantity;
         var profit = subTotal - (TotalProductQuantity * product.ImportPrice);
 
