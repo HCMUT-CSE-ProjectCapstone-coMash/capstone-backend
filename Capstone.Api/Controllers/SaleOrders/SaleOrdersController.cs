@@ -267,4 +267,27 @@ public class SaleOrdersController : ControllerBase
 
         return Ok(result.Value);
     }
+
+    [HttpPost("create-payments")]
+    public async Task<IActionResult> CreatePayments([FromBody] CreatePaymentRequest request)
+    {
+        var result = await _saleOrdersService.CreatePayments(
+            request.OrderCode,
+            request.Amount,
+            request.Description,
+            request.CancelUrl,
+            request.ReturnUrl
+        );
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new
+            {
+                error = result.Error.Code,
+                message = result.Error.Description
+            });
+        }
+
+        return Ok(result.Value);
+    }
 }

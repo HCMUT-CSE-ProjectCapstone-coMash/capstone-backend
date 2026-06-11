@@ -36,4 +36,6 @@ public interface ISaleOrdersService
     Task<Result<DashboardStatsDto>> GetEmployeeDashboardStats(string employeeId);
 
     Task<Result<List<SaleOrderDto>>> FetchRecentCreatedByEmployee(string employeeId);
+
+    Task<Result<PaymentDto>> CreatePayments(int OrderCode, int Amount, string Description, string CancelUrl, string ReturnUrl);
 }

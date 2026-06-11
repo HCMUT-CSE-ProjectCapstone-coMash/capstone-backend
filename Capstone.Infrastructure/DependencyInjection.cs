@@ -31,6 +31,7 @@ public static class DependencyInjection
         services.Configure<VectorizeSettings>(config.GetSection("VectorizeSettings"));
         services.Configure<GeminiSettings>(config.GetSection("GeminiSettings"));
         services.Configure<ClaudeSettings>(config.GetSection("ClaudeSettings"));
+        services.Configure<VietQrSettings>(config.GetSection("VietQrSettings"));
 
         services.AddScoped<IUsersRepository, UsersRepository>();
         services.AddScoped<IProductsRepository, ProductsRepository>();
@@ -78,6 +79,16 @@ public static class DependencyInjection
             var settings = sp.GetRequiredService<IOptions<VectorizeSettings>>().Value;
             client.BaseAddress = new Uri(settings.BaseUrl);
             client.Timeout = TimeSpan.FromSeconds(30);
+        });
+
+        services.AddHttpClient<IVietQrProvider, VietQrProvider>((sp, client) =>
+        {
+            var settings = sp.GetRequiredService<IOptions<VietQrSettings>>().Value;
+            client.BaseAddress = new Uri(settings.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(30);
+
+            client.DefaultRequestHeaders.Add("x-client-id", settings.ClientId);
+            client.DefaultRequestHeaders.Add("x-api-key", settings.Apikey);
         });
 
         services.AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)

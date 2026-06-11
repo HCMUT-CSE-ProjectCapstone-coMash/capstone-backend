@@ -16,6 +16,7 @@ public class SaleOrdersService : ISaleOrdersService
 {
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IFileStorageService _fileStorageService;
+    private readonly IVietQrProvider _vietQrProvider;
 
     private readonly ISaleOrdersRepository _saleOrdersRepository;
     private readonly IOrderPromotionsRepository _orderPromotionsRepository;
@@ -26,7 +27,8 @@ public class SaleOrdersService : ISaleOrdersService
         IFileStorageService fileStorageService,
         ISaleOrdersRepository saleOrdersRepository,
         IOrderPromotionsRepository orderPromotionsRepository,
-        ISaleOrderDetailsRepository saleOrderDetailsRepository
+        ISaleOrderDetailsRepository saleOrderDetailsRepository,
+        IVietQrProvider vietQrProvider
     )
     {
         _dateTimeProvider = dateTimeProvider;
@@ -34,6 +36,7 @@ public class SaleOrdersService : ISaleOrdersService
         _saleOrdersRepository = saleOrdersRepository;
         _orderPromotionsRepository = orderPromotionsRepository;
         _saleOrderDetailsRepository = saleOrderDetailsRepository;
+        _vietQrProvider = vietQrProvider;
     }
 
     public async Task<Result<string>> CreateSaleOrder(
@@ -485,5 +488,26 @@ public class SaleOrdersService : ISaleOrdersService
         }).ToList();
 
         return Result<List<SaleOrderDto>>.Success(saleOrderDtos);
+    }
+
+    public async Task<Result<PaymentDto>> CreatePayments(int OrderCode, int Amount, string Description, string CancelUrl, string ReturnUrl)
+    {
+        var result = await _vietQrProvider.CreatePaymentAsync(OrderCode, Amount, Description, CancelUrl, ReturnUrl);
+
+        var paymentDto = new PaymentDto
+        {
+            Bin = result.Bin,
+            AccountNumber = result.AccountNumber,
+            AccountName = result.AccountName,
+            Amount = result.Amount,
+            Description = result.Description,
+            OrderCode = result.OrderCode,
+            PaymentLinkId = result.PaymentLinkId,
+            Status = result.Status,
+            CheckoutUrl = result.CheckoutUrl,
+            QrCode = result.QrCode
+        };
+
+        return Result<PaymentDto>.Success(paymentDto);
     }
 }
