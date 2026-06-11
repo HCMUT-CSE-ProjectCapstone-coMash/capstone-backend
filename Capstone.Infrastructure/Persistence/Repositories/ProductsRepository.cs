@@ -203,7 +203,7 @@ public class ProductsRepository : IProductsRepository
                 ProductId = p.Id,
                 Similarity = 1f - p.Embedding.CosineDistance(queryVector)
             })
-            .Where(x => x.Similarity > 0.9f)
+            .Where(x => x.Similarity > 0.92f)
             .ToListAsync();
 
         if (similarIds.Count == 0)
